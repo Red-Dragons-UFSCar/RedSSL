@@ -80,7 +80,7 @@ class Vision():
         data_ball_avaliable = len(msg_ball) > 0
 
         if self.convert_coordinates:
-            correction_position_x = self.length/2 + self.goal_depth
+            correction_position_x = self.length/2
             correction_position_y = self.width/2
             for i in range(0, len(msg_robots_blue)):
                 msg_robots_blue[i].x = (msg_robots_blue[i].x + correction_position_x)/10
