@@ -1,0 +1,1 @@
+from communication.proto import *

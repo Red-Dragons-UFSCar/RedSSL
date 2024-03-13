@@ -4,35 +4,58 @@ from communication.proto.ssl_vision_wrapper_pb2 import SSL_WrapperPacket
 
 class Vision():
     def __init__(self, ip:str="224.0.0.1", port:int=10002, logger:bool=False, convert_coordinates:bool=True) -> None:
+        '''
+        Descrição:  
+                Classe utilizada para comunicação com a interface de visão na qual recebe as mensagens
+                protobuf e as converte em um dicionário
+        Entradas:
+                ip:                  String com o ip do server de visão
+                port:                Porta de conexão do server de visão
+                logger:              Flag que ativa o log de recebimento de mensagens no terminal. Por 
+                                     padrão se mantém desativado
+                convert_coordinates: Flag que ativa a conversão de mm para cm, com origem no vertice 
+                                     inferior esquerdo. Por padrão se mantém ativado
+        '''
         #  Network parameters
         self.ip = ip 
         self.port = port
-        self.buffer_size = 65536
-        self.last_frame = []
+        self.buffer_size = 65536  # Parametro que define o tamanho da palavra binária a ser recebida da rede
 
         # Logger control
         self.logger=logger
 
-        # Field characteritics. #TODO: Fazer isso mais genérico para conversão.
-        self.length = 9000
-        self.goal_depth = 180
-        self.width = 6000
+        # Field characteritics. 
+        #TODO: Fazer isso mais genérico para conversão.
+        self.length = 9000  # Comprimento do campo (mm)
+        self.goal_depth = 180  # Profundidade do gol (mm)
+        self.width = 6000  # Largura do campo (mm)
 
         self.convert_coordinates = convert_coordinates
+        self.last_frame = []  # Variavel para armazenar o frame de detecção recebido da visão
+
         self._create_socket()
         self._start_frame()
 
     def _create_socket(self):
+        '''
+        Descrição:  
+                Método responsável pela criação do socket de conexão com o servidor de visão
+        '''
         self.socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 128)
         self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_LOOP, 1)
         self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, struct.pack("=4sl", socket.inet_aton(self.ip), socket.INADDR_ANY))
         self.socket.bind((self.ip, self.port))
+        # Opções para utilização em tempo real não-bloqueante
         self.socket.setblocking(False) 
         self.socket.settimeout(0.0)
 
     def _start_frame(self):
+        '''
+        Descrição:  
+                Método responsável pela criação do frame inicial de detecção
+        '''
         robots_blue = []
         robots_yellow = []
         for i in range(0, 5):
@@ -69,6 +92,13 @@ class Vision():
                                  ("robots_blue", robots_blue)])
 
     def _convert_parameters(self, msgRaw):
+        '''
+        Descrição:  
+                Método responsável pela conversão da mensagem serializada protobuf em um 
+                dicionário Python para utilização.
+        Entradas:
+                msgRaw: Mensagem serializada WrapperPacket recebida pelo socket
+        '''
         msg = SSL_WrapperPacket()
         msg.ParseFromString(msgRaw)
 
@@ -132,6 +162,12 @@ class Vision():
                                  ("robots_blue", robots_blue)])
 
     def update(self):
+        '''
+        Descrição:  
+                Método responsável pela atualização dos ultimos valores recebidos pelo socket
+                realizando a conversão necessária. É necessário chamá-lo todas as vezes que
+                novas informações são desejadas
+        '''
         msgRaw = None
         try: 
             bytesAddressPair = self.socket.recvfrom(self.buffer_size)
@@ -154,4 +190,10 @@ class Vision():
                 print("[VISION] Socket error:", e)
 
     def get_last_frame(self):
+        '''
+        Descrição:  
+                Obtem o ultimo frame recebido pelo socket
+        Saída:
+                last_frame: Ultimo frame de detecção (dicionário)
+        '''
         return self.last_frame
