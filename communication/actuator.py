@@ -2,8 +2,10 @@ import socket
 import struct
 from .proto import ssl_simulation_robot_control_pb2 as pb2
 
+
+
 class Actuator():
-    def __init__(self, ip:str='localhost', port:int=10000,team_port:int=10302, logger:bool=False) -> None:
+    def __init__(self, ip:str='localhost', port:int=10000,team_port:int=10302, logger:bool=True) -> None:
         #Newtork parameters
         self.ip = ip
         self.port = port
@@ -16,6 +18,8 @@ class Actuator():
         #Create socket
         self._create_socket()
 
+
+
     def _create_socket(self):
         self.socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -23,9 +27,23 @@ class Actuator():
         self.socket.setblocking(False) 
         self.socket.settimeout(0.0)
 
-    def send_wheelVelocity_message(self, index, team_port, wheel_bl, wheel_br, wheel_fl, wheel_fr):
+    
+    def send_socket(self, data):
+        try:
+            self.socket.sendto(data, (self.ip, self.team_port))
+            if self.logger: print("[Actuator] Enviado!")
+
+        except socket.error as e:
+            if e.errno == socket.errno.EAGAIN:
+                if self.logger:
+                    print("[Actuator] Falha ao enviar. Socket bloqueado")
+            else:
+                print("[Actuator] Socket error:", e)
+
+
+
+    def send_wheelVelocity_message(self, index, wheel_bl, wheel_br, wheel_fl, wheel_fr):
         self.robot_id = index
-        self.team_port = team_port
         self.wheel_bl = wheel_bl
         self.wheel_br = wheel_br
         self.wheel_fl = wheel_fl
@@ -51,24 +69,15 @@ class Actuator():
         robot_command.move_command.wheel_velocity.CopyFrom(move_command)
 
 
-        try:
-            self.socket.sendto(robot_control.SerializeToString(), (self.ip, self.team_port))
-            if self.logger: print("[S&C] Enviado!")
-
-        except socket.error as e:
-            if e.errno == socket.errno.EAGAIN:
-                if self.logger:
-                    print("[S&C] Falha ao enviar. Socket bloqueado")
-            else:
-                print("[S&C] Socket error:", e)
+        self.send_socket(robot_control.SerializeToString())
+        
 
 
-    def send_globalVelocity_message(self, index, team_port, velocity_x, velocity_y, ang):
+    def send_globalVelocity_message(self, index,velocity_x, velocity_y, angular):
         self.robot_id = index
-        self.team_port = team_port
         self.velocity_x = velocity_x
         self.velocity_y = velocity_y
-        self.angular = ang
+        self.angular = angular
         
 
         # Crie uma mensagem RobotControl
@@ -82,29 +91,19 @@ class Actuator():
         move_command = pb2.MoveGlobalVelocity()
         move_command.x = self.velocity_x
         move_command.y = self.velocity_y
-        move_command.angular = self.ang
+        move_command.angular = self.angular
 
         # Atribua a mensagem MoveGlobalVelocity ao campo move_command da mensagem RobotCommand
         robot_command.move_command.global_velocity.CopyFrom(move_command)
 
 
-        try:
-            self.socket.sendto(robot_control.SerializeToString(), (self.ip, self.team_port))
-            if self.logger: print("[S&C] Enviado!")
+        self.send_socket(robot_control.SerializeToString())
 
-        except socket.error as e:
-            if e.errno == socket.errno.EAGAIN:
-                if self.logger:
-                    print("[S&C] Falha ao enviar. Socket bloqueado")
-            else:
-                print("[S&C] Socket error:", e)
-
-    def send_localVelocity_message(self, index, team_port, forward, left, ang):
+    def send_localVelocity_message(self, index, forward, left, angular):
         self.robot_id = index
-        self.team_port = team_port
         self.forward = forward
         self.left = left
-        self.angular = ang
+        self.angular = angular
         
 
         # Crie uma mensagem RobotControl
@@ -124,13 +123,4 @@ class Actuator():
         robot_command.move_command.local_velocity.CopyFrom(move_command)
 
 
-        try:
-            self.socket.sendto(robot_control.SerializeToString(), (self.ip, self.team_port))
-            if self.logger: print("[S&C] Enviado!")
-
-        except socket.error as e:
-            if e.errno == socket.errno.EAGAIN:
-                if self.logger:
-                    print("[S&C] Falha ao enviar. Socket bloqueado")
-            else:
-                print("[S&C] Socket error:", e)
+        self.send_socket(robot_control.SerializeToString())
