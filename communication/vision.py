@@ -107,7 +107,7 @@ class Vision():
         msg_ball = msg.detection.balls
         msg_geometry = msg.geometry
 
-        data_ball_avaliable = len(msg_ball) > 0
+        self.data_ball_avaliable = len(msg_ball) > 0
 
         if self.convert_coordinates:
             correction_position_x = self.length/2
@@ -118,7 +118,7 @@ class Vision():
             for i in range(0, len(msg_robots_yellow)):
                 msg_robots_yellow[i].x = (msg_robots_yellow[i].x + correction_position_x)/10
                 msg_robots_yellow[i].y = (msg_robots_yellow[i].y + correction_position_y)/10
-            if data_ball_avaliable:
+            if self.data_ball_avaliable:
                 msg_ball[0].x = (msg_ball[0].x + correction_position_x)/10
                 msg_ball[0].y = (msg_ball[0].y + correction_position_y)/10
 
@@ -142,7 +142,7 @@ class Vision():
                                          ("pixel_x", msg_robots_yellow[i].pixel_x), 
                                          ("pixel_y", msg_robots_yellow[i].pixel_y), 
                                          ("height", msg_robots_yellow[i].height) ]) )
-        if data_ball_avaliable:
+        if self.data_ball_avaliable:
             ball = dict([ ("confidence", msg_ball[0].confidence),
                         ("area", msg_ball[0].area),
                         ("x", msg_ball[0].x), 
@@ -197,3 +197,37 @@ class Vision():
                 last_frame: Ultimo frame de detecção (dicionário)
         '''
         return self.last_frame
+
+if __name__ == '__main__':
+    import time
+    visao = Vision(ip="224.0.0.1", port=10002)
+
+    while True:
+        t1 = time.time()
+
+        visao.update()
+        frame = visao.get_last_frame()
+
+        print("\n---START LOGGER---")
+        print("Camera ID: ", frame["camera_id"])
+        print("Robots blue: ")
+        for robot in frame["robots_blue"]:
+            print("Index: ", robot["robot_id"], end = ' ')
+            print("X: ", robot["x"], end = ' ')
+            print("Y: ", robot["y"], end = '\n')
+        print("Robots yellow: ")
+        for robot in frame["robots_yellow"]:
+            print("Index: ", robot["robot_id"], end = ' ')
+            print("X: ", robot["x"], end = ' ')
+            print("Y: ", robot["y"], end = '\n')
+        
+        if (len(frame["ball"]) > 0):
+            print("Ball: ")
+            ball  = frame["ball"]
+            print("X: ", int(ball["x"]), end = ' ')
+            print("Y: ", ball["y"], end = '\n')
+
+        t2 = time.time()
+
+        if( (t2-t1) < 1/300 ):
+            time.sleep(1/300 - (t2-t1))
