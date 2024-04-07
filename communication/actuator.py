@@ -1,6 +1,6 @@
 import socket
 import struct
-from .proto import ssl_simulation_robot_control_pb2 as pb2
+from communication.proto.ssl_simulation_robot_control_pb2 import RobotControl, MoveWheelVelocity, MoveGlobalVelocity, MoveLocalVelocity
 
 
 
@@ -75,14 +75,14 @@ class Actuator():
 
 
         # Crie uma mensagem RobotControl
-        robot_control = pb2.RobotControl()
+        robot_control = RobotControl()
 
         #Crie uma mensagem RobotCommand
         robot_command = robot_control.robot_commands.add()
         robot_command.id = self.robot_id
 
         #Crie uma mensagem MoveWheelVelocity
-        move_command = pb2.MoveWheelVelocity()
+        move_command = MoveWheelVelocity()
         move_command.front_right = self.wheel_fr
         move_command.back_right = self.wheel_fl
         move_command.back_left = self.wheel_br
@@ -108,14 +108,14 @@ class Actuator():
         
 
         # Crie uma mensagem RobotControl
-        robot_control = pb2.RobotControl()
+        robot_control = RobotControl()
 
         #Crie uma mensagem RobotCommand
         robot_command = robot_control.robot_commands.add()
         robot_command.id = self.robot_id
 
         #Crie uma mensagem MoveGlobalVelocity
-        move_command = pb2.MoveGlobalVelocity()
+        move_command = MoveGlobalVelocity()
         move_command.x = self.velocity_x
         move_command.y = self.velocity_y
         move_command.angular = self.angular
@@ -138,14 +138,14 @@ class Actuator():
         
 
         # Crie uma mensagem RobotControl
-        robot_control = pb2.RobotControl()
+        robot_control = RobotControl()
 
         #Crie uma mensagem RobotCommand
         robot_command = robot_control.robot_commands.add()
         robot_command.id = self.robot_id
 
         #Crie uma mensagem MoveLocalVelocity
-        move_command = pb2.MoveLocalVelocity()
+        move_command = MoveLocalVelocity()
         move_command.forward = self.forward
         move_command.left = self.left
         move_command.angular = self.angular
@@ -155,3 +155,18 @@ class Actuator():
 
 
         self.send_socket(robot_control.SerializeToString())
+
+
+if __name__ == '__main__':
+    import time
+    actuator = Actuator()
+
+    while True:
+        t1 = time.time()
+        actuator.send_wheelVelocity_message(4,15,1,15,1)
+        actuator.send_globalVelocity_message(2,5,10,15)
+        actuator.send_localVelocity_message(3,5,10,15)
+        t2 = time.time()
+
+        if( (t2-t1) < 1/300 ):
+            time.sleep(1/300 - (t2-t1))
