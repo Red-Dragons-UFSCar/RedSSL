@@ -11,8 +11,8 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-import ssl_vision_detection_pb2 as ssl__vision__detection__pb2
-import ssl_vision_geometry_pb2 as ssl__vision__geometry__pb2
+from . import ssl_vision_detection_pb2 as ssl__vision__detection__pb2
+from . import ssl_vision_geometry_pb2 as ssl__vision__geometry__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
