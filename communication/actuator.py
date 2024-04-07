@@ -6,21 +6,36 @@ from .proto import ssl_simulation_robot_control_pb2 as pb2
 
 class Actuator():
     def __init__(self, ip:str='localhost', port:int=10000,team_port:int=10302, logger:bool=True) -> None:
-        #Newtork parameters
+        """
+        Descrição:
+                Classe para interação com um atuador em um sistema de controle ou automação.
+
+        Entradas:
+                ip:             Endereço IP para comunicação. Padrão é 'localhost'.
+                port:           Porta de comunicação. Padrão é 10000.
+                team_port:      Porta da equipe. Padrão é 10302.
+                logger:         Flag que ativa o log de recebimento de mensagens no terminal. Por 
+                                padrão se mantém desativado
+        """
+        # Newtork parameters
         self.ip = ip
         self.port = port
         self.team_port = team_port
-        self.buffer_sice = 65536
-
-        #Logger control
+        self.buffer_sice = 65536 # Parametro que define o tamanho da palavra binária a ser recebida da rede
+ 
+        # Logger control
         self.logger = logger
 
-        #Create socket
+        # Create socket
         self._create_socket()
 
 
 
     def _create_socket(self):
+        '''
+        Descrição:  
+                Método responsável pela criação do socket de conexão com o servidor de visão
+        '''
         self.socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind((self.ip, self.port))
@@ -29,6 +44,10 @@ class Actuator():
 
     
     def send_socket(self, data):
+        '''
+        Descrição:  
+                Método responsável pelo envio da mensagem para o simulador
+        '''
         try:
             self.socket.sendto(data, (self.ip, self.team_port))
             if self.logger: print("[Actuator] Enviado!")
@@ -43,6 +62,10 @@ class Actuator():
 
 
     def send_wheelVelocity_message(self, index, wheel_bl, wheel_br, wheel_fl, wheel_fr):
+        '''
+        Descrição:  
+                Método responsável pelo envio das velocidades diretamente para as rodas do robô
+        '''
         self.robot_id = index
         self.wheel_bl = wheel_bl
         self.wheel_br = wheel_br
@@ -74,6 +97,10 @@ class Actuator():
 
 
     def send_globalVelocity_message(self, index,velocity_x, velocity_y, angular):
+        '''
+        Descrição:  
+                Método responsável pelo envio da velocidade global do robô
+        '''
         self.robot_id = index
         self.velocity_x = velocity_x
         self.velocity_y = velocity_y
@@ -100,6 +127,10 @@ class Actuator():
         self.send_socket(robot_control.SerializeToString())
 
     def send_localVelocity_message(self, index, forward, left, angular):
+        '''
+        Descrição:  
+                Método responsável pelo envio da velocidade local do robô
+        '''
         self.robot_id = index
         self.forward = forward
         self.left = left
