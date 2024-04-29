@@ -1,8 +1,8 @@
 class Velocities:
-    def __init__(self, linear=0, angular=0, vtopRight=0, vtopLeft=0,vbottomRight=0, vbottomLeft=0):
+    def __init__(self, linear=0, angular=0, v_top_right=0, v_top_left=0,v_bottom_right=0, v_bottom_left=0):
         self.linear = linear
         self.angular = angular
-        self.vtopRight = vtopRight
-        self.vtopLeft = vtopLeft
-        self.vbottomRight = vbottomRight
-        self.vbottomLeft = vbottomLeft
+        self.v_top_right = v_top_right
+        self.v_top_left = v_top_left
+        self.v_bottom_right = v_bottom_right
+        self.v_bottom_left = v_bottom_left

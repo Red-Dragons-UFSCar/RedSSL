@@ -18,13 +18,13 @@ class KinematicBody:
         self._coordinates.rotation = rotation
 
 
-    def set_velocities(self, linear, angular, vtopRight, vTopLeft, vBottomRight, vBottomLeft):
+    def set_velocities(self, linear, angular, v_top_right, v_top_left, v_bottom_right, v_bottom_left):
         self._velocities.linear = linear
         self._velocities.angular = angular
-        self._velocities.vtopRight = vtopRight
-        self._velocities.vtopLeft = vTopLeft
-        self._velocities.vbottomRight = vBottomRight
-        self._velocities.vbottomLeft = vBottomLeft
+        self._velocities.v_top_right = v_top_right
+        self._velocities.v_top_left = v_top_left
+        self._velocities.v_bottom_right = v_bottom_right
+        self._velocities.v_bottom_left = v_bottom_left
 
 
     def get_coordinates(self):
@@ -35,8 +35,8 @@ class KinematicBody:
 
     def get_velocities(self):
         """Returns velocities"""
-        velocities = Velocities(self._velocities.linear, self._velocities.angular, self._velocities.vtopRight,
-                                self._velocities.vtopLeft, self._velocities.vbottomRight, self._velocities.vbottomLeft)
+        velocities = Velocities(self._velocities.linear, self._velocities.angular, self._velocities.v_top_right,
+                                self._velocities.v_top_left, self._velocities.v_bottom_right, self._velocities.v_bottom_left)
         return velocities
 
 
