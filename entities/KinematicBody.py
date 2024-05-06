@@ -5,7 +5,7 @@ from entities.Velocities import Velocities
 #Units: cm, rad, s
 
 class KinematicBody:
-    #Base classe for all moving bodies
+    """Base class for all moving bodies"""
 
     def __init__(self):
         self._coordinates = SpatialCoordinates()

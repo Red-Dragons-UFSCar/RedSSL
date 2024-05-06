@@ -2,6 +2,9 @@ from entities.KinematicBody import KinematicBody
 from communication.actuator import Actuator
 
 class Robot(KinematicBody):
+    """Stores data about robots in the game."""
+
+
     def __init__(self, robot_id, actuator):
         super().__init__()
         self.robot_id = robot_id
