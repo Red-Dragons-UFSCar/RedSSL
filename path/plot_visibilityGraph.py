@@ -35,14 +35,21 @@ vg = VisibilityGraph()
 # Timer apenas para pegar todas as informações do campo
 counter = 0
 
-
 def plot_path(robot, obstacles, origin, target, path):
+    '''
+        Função para realizar o plot do campo com os robôs de obstáculo e o path
+    '''
     # Criação do gráfico
     ax = plt.gca()
 
     # Limites do gráfico
     ax.set_xlim(left = 000, right = 1000)
     ax.set_ylim(top = 600, bottom = 000)
+
+    # Criação da lista de triangulos e circulos dos obstaculos
+    list_triangles = []
+    list_circles = []
+
     for i in range(len(obstacles)):
         # Criação do triangulo obstaculo
         triangle = vg.robot_triangle_obstacle(obstacles[i], robot)
@@ -70,16 +77,18 @@ def plot_path(robot, obstacles, origin, target, path):
     # Plot dos triangulos
     for i in range(len(list_triangles)):
         ax.add_patch(list_triangles[i])
+
     # Plot dos circulos
     for i in range(len(list_circles)):
         ax.add_patch(list_circles[i])
+
     # Plot do robô base
     ax.add_patch(circle)
 
     # Plot do target
     ax.add_patch(circle_target)
 
-    # Path line
+    # Criação da linha de path
     list_points_path = []
     list_points_path_x = []
     list_points_path_y = []
@@ -89,10 +98,10 @@ def plot_path(robot, obstacles, origin, target, path):
         list_points_path_x.append(vg_point.x)
         list_points_path_y.append(vg_point.y)
     line_path = plt.Line2D(list_points_path_x, list_points_path_y, color='orange')
+
     # Plot do path
     ax.add_line(line_path)
     plt.show()
-
 
 
 while True:
@@ -128,24 +137,19 @@ while True:
     print("Robot 4: ", robots[4].get_coordinates().X)
     print("----")
 
-    # Se o tempo de aquisição estourar, plotar o gráfico com obstaculos
-    
+    # Se o tempo de aquisição estourar, gerar o path
     if counter >= 600:
+        # Definição de origem e target do path
         origin = array([robots[0].get_coordinates().X,
                         robots[0].get_coordinates().Y])
-        
+                
         target = array([800,100])
-
-        # Criação da lista de triangulos e circulos dos obstaculos
-        list_triangles = []
-        list_circles = []
 
         vg_obstacles = []
 
         obstacles = robots[1:] + enemy_robots
-        print(obstacles)
 
-        # Obstaculos - robôs azuis
+        # Obstaculos
         for i in range(len(obstacles)):
             # Criação do triangulo obstaculo
             triangle = vg.robot_triangle_obstacle(obstacles[i], robots[0])
