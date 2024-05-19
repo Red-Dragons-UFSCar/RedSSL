@@ -11,7 +11,7 @@ import time
 
 
 # Objeto de visão
-visao = Vision(ip="224.0.0.1", port=10002)
+visao = Vision(ip="224.5.23.2", port=10020)
 
 # Robos azuis
 robot0 = Robot(robot_id=0, actuator=None)
