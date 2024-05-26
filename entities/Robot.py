@@ -29,5 +29,9 @@ class Robot(KinematicBody):
 
         self.set_velocities(0, 0, self.v_top_right, self.v_top_left, self.v_bottom_right, self.v_bottom_left)
         self.actuator.send_wheelVelocity_message(self.robot_id, self.v_top_right, self.v_top_left, self.v_bottom_right, self.v_bottom_left)
+
+
+    def sim_set_global_vel(self, velocity_x, velocity_y, angular):
+        self.actuator.send_globalVelocity_message(self.robot_id, velocity_x, velocity_y, angular)
     
     
