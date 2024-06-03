@@ -87,6 +87,8 @@ class PID():
         self.last_error = self.error
         self.sum_error = self.sum_error + self.error
 
+        self.sum_error = self.saturate_control_signal(self.sum_error)
+
         return u
     
     def update_angular(self):

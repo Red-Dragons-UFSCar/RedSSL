@@ -32,15 +32,17 @@ control_PID_y = PID(Kp_y, Kd_y, Ki_y, saturation=2)
 
 # Controlador para a rotação theta
 Kp_theta = 0.6
-Kd_theta = 0 
+Kd_theta = 0
 Ki_theta = 0
 control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=1)
 
 
 # Alvos para cada eixo coordenado
-control_PID_x.set_target(400)
-control_PID_y.set_target(300)
-control_PID_theta.set_target(-np.pi/2)
+x_target = [100, 100, 600, 600]
+y_target = [500, 100, 100, 500]
+theta_target = [-np.pi/2, 0, np.pi/2, np.pi]
+n_points = len(x_target)
+cont_target = 0
 
 
 # Contador para garantir a leitura dos dados da camera
@@ -72,6 +74,10 @@ while True:
     # Garantia de recebimento de todos os dados da visão
     # (sim, isso é uma gambiarra, é apenas para teste)
     if cont==5:
+        control_PID_x.set_target(x_target[cont_target])
+        control_PID_y.set_target(y_target[cont_target])
+        control_PID_theta.set_target(theta_target[cont_target])
+
         control_PID_x.set_actual_value(robot0.get_coordinates().X)
         vx = control_PID_x.update()
 
@@ -90,6 +96,14 @@ while True:
     print("Vy = ", vy)
     print("w = ", w)
     print("---")
+
+    target_distance = np.sqrt((robot0.get_coordinates().X - x_target[cont_target]) ** 2 +
+                              (robot0.get_coordinates().Y - y_target[cont_target]) ** 2)
+    
+    if target_distance < 10:
+        cont_target = cont_target + 1
+        if cont_target == n_points:
+            cont_target = 0
 
     t2 = time.time()
 
