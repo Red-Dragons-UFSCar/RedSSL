@@ -5,7 +5,7 @@ from communication.proto.ssl_simulation_robot_control_pb2 import RobotControl, M
 
 
 class Actuator():
-    def __init__(self, ip:str='localhost', port:int=10000,team_port:int=10302, logger:bool=True) -> None:
+    def __init__(self, ip:str='localhost', port:int=10000,team_port:int=10302, logger:bool=False) -> None:
         """
         Descrição:
                 Classe para interação com um atuador em um sistema de controle ou automação.
