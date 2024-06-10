@@ -78,47 +78,47 @@ class VisibilityGraph():
         p3 = rotate_vector(p3, theta)
 
         # Translação do triângulo para as coordenadas do obstaculo
-        p1[0], p1[1] = p1[0] + obst_coords[0], p1[1]+obst_coords[1] 
-        p2[0], p2[1] = p2[0] + obst_coords[0] , p2[1]+obst_coords[1] 
-        p3[0], p3[1] = p3[0] + obst_coords[0] , p3[1]+obst_coords[1] 
+        p1[0], p1[1] = p1[0] + obst_coords[0], p1[1] + obst_coords[1]
+        p2[0], p2[1] = p2[0] + obst_coords[0], p2[1] + obst_coords[1]
+        p3[0], p3[1] = p3[0] + obst_coords[0], p3[1] + obst_coords[1]
         triangle = np.array([p1, p2, p3])
 
         return triangle
-    
-    def convert_to_vgPoly(self, points:np.ndarray) -> vg.Point:
-        '''
-            Descrição:  
-                    Função responsável por converter um array numpy
-                    em pontos da biblioteca VisibilityGraph
-            Entradas:
-                    points:     Vetor numpy [3x2]
-            Saídas:
-                    polygons:   Vetor de pontos VisibilityGraph
-        '''
+
+    def convert_to_vgPoly(self, points: np.ndarray) -> vg.Point:
+        """
+        Descrição:
+                Função responsável por converter um array numpy
+                em pontos da biblioteca VisibilityGraph
+        Entradas:
+                points:     Vetor numpy [3x2]
+        Saídas:
+                polygons:   Vetor de pontos VisibilityGraph
+        """
         polygons = []
         for point in points:
             poly = vg.Point(point[0], point[1])
             polygons.append(poly)
         return polygons
-    
+
     def update_obstacle_map(self, vg_obstacles) -> None:
-        '''
-            Descrição:  
-                    Função responsável por converter um conjunto de poligonos 
-                    VisibilityGraph em um mapa de obstaculos
-            Entradas:
-                    points:     Vetor de poligonos VisibilityGraph
-        '''
+        """
+        Descrição:
+                Função responsável por converter um conjunto de poligonos
+                VisibilityGraph em um mapa de obstaculos
+        Entradas:
+                points:     Vetor de poligonos VisibilityGraph
+        """
         self.obstacle_map = vg.VisGraph()
         self.obstacle_map.build(vg_obstacles)
-    
+
     def get_path(self) -> list:
-        '''
-            Descrição:  
-                    Função responsável por gerar o path a partir dos
-                    obstaculos gerados
-            Saídas:
-                    path:   Lista de pontos VisibilityGraph
-        '''
+        """
+        Descrição:
+                Função responsável por gerar o path a partir dos
+                obstaculos gerados
+        Saídas:
+                path:   Lista de pontos VisibilityGraph
+        """
         path = self.obstacle_map.shortest_path(self.origin, self.target)
         return path
