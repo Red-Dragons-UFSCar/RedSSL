@@ -13,3 +13,4 @@ A seguir serão explicados os scripts aqui presentes para execução:
 - **path_visibility_graph_test:** Script para mostrar o campo de obstáculos triangulares do *visibility graph*. A origem do *path* é definido manualmente como algum ponto do campo (*default*: Robô 0 azul) e constroi o *path* até a outro ponto, considerando os outros robôs como obstáculos.
 - **PID_path_test:** Script para testar o controlador seguindo um path de um quadrado (com coordenadas definidas manualmente no início do código) no simulador. Este teste é provisório pois não é integrado com o path planning do visibility graph.(*default*: Robô 0 azul).
 - **vision_test:** Script que executa um client basico para receber as informações de visão do simulador.
+**desvio_obstaculo_path_test:** Script para testar o controlador seguindo um path de um quadrado (com coordenadas definidas manualmente no início do código) no simulador, juntamente com o path planning para desviar de obstáculos.

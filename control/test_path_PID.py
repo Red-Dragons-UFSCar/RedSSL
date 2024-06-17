@@ -3,6 +3,7 @@ from communication.actuator import Actuator
 from entities.Robot import Robot
 from control.PID import PID
 
+
 import time
 import numpy as np
 
@@ -17,15 +18,15 @@ robot0 = Robot(robot_id=0, actuator=actuator)
 
 
 # Controlador para a posição x
-Kp_x = 1/100 
-Kd_x = -0.0631/100 
+Kp_x = 1 / 100
+Kd_x = -0.0631 / 100
 Ki_x = 0
 control_PID_x = PID(Kp_x, Kd_x, Ki_x, saturation=2)
 
 
 # Controlador para a posição y
-Kp_y = 1/100 
-Kd_y = -0.0169/100 
+Kp_y = 1 / 100
+Kd_y = -0.0169 / 100
 Ki_y = 0
 control_PID_y = PID(Kp_y, Kd_y, Ki_y, saturation=2)
 
@@ -40,7 +41,7 @@ control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=1)
 # Alvos para cada eixo coordenado
 x_target = [100, 100, 600, 600]
 y_target = [500, 100, 100, 500]
-theta_target = [-np.pi/2, 0, np.pi/2, np.pi]
+theta_target = [-np.pi / 2, 0, np.pi / 2, np.pi]
 n_points = len(x_target)
 cont_target = 0
 
@@ -73,7 +74,7 @@ while True:
     # Se foi recebido ao menos 5 frames de visão, realizar o controle
     # Garantia de recebimento de todos os dados da visão
     # (sim, isso é uma gambiarra, é apenas para teste)
-    if cont==5:
+    if cont == 5:
         control_PID_x.set_target(x_target[cont_target])
         control_PID_y.set_target(y_target[cont_target])
         control_PID_theta.set_target(theta_target[cont_target])
@@ -85,7 +86,7 @@ while True:
         vy = control_PID_y.update()
 
         control_PID_theta.set_actual_value(robot0.get_coordinates().rotation)
-        w = control_PID_theta.update()
+        w = control_PID_theta.update.angular()
 
         cont = 0
 
@@ -97,9 +98,11 @@ while True:
     print("w = ", w)
     print("---")
 
-    target_distance = np.sqrt((robot0.get_coordinates().X - x_target[cont_target]) ** 2 +
-                              (robot0.get_coordinates().Y - y_target[cont_target]) ** 2)
-    
+    target_distance = np.sqrt(
+        (robot0.get_coordinates().X - x_target[cont_target]) ** 2
+        + (robot0.get_coordinates().Y - y_target[cont_target]) ** 2
+    )
+
     if target_distance < 10:
         cont_target = cont_target + 1
         if cont_target == n_points:
@@ -107,6 +110,5 @@ while True:
 
     t2 = time.time()
 
-    if( (t2-t1) < 1/300 ):
-        time.sleep(1/300 - (t2-t1))
-
+    if (t2 - t1) < 1 / 300:
+        time.sleep(1 / 300 - (t2 - t1))

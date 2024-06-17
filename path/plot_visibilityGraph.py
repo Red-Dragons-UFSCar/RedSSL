@@ -9,7 +9,7 @@ import time
 
 
 # Objeto de visão
-visao = Vision(ip="224.0.0.1", port=10002)
+visao = Vision(ip="224.5.23.2", port=10020)
 
 # Robos azuis
 robot0 = Robot(robot_id=0, actuator=None)
@@ -35,16 +35,17 @@ vg = VisibilityGraph()
 # Timer apenas para pegar todas as informações do campo
 counter = 0
 
+
 def plot_path(robot, obstacles, origin, target, path):
-    '''
-        Função para realizar o plot do campo com os robôs de obstáculo e o path
-    '''
+    """
+    Função para realizar o plot do campo com os robôs de obstáculo e o path
+    """
     # Criação do gráfico
     ax = plt.gca()
 
     # Limites do gráfico
-    ax.set_xlim(left = 000, right = 1000)
-    ax.set_ylim(top = 600, bottom = 000)
+    ax.set_xlim(left=000, right=1000)
+    ax.set_ylim(top=600, bottom=000)
 
     # Criação da lista de triangulos e circulos dos obstaculos
     list_triangles = []
@@ -54,25 +55,27 @@ def plot_path(robot, obstacles, origin, target, path):
         # Criação do triangulo obstaculo
         triangle = vg.robot_triangle_obstacle(obstacles[i], robot)
         pts = array(triangle)
-        p = Polygon(pts, fill=False) # Triangulo no matplotlib
+        p = Polygon(pts, fill=False)  # Triangulo no matplotlib
         list_triangles.append(p)
 
         vg_triangle = vg.convert_to_vgPoly(pts)
         vg_obstacles.append(vg_triangle)
 
         # Criação do circulo obstaculo
-        center = (obstacles[i].get_coordinates().X,
-                    obstacles[i].get_coordinates().Y) # Centro do robô (circulo)
-        circle_obst = plt.Circle(center,9, fc='red',ec="red") # Circulo matplotlib
+        center = (
+            obstacles[i].get_coordinates().X,
+            obstacles[i].get_coordinates().Y,
+        )  # Centro do robô (circulo)
+        circle_obst = plt.Circle(center, 9, fc="red", ec="red")  # Circulo matplotlib
         list_circles.append(circle_obst)
-    
+
     # Robot
-    center = (origin[0],origin[1])
-    circle = plt.Circle(center,9, fc='blue',ec="blue")
+    center = (origin[0], origin[1])
+    circle = plt.Circle(center, 9, fc="blue", ec="blue")
 
     # Target
-    center_target = (target[0],target[1])
-    circle_target = plt.Circle(center_target,3, fc='orange',ec="orange")
+    center_target = (target[0], target[1])
+    circle_target = plt.Circle(center_target, 3, fc="orange", ec="orange")
 
     # Plot dos triangulos
     for i in range(len(list_triangles)):
@@ -97,7 +100,7 @@ def plot_path(robot, obstacles, origin, target, path):
         list_points_path.append(point)
         list_points_path_x.append(vg_point.x)
         list_points_path_y.append(vg_point.y)
-    line_path = plt.Line2D(list_points_path_x, list_points_path_y, color='orange')
+    line_path = plt.Line2D(list_points_path_x, list_points_path_y, color="orange")
 
     # Plot do path
     ax.add_line(line_path)
@@ -119,7 +122,7 @@ while True:
                 y_pos = detection["y"]
                 theta = detection["orientation"]
                 robots[i].set_coordinates(x_pos, y_pos, theta)
-    
+
     # Detecção dos robôs amarelos
     for detection in frame["robots_yellow"]:
         for i in range(len(robots)):
@@ -128,7 +131,7 @@ while True:
                 y_pos = detection["y"]
                 theta = detection["orientation"]
                 enemy_robots[i].set_coordinates(x_pos, y_pos, theta)
-    
+
     # Log dos robôs
     print("Robot 0: ", robots[0].get_coordinates().X)
     print("Robot 1: ", robots[1].get_coordinates().X)
@@ -140,10 +143,9 @@ while True:
     # Se o tempo de aquisição estourar, gerar o path
     if counter >= 600:
         # Definição de origem e target do path
-        origin = array([robots[0].get_coordinates().X,
-                        robots[0].get_coordinates().Y])
-                
-        target = array([800,100])
+        origin = array([robots[0].get_coordinates().X, robots[0].get_coordinates().Y])
+
+        target = array([990, 600])
 
         vg_obstacles = []
 
@@ -157,7 +159,7 @@ while True:
 
             vg_triangle = vg.convert_to_vgPoly(pts)
             vg_obstacles.append(vg_triangle)
-        
+
         vg.update_obstacle_map(vg_obstacles)
         vg.set_origin(origin)
         vg.set_target(target)
@@ -166,9 +168,9 @@ while True:
 
         plot_path(robots[0], obstacles, origin, target, path)
 
-    counter = counter+1
+    counter = counter + 1
 
     t2 = time.time()
 
-    if( (t2-t1) < 1/300 ):
-        time.sleep(1/300 - (t2-t1))
+    if (t2 - t1) < 1 / 300:
+        time.sleep(1 / 300 - (t2 - t1))
