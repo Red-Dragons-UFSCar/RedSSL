@@ -5,47 +5,49 @@ from commons.math import angle_between, rotate_vector
 from entities.Robot import Robot
 from entities.Obstacle import Obstacle
 
-class VisibilityGraph():
-    '''
-        Descrição:  
-                Classe responsável pela criação de paths a partir do algoritmo 
-                Visibility Graph
-    '''
-    def __init__(self) -> None:
-        self.r_obstacle = 18                # Raio de tolerânica para o obstáculo
-        self.obstacle_map = vg.VisGraph()   # Mapa de obstáculos do Visibility Graph
-        self.origin = vg.Point(0, 0)        # Origem do path
-        self.target = vg.Point(0, 0)        # Target do path
 
-    def set_origin(self, coordinates:np.ndarray) -> None:
-        '''
-            Descrição:  
-                    Função que define a origem do path
-            Entradas:
-                    coordinates:    Vetor numpy [1x2] 
-        '''
+class VisibilityGraph:
+    """
+    Descrição:
+            Classe responsável pela criação de paths a partir do algoritmo
+            Visibility Graph
+    """
+
+    def __init__(self) -> None:
+        self.r_obstacle = 18  # Raio de tolerânica para o obstáculo
+        self.obstacle_map = vg.VisGraph()  # Mapa de obstáculos do Visibility Graph
+        self.origin = vg.Point(0, 0)  # Origem do path
+        self.target = vg.Point(0, 0)  # Target do path
+
+    def set_origin(self, coordinates: np.ndarray) -> None:
+        """
+        Descrição:
+                Função que define a origem do path
+        Entradas:
+                coordinates:    Vetor numpy [1x2]
+        """
         self.origin = vg.Point(coordinates[0], coordinates[1])
-    
-    def set_target(self, coordinates:np.ndarray) -> None:
-        '''
-            Descrição:  
-                    Função que define o fim/alvo do path
-            Entradas:
-                    coordinates:    Vetor numpy [1x2] 
-        '''
+
+    def set_target(self, coordinates: np.ndarray) -> None:
+        """
+        Descrição:
+                Função que define o fim/alvo do path
+        Entradas:
+                coordinates:    Vetor numpy [1x2]
+        """
         self.target = vg.Point(coordinates[0], coordinates[1])
-    
-    def robot_triangle_obstacle(self, obstacle:Obstacle, robot:Robot) -> np.ndarray:
-        '''
-            Descrição:  
-                    Função responsável por definir os pontos triangulares
-                    que circunscrevem o obstáculo de raio R
-            Entradas:
-                    obstacle:   Objeto da classe Obstacle
-                    robot:      Objeto da classe Robot
-            Saídas:
-                    triangle:   Vetor numpy [3x2]
-        '''
+
+    def robot_triangle_obstacle(self, obstacle: Obstacle, robot: Robot) -> np.ndarray:
+        """
+        Descrição:
+                Função responsável por definir os pontos triangulares
+                que circunscrevem o obstáculo de raio R
+        Entradas:
+                obstacle:   Objeto da classe Obstacle
+                robot:      Objeto da classe Robot
+        Saídas:
+                triangle:   Vetor numpy [3x2]
+        """
         # Coordenadas do obstaculo
         obst_coords = obstacle.get_coordinates()
         obst_coords = np.array([obst_coords.X, obst_coords.Y])
@@ -56,12 +58,12 @@ class VisibilityGraph():
 
         # Pontos do triângulo padrão - Origem do sistema coordenado
         p1_x = self.r_obstacle
-        p1_y = - np.sqrt(3) * self.r_obstacle
+        p1_y = -np.sqrt(3) * self.r_obstacle
 
         p2_x = self.r_obstacle
         p2_y = np.sqrt(3) * self.r_obstacle
 
-        p3_x = -2*self.r_obstacle
+        p3_x = -2 * self.r_obstacle
         p3_y = 0
 
         p1 = np.array([p1_x, p1_y])
@@ -70,9 +72,9 @@ class VisibilityGraph():
 
         # Angulo entre o obstaculo e o robô em relação ao eixo x
         ref_vector = np.array([1, 0])
-        theta = angle_between(robot_coords-obst_coords, ref_vector)
+        theta = angle_between(robot_coords - obst_coords, ref_vector)
 
-        # Rotação do triângulo 
+        # Rotação do triângulo
         p1 = rotate_vector(p1, theta)
         p2 = rotate_vector(p2, theta)
         p3 = rotate_vector(p3, theta)
