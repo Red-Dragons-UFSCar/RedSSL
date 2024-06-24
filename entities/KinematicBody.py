@@ -10,6 +10,9 @@ class KinematicBody:
     def __init__(self):
         self._coordinates = SpatialCoordinates()
         self._velocities = Velocities()
+        self._is_filtered = False
+        self.filter = None
+
     
 
     def set_coordinates(self, x, y, rotation):
