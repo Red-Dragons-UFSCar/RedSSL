@@ -124,3 +124,50 @@ class VisibilityGraph:
         """
         path = self.obstacle_map.shortest_path(self.origin, self.target)
         return path
+
+    # Função de desvio de obstáculos
+    def update_target_with_obstacles(
+        self, robot0, robots, enemy_robots, x_target, y_target, cont_target
+    ):
+        """
+        Descrição:
+                Função que atualiza o alvo considerando obstáculos e
+                calcula o próximo ponto no caminho gerado pelo algoritmo de visibilidade.
+        Entradas:
+                robot0:         Objeto do robô controlado
+                robots:         Lista de objetos de robôs
+                enemy_robots:   Lista de objetos de robôs inimigos
+                x_target:       Lista de alvos no eixo x
+                y_target:       Lista de alvos no eixo y
+                cont_target:    Contador de alvo atual
+        Saídas:
+                next_target:    Próximo alvo considerando obstáculos
+        """
+        # Definir origem e alvo atuais
+        current_position = np.array(
+            [robot0.get_coordinates().X, robot0.get_coordinates().Y]
+        )
+        current_target = np.array([x_target[cont_target], y_target[cont_target]])
+        self.set_origin(current_position)
+        self.set_target(current_target)
+
+        # Adicionar obstáculos ao mapa de visibilidade
+        vg_obstacles = []
+        obstacles = robots[1:] + enemy_robots
+        for obstacle in obstacles:
+            triangle = self.robot_triangle_obstacle(obstacle, robot0)
+            vg_triangle = self.convert_to_vgPoly(triangle)
+            vg_obstacles.append(vg_triangle)
+
+        self.update_obstacle_map(vg_obstacles)
+        path = self.get_path()
+
+        if path:
+            # Pega o próximo ponto no caminho gerado pelo algoritmo de visibilidade
+            next_point = path[1] if len(path) > 1 else path[0]
+            next_target = np.array([next_point.x, next_point.y])
+        else:
+            # Se não há caminho, mantém o alvo atual
+            next_target = current_target
+
+        return next_target
