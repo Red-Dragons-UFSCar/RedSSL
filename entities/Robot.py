@@ -1,5 +1,7 @@
 from entities.KinematicBody import KinematicBody
 from communication.actuator import Actuator
+from entities.Target import Target
+import numpy as np
 
 
 class Robot(KinematicBody):
@@ -14,7 +16,8 @@ class Robot(KinematicBody):
         # self.top_left_motor = 0
         # self.bottom_left_motor = 0
         # self.obst = Obstacle(self)
-        # self.target = Target()
+        self.cont_target = 0  # Adicionado cont_target como atributo do robô
+        self.target = None
         self.v_bottom_right = 0  # Velocidade do motor inferior direito
         self.v_bottom_left = 0  # Velocidade do motor inferior esquerdo
         self.v_top_right = 0  # Velocidade do motor superior direito
@@ -46,3 +49,17 @@ class Robot(KinematicBody):
         self.actuator.send_globalVelocity_message(
             self.robot_id, velocity_x, velocity_y, angular
         )
+
+    def set_target(self, target):
+        self.target = target
+
+    def target_reached(self):
+        # Implemente sua lógica para verificar se o robô alcançou o alvo aqui
+        if self.target is None:
+            return False
+        current_position = np.array(
+            [self.get_coordinates().X, self.get_coordinates().Y]
+        )
+        target_position = np.array([self.target.x, self.target.y])
+        distance_to_target = np.linalg.norm(current_position - target_position)
+        return distance_to_target < 10
