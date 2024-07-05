@@ -6,7 +6,7 @@ from numpy import power, sqrt
 """
 
 
-class KalmanFilterFEI:
+class KalmanFilter:
 
     def __init__(self, print_attr=False):
         """
@@ -71,8 +71,8 @@ class KalmanFilterFEI:
                            [-0.05]])
 
         # Matriz de Controle
-        self.B = np.array([[(0.5) * (dt * dt), 0],
-                           [0, (0.5) * (dt * dt)],
+        self.B = np.array([[0.5 * (dt * dt), 0],
+                           [0, 0.5 * (dt * dt)],
                            [dt, 0],
                            [0, dt]])
 
@@ -145,36 +145,36 @@ class KalmanFilterFEI:
         @param _vt2d_ultima_pos - Última posição do objeto sendo filtrado (robô/bola)
         """
 
-        # _vt2d_ultima_pos /= 1e3;
-        # x(0,0) = (double)_vt2d_ultima_pos.x();
-        # x(1,0) = (double)_vt2d_ultima_pos.y();
+        # _vt2dUltimaPos /= 1e3;
+        # x(0,0) = (double)_vt2dUltimaPos.x();
+        # x(1,0) = (double)_vt2dUltimaPos.y();
 
-        # print(_vt2d_ultima_pos)
+        # print(_vt2dUltimaPos)
 
-        # _vt2d_ultima_pos = _vt2d_ultima_pos / 1e3
-        # self.x[0, 0] = _vt2d_ultima_pos.x # <- usando namedtuple
-        # self.x[1, 0] = _vt2d_ultima_pos.y # <- usando namedtuple
+        # _vt2dUltimaPos = _vt2dUltimaPos / 1e3
+        # self.x[0, 0] = _vt2dUltimaPos.x # <- usando namedtuple
+        # self.x[1, 0] = _vt2dUltimaPos.y # <- usando namedtuple
         self.x[0, 0] = _vt2d_ultima_pos[0]  # <- usando numpy.array
         self.x[1, 0] = _vt2d_ultima_pos[1]  # <- usando numpy.array
 
-        # QVector2D vtAux;
+        # QVector2D vt_aux;
         # double d_modulo = sqrt(pow(x(2),2) + pow(x(3),2));
 
-        # vtAux.setX(_vt2d_ultima_pos.x()-x(0));
-        # vtAux.setY(_vt2d_ultima_pos.y()-x(1));
+        # vt_aux.setX(_vt2dUltimaPos.x()-x(0));
+        # vt_aux.setY(_vt2dUltimaPos.y()-x(1));
 
         d_modulo = sqrt(power(self.x[2, 0], 2) + power(self.x[3, 0], 2))
 
-        # vtAux = vector2d(_vt2d_ultima_pos.x - self.x[0, 0], _vt2d_ultima_pos.y - self.x[1, 0]) # <- usando namedtuple
-        vtAux = np.array([_vt2d_ultima_pos[0] - self.x[0, 0], _vt2d_ultima_pos[1] - self.x[1, 0]])  # <- usando numpy.array
+        # vt_aux = vector2d(_vt2dUltimaPos.x - self.x[0, 0], _vt2dUltimaPos.y - self.x[1, 0]) # <- usando namedtuple
+        vt_aux = np.array([_vt2d_ultima_pos[0] - self.x[0, 0], _vt2d_ultima_pos[1] - self.x[1, 0]])  # <- usando numpy.array
 
-        # x(2)= (vtAux*d_modulo).x();
-        # x(3)= (vtAux*d_modulo).y();
+        # x(2)= (vt_aux*d_modulo).x();
+        # x(3)= (vt_aux*d_modulo).y();
 
-        # self.x[2, 0] = (vtAux * d_modulo).x # <- usando namedtuple
-        # self.x[3, 0] = (vtAux * d_modulo).y # <- usando namedtuple
-        self.x[2, 0] = (vtAux * d_modulo)[0]  # <- usando numpy.array
-        self.x[3, 0] = (vtAux * d_modulo)[1]  # <- usando numpy.array
+        # self.x[2, 0] = (vt_aux * d_modulo).x # <- usando namedtuple
+        # self.x[3, 0] = (vt_aux * d_modulo).y # <- usando namedtuple
+        self.x[2, 0] = (vt_aux * d_modulo)[0]  # <- usando numpy.array
+        self.x[3, 0] = (vt_aux * d_modulo)[1]  # <- usando numpy.array
 
         # R(0,0) = 1.0;
         # R(1,1) = 1.0;
@@ -191,42 +191,42 @@ class KalmanFilterFEI:
         @brief Executa o passo de atualização do Filtro de Kalman
 
         @param _vt2d_posicao_atual - Posição atual do objeto
-        @param print_attr - Logging
+        @param print_attr - logging
         """
 
-        # Eigen::Matrix<double, 2, 2> Sk;
+        # Eigen::Matrix<double, 2, 2> sk;
         # Eigen::Matrix<double, 2, 1> zk, yk;
 
-        # Sk = np.zeros([2, 2])
+        # sk = np.zeros([2, 2])
         # zk = np.zeros([2, 1])
         # yk = np.zeros([2, 1])
 
-        # _vt2d_posicao_atual /= 1e3;
-        # zk << (double)_vt2d_posicao_atual.x(),(double)_vt2d_posicao_atual.y();
+        # _vt2dPosicaoAtual /= 1e3;
+        # zk << (double)_vt2dPosicaoAtual.x(),(double)_vt2dPosicaoAtual.y();
 
-        # _vt2d_posicao_atual = _vt2d_posicao_atual / 1e3
-        # zk = np.array([[float(_vt2d_posicao_atual.x)], [float(_vt2d_posicao_atual.y)]]) # <- usando namedtuple
-        # zk = np.array([[float(_vt2d_posicao_atual[0])], [float(_vt2d_posicao_atual[1])]]) # <- usando numpy.array
+        # _vt2dPosicaoAtual = _vt2dPosicaoAtual / 1e3
+        # zk = np.array([[float(_vt2dPosicaoAtual.x)], [float(_vt2dPosicaoAtual.y)]]) # <- usando namedtuple
+        # zk = np.array([[float(_vt2dPosicaoAtual[0])], [float(_vt2dPosicaoAtual[1])]]) # <- usando numpy.array
         zk = np.array([[_vt2d_posicao_atual[0]],
                        [_vt2d_posicao_atual[1]]])  # <- usando numpy.array
 
         # yk = zk - H*x_k_1;
-        # Sk = H*P_k_1*(H.transpose()) + R;
-        # K = P_k_1*(H.transpose())*(Sk.inverse());
+        # sk = H*P_k_1*(H.transpose()) + R;
+        # K = P_k_1*(H.transpose())*(sk.inverse());
         # x  = x_k_1 + K*yk;
         # P  = (ident - K*H)*P_k_1;
 
         yk = zk - np.matmul(self.H, self.x_k_1)
-        Sk = np.matmul(np.matmul(self.H, self.P_k_1), self.H.T) + self.R
-        self.K = np.matmul(np.matmul(self.P_k_1, self.H.T), np.linalg.inv(Sk))
+        sk = np.matmul(np.matmul(self.H, self.P_k_1), self.H.T) + self.R
+        self.K = np.matmul(np.matmul(self.P_k_1, self.H.T), np.linalg.inv(sk))
         self.x = self.x_k_1 + np.matmul(self.K, yk)
         self.P = np.matmul(np.identity(4) - np.matmul(self.K, self.H), self.P_k_1)
 
         if print_attr:
-            print(f'_vt2d_posicao_atual = {_vt2d_posicao_atual}')
+            print(f'_vt2dPosicaoAtual = {_vt2d_posicao_atual}')
             print(f'zk = {zk}')
             print(f'yk = {yk}')
-            # print(f'Sk = {Sk}')
+            # print(f'sk = {sk}')
             print(f'self.H = {self.H}')
             print(f'self.x_k_1 = {self.x_k_1}')
 
@@ -237,7 +237,7 @@ class KalmanFilterFEI:
 
         if self.x[0, 0] + self.x[1, 0] + self.x[2, 0] + self.x[3, 0] > 10e9:
             # self.vResetKalman(vector2d(0, 0))
-            self.vResetKalman(np.array([0.0, 0.0]))
+            self.v_reset_kalman(np.array([0.0, 0.0]))
             print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
 
     def v_prediz_kalman(self):
@@ -258,7 +258,7 @@ class KalmanFilterFEI:
         @param _delta_t - Intervalo de tempo entre as amostras [s]
         """
 
-        # dt = _delta_t;
+        # dt = _deltaT;
         # A(0,2) = dt;
         # A(1,3) = dt;
 
@@ -271,8 +271,8 @@ class KalmanFilterFEI:
         # B(2,0) = dt;
         # B(3,1) = dt;
 
-        self.B[0, 0] = (0.5) * (self.dt * self.dt)
-        self.B[1, 1] = (0.5) * (self.dt * self.dt)
+        self.B[0, 0] = 0.5 * (self.dt * self.dt)
+        self.B[1, 1] = 0.5 * (self.dt * self.dt)
         self.B[2, 0] = self.dt
         self.B[3, 1] = self.dt
 
@@ -330,8 +330,8 @@ class KalmanFilterFEI:
         @param _var_y
         """
 
-        # R(0,0) = _var_x;
-        # R(1,1) = _var_y;
+        # R(0,0) = _varX;
+        # R(1,1) = _varY;
 
         self.R[0, 0] = _var_x
         self.R[1, 1] = _var_y
@@ -350,25 +350,25 @@ class KalmanFilterFEI:
         """
 
         # Eigen::Matrix<double,4,1> x_k_1_ = xPred, x_k_1_aux;// x(k-1) Estado anterior
-        # Eigen::Matrix<double,4,4> P_k_1_ = pPred, p_k_1_aux;// P(k-1) Ganho no tempo anterior
-        # Eigen::Matrix<double,4,2> K_ = K;       // Kk Ganho de Kalman
+        # Eigen::Matrix<double,4,4> p_k_1_ = pPred, p_k_1_aux;// P(k-1) Ganho no tempo anterior
+        # Eigen::Matrix<double,4,2> k_ = K;       // Kk Ganho de Kalman
 
         # double d_modulo;
 
-        # Eigen::Matrix<double,2,2> Sk;
+        # Eigen::Matrix<double,2,2> sk;
         # Eigen::Matrix<double,2,1> zk,yk;
 
-        # v_atualiza_variancia(99,99);
+        # vAtualizaVariancia(99,99);
 
         x_k_1_ = self.xPred.copy()  # x(k-1) Estado anterior
         x_k_1_aux = np.zeros([4, 1])
-        P_k_1_ = self.pPred.copy()  # P(k-1) Ganho no tempo anterior
+        p_k_1_ = self.pPred.copy()  # P(k-1) Ganho no tempo anterior
         p_k_1_aux = np.zeros([4, 4])
-        K_ = self.K.copy()  # Kk Ganho de Kalman
+        k_ = self.K.copy()  # Kk Ganho de Kalman
 
         d_modulo = 0.0
 
-        Sk = np.zeros([2, 2])
+        sk = np.zeros([2, 2])
         zk = np.zeros([2, 1])
         yk = np.zeros([2, 1])
 
@@ -377,20 +377,20 @@ class KalmanFilterFEI:
         # for(int i=1;i<=num;i++)
         # {
         #     d_modulo = sqrt(pow(x_k_1_(2),2) + pow(x_k_1_(3),2))/1e3;
-        #     v_atualiza_matrizes(i*_d_t);
+        #     vAtualizaMatrizes(i*_d_t);
 
         #     if(d_modulo*10 > 0.05)
         #     {
         #         x_k_1_aux = A*x_k_1_ + B*u;
-        #         p_k_1_aux = (A*P_k_1_)*A.transpose() + Q;
+        #         p_k_1_aux = (A*p_k_1_)*A.transpose() + Q;
 
         #         zk << x_k_1_aux(0), x_k_1_aux(1);
 
         #         yk = zk - H*x_k_1_;
-        #         Sk = H*p_k_1_aux*(H.transpose()) + R;
-        #         K_ = p_k_1_aux*(H.transpose())*(Sk.inverse());
-        #         x_k_1_  = x_k_1_aux + K_*yk;
-        #         P_k_1_  = (ident - K_*H)*p_k_1_aux;
+        #         sk = H*p_k_1_aux*(H.transpose()) + R;
+        #         k_ = p_k_1_aux*(H.transpose())*(sk.inverse());
+        #         x_k_1_  = x_k_1_aux + k_*yk;
+        #         p_k_1_  = (ident - k_*H)*p_k_1_aux;
         #     }
         #     else
         #     {
@@ -407,16 +407,16 @@ class KalmanFilterFEI:
             if d_modulo * 10 > 0.05:
 
                 x_k_1_aux = np.matmul(self.A, x_k_1_) + np.matmul(self.B, self.u)
-                p_k_1_aux = np.matmul(np.matmul(self.A, P_k_1_), self.A.T) + self.Q
+                p_k_1_aux = np.matmul(np.matmul(self.A, p_k_1_), self.A.T) + self.Q
 
                 zk[0, 0] = x_k_1_aux[0, 0]
                 zk[1, 0] = x_k_1_aux[1, 0]
 
                 yk = zk - np.matmul(self.H, x_k_1_)
-                Sk = np.matmul(np.matmul(self.H, p_k_1_aux), (self.H.T)) + self.R
-                K_ = np.matmul(np.matmul(p_k_1_aux, self.H.T), np.linalg.inv(Sk))
-                x_k_1_ = x_k_1_aux + np.matmul(K_, yk)
-                P_k_1_ = np.matmul(np.identity(4) - np.matmul(K_, self.H), p_k_1_aux)
+                sk = np.matmul(np.matmul(self.H, p_k_1_aux), self.H.T) + self.R
+                k_ = np.matmul(np.matmul(p_k_1_aux, self.H.T), np.linalg.inv(sk))
+                x_k_1_ = x_k_1_aux + np.matmul(k_, yk)
+                p_k_1_ = np.matmul(np.identity(4) - np.matmul(k_, self.H), p_k_1_aux)
 
             else:
 
@@ -426,3 +426,15 @@ class KalmanFilterFEI:
 
         # return vector2d(x_k_1_[0, 0], x_k_1_[1, 0]) # <- usando namedtuple
         return np.array([x_k_1_[0, 0], x_k_1_[1, 0]])  # <- usando numpy.array
+
+    def v_inicializa_kalman(self, pos):
+
+        i = pos.shape[0] - 1
+        pos_x = pos[i, 0]
+        pos_y = pos[i, 1]
+        vel_x = pos[i, 0] - pos[i - 1, 0]
+        vel_y = pos[i, 1] - pos[i - 1, 1]
+        self.x = np.array([[pos_x],
+                           [pos_y],
+                           [vel_x],
+                           [vel_y]])
