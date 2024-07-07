@@ -123,3 +123,29 @@ class PID:
         self.sum_error = self.sum_error + self.error
 
         return u
+
+    def inicializar_controladores_PID(self):
+        self.control_PID_x = PID(self.Kp, self.Kd, self.Ki, saturation=2)
+        self.control_PID_y = PID(self.Kp, self.Kd, self.Ki, saturation=2)
+        self.control_PID_theta = PID(self.Kp, self.Kd, self.Ki, saturation=1)
+
+    def controle_PID(self, robot0):
+        if robot0.target is None:
+            return 0, 0, 0
+
+        self.control_PID_x.set_target(robot0.target[0])
+        self.control_PID_y.set_target(robot0.target[1])
+        self.control_PID_theta.set_target(robot0.target[2])
+
+        self.control_PID_x.set_actual_value(robot0.get_coordinates().X)
+        vx = self.control_PID_x.update()
+
+        self.control_PID_y.set_actual_value(robot0.get_coordinates().Y)
+        vy = self.control_PID_y.update()
+
+        self.control_PID_theta.set_actual_value(robot0.get_coordinates().rotation)
+        w = self.control_PID_theta.update_angular()
+
+        robot0.sim_set_global_vel(vx, vy, w)
+
+        return vx, vy, w
