@@ -3,6 +3,7 @@ from numpy import sqrt, zeros, int32
 from entities.SpatialCoordinates import SpatialCoordinates
 from entities.Velocities import Velocities
 from commons.kalmanfilter import KalmanFilter
+from commons.math import get_dif
 
 
 # Units: cm, rad, s
@@ -24,10 +25,17 @@ class KinematicBody:
             self.unfiltered_coordinates(x, y, rotation)
 
     def filtered_coordinates(self, x, y, rotation):
+        self._coordinates.rotation = rotation
         self.filter.v_prediz_kalman()
         self.filter.v_atualiza_kalman(np.array([[x], [y], [0], [0]]))
         self.filter.xPred = self.filter.x
         self.filter.pPred = self.filter.P
+        self.set_coordinates(self.filter.posX, self.filter.posY, rotation)
+        self.unfiltered_coordinate_buffer = self.get_coordinates()
+        coordinates_vector = np.array([self._coordinates.X, self._coordinates.Y])
+        previous_coordinates_vector = np.array([self.unfiltered_coordinate_buffer.X, self.unfiltered_coordinate_buffer.Y])
+        vel_linear = get_dif(previous_coordinates_vector, coordinates_vector)
+        self.set_velocities(vel_linear, self._velocities.angular, self._velocities.v_top_right, self._velocities.v_top_left, self._velocities.v_bottom_right, self._velocities.v_bottom_left)
 
     def unfiltered_coordinates(self, x, y, rotation):
         self._coordinates.X = x
