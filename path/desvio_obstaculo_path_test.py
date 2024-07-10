@@ -33,27 +33,18 @@ enemy_robot1 = Robot(robot_id=1, actuator=None)
 enemy_robots = [enemy_robot0, enemy_robot1]
 # Controladores PID para posição e orientação
 
-Kp_x, Kd_x, Ki_x = 1 / 100, -0.0631 / 100, 0
-control_PID_x = PID(Kp_x, Kd_x, Ki_x, saturation=2)
-
-Kp_y, Kd_y, Ki_y = 1 / 100, -0.0169 / 100, 0
-control_PID_y = PID(Kp_y, Kd_y, Ki_y, saturation=2)
-
-Kp_theta, Kd_theta, Ki_theta = 0.6, 0, 0
-control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=1)
-'''
 Kp_x = 6.551
 Kd_x = 1.004 
 Ki_x = 0
 N_x = 1/0.01898
-control_PID_x = PID_discrete(Kp_x, Kd_x, Ki_x, saturation=1, N=N_x)
+control_PID_x = PID_discrete(Kp_x, Kd_x, Ki_x, saturation=2, N=N_x)
 
 Kp_y = 4.857
 Kd_y = 1.077 
 Ki_y = 0
 N_y = 1/0.01805
-control_PID_y = PID_discrete(Kp_y, Kd_y, Ki_y, saturation=1, N=N_y)
-'''
+control_PID_y = PID_discrete(Kp_y, Kd_y, Ki_y, saturation=2, N=N_y)
+
 Kp_theta, Kd_theta, Ki_theta = 0.6, 0, 0
 control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=1)
 
