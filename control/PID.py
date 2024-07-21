@@ -107,6 +107,17 @@ class PID:
 
         TODO: Repensar esse controlador, alguns problemas em -180 ocorrem nele
         """
+
+    def update_angular(self):
+        """
+        Descrição:
+                Função responsável por calcular a ação de controle angular
+                por meio de um controlador PID analógico
+        Saídas:
+                u:    float
+
+        TODO: Repensar esse controlador, alguns problemas em -180 ocorrem nele
+        """
         # Forma matemática de manter o angulo no intervalo [-pi, pi]
         sin_error = np.sin(self.target - self.actual_value)
         cos_error = np.cos(self.target - self.actual_value)
