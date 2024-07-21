@@ -1,6 +1,8 @@
 from entities.KinematicBody import KinematicBody
 from communication.actuator import Actuator
 from entities.Target import Target
+from entities.Obstacle import Obstacle
+
 import numpy as np
 
 
@@ -17,7 +19,8 @@ class Robot(KinematicBody):
         # self.bottom_left_motor = 0
         # self.obst = Obstacle(self)
         self.cont_target = 0  # Adicionado cont_target como atributo do robô
-        self.target = None
+        self.target = Target()
+        self.obst = Obstacle(self)
         self.v_bottom_right = 0  # Velocidade do motor inferior direito
         self.v_bottom_left = 0  # Velocidade do motor inferior esquerdo
         self.v_top_right = 0  # Velocidade do motor superior direito

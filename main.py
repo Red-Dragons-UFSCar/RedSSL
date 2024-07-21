@@ -79,7 +79,7 @@ while True:
     if cont == 5:
         quadradinho(robot0, robots, enemy_robots, vg)
 
-        pid.controle_PID(robot0)
+        pid.setRobotVelocity(robot0)
         cont = 0
 
     t2 = time.time()

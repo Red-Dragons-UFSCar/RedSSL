@@ -129,7 +129,7 @@ class PID:
         self.control_PID_y = PID(self.Kp, self.Kd, self.Ki, saturation=2)
         self.control_PID_theta = PID(self.Kp, self.Kd, self.Ki, saturation=1)
 
-    def controle_PID(self, robot0):
+    def setRobotVelocity(self, robot0):
         if robot0.target is None:
             return 0, 0, 0
 
