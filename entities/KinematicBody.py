@@ -27,14 +27,11 @@ class KinematicBody:
     def filtered_coordinates(self, x, y, rotation):
         self._coordinates.rotation = rotation
         self.filter.v_prediz_kalman()
-        self.filter.v_atualiza_kalman(np.array([[x], [y], [0], [0]]))
+        self.filter.v_atualiza_kalman(np.array([x, y]))
         self.filter.xPred = self.filter.x
         self.filter.pPred = self.filter.P
-        self.set_coordinates(self.filter.posX, self.filter.posY, rotation)
-        self.unfiltered_coordinate_buffer = self.get_coordinates()
-        coordinates_vector = np.array([self._coordinates.X, self._coordinates.Y])
-        previous_coordinates_vector = np.array([self.unfiltered_coordinate_buffer.X, self.unfiltered_coordinate_buffer.Y])
-        vel_linear = get_dif(previous_coordinates_vector, coordinates_vector)
+        self.set_coordinates(self.filter.x[0], self.filter.x[1], rotation)
+        vel_linear = sqrt(self.filter.x[2]**2 + self.filter.x[3]**2)
         self.set_velocities(vel_linear, self._velocities.angular, self._velocities.v_top_right, self._velocities.v_top_left, self._velocities.v_bottom_right, self._velocities.v_bottom_left)
 
     def unfiltered_coordinates(self, x, y, rotation):
