@@ -86,7 +86,7 @@ while True:
         vy = control_PID_y.update()
 
         control_PID_theta.set_actual_value(robot0.get_coordinates().rotation)
-        w = control_PID_theta.update.angular()
+        w = control_PID_theta.update_angular()
 
         cont = 0
 

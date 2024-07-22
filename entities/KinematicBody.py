@@ -30,7 +30,9 @@ class KinematicBody:
         self.filter.v_atualiza_kalman(np.array([x, y]))
         self.filter.xPred = self.filter.x
         self.filter.pPred = self.filter.P
-        self.set_coordinates(self.filter.x[0], self.filter.x[1], rotation)
+        self._coordinates.X = self.filter.x[0][0]
+        self._coordinates.Y = self.filter.x[1][0]
+        self._coordinates.rotation = rotation
         vel_linear = sqrt(self.filter.x[2]**2 + self.filter.x[3]**2)
         self.set_velocities(vel_linear, self._velocities.angular, self._velocities.v_top_right, self._velocities.v_top_left, self._velocities.v_bottom_right, self._velocities.v_bottom_left)
 

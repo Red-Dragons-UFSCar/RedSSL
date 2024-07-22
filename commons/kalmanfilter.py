@@ -237,9 +237,9 @@ class KalmanFilter:
 
         if self.x[0, 0] + self.x[1, 0] + self.x[2, 0] + self.x[3, 0] > 10e9:
             # self.vResetKalman(vector2d(0, 0))
-            self.v_reset_kalman(np.array([0.0, 0.0]))
             print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-
+            self.v_reset_kalman(np.array([0.0, 0.0]))
+            
     def v_prediz_kalman(self):
         """
         @brief Executa o passo de predição do Filtro de Kalman
