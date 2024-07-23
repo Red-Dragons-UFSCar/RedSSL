@@ -1,17 +1,19 @@
 import numpy as np
-import entities.Robot as Robot
 
 
-class PID:
-    def __init__(self, Kp, Kd, Ki, saturation) -> None:
+class PID_discrete:
+    def __init__(self, Kp, Kd, Ki, saturation, N=1) -> None:
         """
         Descrição:
                 Classe responsável pelo algoritmo de controle
-                Proporcional, Integral e Derivativo (PID)
+                Proporcional, Integral e Derivativo discreto
+                com filtro (PID-F)
         Entradas:
                 Kp:     float
                 Ki:     float
                 Kd:     float
+                saturation:     float
+                N:      float
 
         TODO: Sincronizar fps com o código da estratégia
         """
@@ -19,6 +21,7 @@ class PID:
         self.Kp = Kp
         self.Kd = Kd
         self.Ki = Ki
+        self.N = N
 
         # Variaveis para controle
         self.target = 0
@@ -26,11 +29,16 @@ class PID:
 
         # Variaveis para erro
         self.error = 0
-        self.last_error = 0
-        self.sum_error = 0
+        self.error_k1 = 0
+        self.error_k2 = 0
+
+        # Variaveis de acao de controle
+        self.c = 0
+        self.c_k1 = 0
 
         # Framerate do ciclo de controle.
         self.fps = 60
+        self.Ts = 1 / 60
 
         # Valores de saruração do controlador
         self.saturation = saturation
@@ -43,7 +51,7 @@ class PID:
         Entradas:
                 value:     float
         """
-        self.actual_value = value
+        self.actual_value = value / 100
 
     def set_target(self, target: float) -> None:
         """
@@ -53,7 +61,7 @@ class PID:
         Entradas:
                 target:     float
         """
-        self.target = target
+        self.target = target / 100
 
     def saturate_control_signal(self, u: float) -> float:
         """
@@ -80,33 +88,26 @@ class PID:
                 por meio de um controlador PID analógico
         Saídas:
                 u:    float
+
+        #TODO: Colocar a parcela integrativa na equação discreta
         """
         self.error = self.target - self.actual_value
 
-        u = (
-            self.Kp * self.error
-            + self.Kd * (self.error - self.last_error) / (1 / self.fps)
-            + self.Ki * self.sum_error
-        )
-        u = self.saturate_control_signal(u)
+        # Constantes para calculo da ação de controle
+        a1 = self.Kp + self.Kd * self.N
+        a2 = self.N * self.Ts - 1 - self.N * self.Kd
+        a3 = self.N * self.Ts - 1
 
-        self.last_error = self.error
-        self.sum_error = self.sum_error + self.error
+        # Ação de controle
+        self.c = a1 * self.error + a2 * self.error_k1 - a3 * self.c_k1
+        self.c = self.saturate_control_signal(self.c)
 
-        self.sum_error = self.saturate_control_signal(self.sum_error)
+        # Atualização de variaveis
+        self.error_k2 = self.error_k1
+        self.error_k1 = self.error
+        self.c_k1 = self.c
 
-        return u
-
-    def update_angular(self):
-        """
-        Descrição:
-                Função responsável por calcular a ação de controle angular
-                por meio de um controlador PID analógico
-        Saídas:
-                u:    float
-
-        TODO: Repensar esse controlador, alguns problemas em -180 ocorrem nele
-        """
+        return self.c
 
     def update_angular(self):
         """
@@ -115,47 +116,44 @@ class PID:
                 por meio de um controlador PID analógico
         Saídas:
                 u:    float
-
-        TODO: Repensar esse controlador, alguns problemas em -180 ocorrem nele
         """
-        # Forma matemática de manter o angulo no intervalo [-pi, pi]
+        # Forma matemática de manter o erro angular no intervalo [-pi, pi]
         sin_error = np.sin(self.target - self.actual_value)
         cos_error = np.cos(self.target - self.actual_value)
         self.error = np.arctan2(sin_error, cos_error)
 
-        u = (
-            self.Kp * self.error
-            + self.Kd * (self.error - self.last_error) / (1 / self.fps)
-            + self.Ki * self.sum_error
-        )
-        u = self.saturate_control_signal(u)
+        # Constantes para calculo da ação de controle
+        a1 = self.Kp + self.Kd * self.N
+        a2 = self.N * self.Ts - 1 - self.N * self.Kd
+        a3 = self.N * self.Ts - 1
 
-        self.last_error = self.error
-        self.sum_error = self.sum_error + self.error
+        # Ação de controle
+        self.c = a1 * self.error + a2 * self.error_k1 - a3 * self.c_k1
+        self.c = self.saturate_control_signal(self.c)
 
-        return u
+        # Atualização de variaveis
+        self.error_k2 = self.error_k1
+        self.error_k1 = self.error
+        self.c_k1 = self.c
 
-    def inicializar_controladores_PID(self):
-        self.control_PID_x = PID(self.Kp, self.Kd, self.Ki, saturation=2)
-        self.control_PID_y = PID(self.Kp, self.Kd, self.Ki, saturation=2)
-        self.control_PID_theta = PID(self.Kp, self.Kd, self.Ki, saturation=1)
+        return self.c
 
-    def setRobotVelocity(self, robot0):
+    def set_robot_velocity(robot0, control_PID_x, control_PID_y, control_PID_theta):
         if robot0.target is None:
             return 0, 0, 0
 
-        self.control_PID_x.set_target(robot0.target[0])
-        self.control_PID_y.set_target(robot0.target[1])
-        self.control_PID_theta.set_target(robot0.target[2])
+        control_PID_x.set_target(robot0.target[0])
+        control_PID_y.set_target(robot0.target[1])
+        control_PID_theta.set_target(robot0.target[2])
 
-        self.control_PID_x.set_actual_value(robot0.get_coordinates().X)
-        vx = self.control_PID_x.update()
+        control_PID_x.set_actual_value(robot0.get_coordinates().X)
+        vx = control_PID_x.update()
 
-        self.control_PID_y.set_actual_value(robot0.get_coordinates().Y)
-        vy = self.control_PID_y.update()
+        control_PID_y.set_actual_value(robot0.get_coordinates().Y)
+        vy = control_PID_y.update()
 
-        self.control_PID_theta.set_actual_value(robot0.get_coordinates().rotation)
-        w = self.control_PID_theta.update_angular()
+        control_PID_theta.set_actual_value(robot0.get_coordinates().rotation)
+        w = control_PID_theta.update_angular()
 
         robot0.sim_set_global_vel(vx, vy, w)
 

@@ -1,6 +1,5 @@
 import pyvisgraph as vg
 import numpy as np
-
 from commons.math import angle_between, rotate_vector
 from entities.Robot import Robot
 from entities.Obstacle import Obstacle
