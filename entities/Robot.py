@@ -1,7 +1,7 @@
 from entities.KinematicBody import KinematicBody
 from communication.actuator import Actuator
-from entities.Target import Target
 from entities.Obstacle import Obstacle
+from entities.Target import Target
 from control.PID import PID
 from control.PID_discrete import PID_discrete
 
@@ -15,10 +15,6 @@ class Robot(KinematicBody):
         super().__init__()
         self.robot_id = robot_id
         self.actuator = actuator
-        # self.top_right_motor = 0
-        # self.bottom_right_motor = 0
-        # self.top_left_motor = 0
-        # self.bottom_left_motor = 0
         self.obst = Obstacle(self)
         self.cont_target = 0  # Adicionado cont_target como atributo do robô
         self.target = Target()
@@ -83,7 +79,8 @@ class Robot(KinematicBody):
         distance_to_target = np.linalg.norm(current_position - target_position)
         return distance_to_target < 10
 
-    def set_robot_velocity(self, target_velocity_x, target_velocity_y, target_angular):
+    def calculate_velocity(self, target_velocity_x, target_velocity_y, target_angular):
+        """Calcula as velocidades de controle sem definir diretamente no robô."""
         self.control_PID_x.set_target(target_velocity_x)
         self.control_PID_y.set_target(target_velocity_y)
         self.control_PID_theta.set_target(target_angular)
@@ -97,6 +94,8 @@ class Robot(KinematicBody):
         self.control_PID_theta.set_actual_value(self.get_coordinates().rotation)
         w = self.control_PID_theta.update_angular()
 
-        self.sim_set_global_vel(vx, vy, w)
-
         return vx, vy, w
+
+    def apply_velocity(self, vx, vy, w):
+        """Aplica as velocidades calculadas ao robô."""
+        self.sim_set_global_vel(vx, vy, w)

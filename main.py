@@ -1,9 +1,7 @@
 from communication.vision import Vision
 from communication.actuator import Actuator
 from entities.Robot import Robot
-from path.visibilityGraph import VisibilityGraph
 from control.PID import PID
-from control.PID_discrete import PID_discrete
 from behavior.skills import *
 import time
 import numpy as np
@@ -11,9 +9,6 @@ import numpy as np
 
 # Objeto de visão
 visao = Vision(ip="224.5.23.2", port=10020)
-
-# Visibilidade
-vg = VisibilityGraph()
 
 # Client de conexão de atuação do simulador
 actuator = Actuator(team_port=10301)
@@ -23,14 +18,17 @@ robot0 = Robot(
     robot_id=0,
     actuator=actuator,
 )
+
 robot1 = Robot(robot_id=1, actuator=None)
 robot2 = Robot(robot_id=2, actuator=None)
 
 robots = [robot0, robot1, robot2]
 
+
 # Robôs amarelos (considerados como obstáculos)
 enemy_robot0 = Robot(robot_id=0, actuator=None)
 enemy_robot1 = Robot(robot_id=1, actuator=None)
+
 
 enemy_robots = [enemy_robot0, enemy_robot1]
 
@@ -74,8 +72,8 @@ while True:
     # Se foi recebido ao menos 5 frames de visão, realizar o controle
     if cont == 5:
 
-        go_to(robot0, 100, 0, robots, enemy_robots, vg)
-
+        vx, vy, w = go_to_point(robot0, 100, 500, robots, enemy_robots)
+        robot0.apply_velocity(vx, vy, w)
         cont = 0
 
     t2 = time.time()
