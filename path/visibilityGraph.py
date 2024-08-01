@@ -138,37 +138,59 @@ class VisibilityGraph:
 
         self.update_obstacle_map(vg_obstacles)
 
-    def update_target_with_obstacles(
-        self, robot, robots, enemy_robots, X_path, Y_path, target_idx
-    ) -> np.ndarray:
+    def get_path(self) -> list:
         """
         Descrição:
-                Função responsável por definir um path e retornar um ponto acessível
-        Entradas:
-                robot:          Objeto da classe Robot
-                robots:         Lista de objetos da classe Robot
-                enemy_robots:   Lista de objetos da classe Robot
-                X_path:         Lista de pontos X
-                Y_path:         Lista de pontos Y
-                target_idx:     Ponto target
+                Função responsável por gerar o path a partir dos
+                obstaculos gerados
+        Saídas:
+                path:   Lista de pontos VisibilityGraph
         """
-        current_target = np.array([X_path[target_idx], Y_path[target_idx]])
+        path = self.obstacle_map.shortest_path(self.origin, self.target)
+        return path
+
+    def update_target_with_obstacles(
+        self, robot0, robots, enemy_robots, x_target, y_target, cont_target
+    ):
+        """
+        Descrição:
+                Função que atualiza o alvo considerando obstáculos e
+                calcula o próximo ponto no caminho gerado pelo algoritmo de visibilidade.
+        Entradas:
+                robot0:         Objeto do robô controlado
+                robots:         Lista de objetos de robôs
+                enemy_robots:   Lista de objetos de robôs inimigos
+                x_target:       Lista de alvos no eixo x
+                y_target:       Lista de alvos no eixo y
+                cont_target:    Contador de alvo atual
+        Saídas:
+                next_target:    Próximo alvo considerando obstáculos
+        """
+        # Definir origem e alvo atuais
+        current_position = np.array(
+            [robot0.get_coordinates().X, robot0.get_coordinates().Y]
+        )
+        current_target = np.array([x_target[cont_target], y_target[cont_target]])
+        self.set_origin(current_position)
         self.set_target(current_target)
 
-        robot_coords = robot.get_coordinates()
-        current_coords = np.array([robot_coords.X, robot_coords.Y])
-        self.set_origin(current_coords)
+        # Adicionar obstáculos ao mapa de visibilidade
+        vg_obstacles = []
+        obstacles = robots[1:] + enemy_robots
+        for obstacle in obstacles:
+            triangle = self.robot_triangle_obstacle(obstacle, robot0)
+            vg_triangle = self.convert_to_vgPoly(triangle)
+            vg_obstacles.append(vg_triangle)
 
-        path = self.obstacle_map.shortest_path(self.origin, self.target)
+        self.update_obstacle_map(vg_obstacles)
+        path = self.get_path()
 
-        if not path:
-            # Se não houver caminho, retornar a posição atual
-            return current_coords
+        if path:
+            # Pega o próximo ponto no caminho gerado pelo algoritmo de visibilidade
+            next_point = path[1] if len(path) > 1 else path[0]
+            next_target = np.array([next_point.x, next_point.y])
+        else:
+            # Se não há caminho, mantém o alvo atual
+            next_target = current_target
 
-        for point in path:
-            point_coords = np.array([point.x, point.y])
-            if np.linalg.norm(point_coords - current_coords) < self.r_obstacle:
-                continue
-            return point_coords
-
-        return current_coords
+        return next_target

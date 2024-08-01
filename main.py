@@ -72,7 +72,7 @@ while True:
     # Se foi recebido ao menos 5 frames de visão, realizar o controle
     if cont == 5:
 
-        vx, vy, w = go_to_point(robot0, 100, 500, robots, enemy_robots)
+        vx, vy, w = go_to_point(robot0, 100, 0, robots, enemy_robots)
         robot0.apply_velocity(vx, vy, w)
         cont = 0
 

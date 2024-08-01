@@ -19,9 +19,7 @@ def go_to_point(robot0, target_x, target_y, robots, enemy_robots, target_theta=0
     """
 
     # Define o alvo (inclui a atualização do mapa de obstáculos)
-    robot0.target.set_target(
-        robot0, (target_x, target_y), [], enemy_robots, target_theta
-    )
+    robot0.target.set_target(robot0, [], enemy_robots, [target_x], [target_y], 0)
 
     # Atualiza o controle PID e define a velocidade do robô
     vx, vy, w = robot0.calculate_velocity(
