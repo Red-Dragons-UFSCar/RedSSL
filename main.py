@@ -6,77 +6,61 @@ from behavior.skills import *
 import time
 import numpy as np
 
+class RobotController:
+    def __init__(self, vision_ip, vision_port, actuator_port):
+        self.visao = Vision(ip=vision_ip, port=vision_port)
+        self.actuator = Actuator(team_port=actuator_port)
 
-# Objeto de visão
-visao = Vision(ip="224.5.23.2", port=10020)
+        self.robot0 = Robot(robot_id=0, actuator=self.actuator)
+        self.robot1 = Robot(robot_id=1, actuator=None)
+        self.robot2 = Robot(robot_id=2, actuator=None)
 
-# Client de conexão de atuação do simulador
-actuator = Actuator(team_port=10301)
+        self.robots = [self.robot0, self.robot1, self.robot2]
 
-# Robôs azuis (o primeiro é o robô controlado, os outros são obstáculos)
-robot0 = Robot(
-    robot_id=0,
-    actuator=actuator,
-)
+        self.enemy_robot0 = Robot(robot_id=0, actuator=None)
+        self.enemy_robot1 = Robot(robot_id=1, actuator=None)
 
-robot1 = Robot(robot_id=1, actuator=None)
-robot2 = Robot(robot_id=2, actuator=None)
+        self.enemy_robots = [self.enemy_robot0, self.enemy_robot1]
 
-robots = [robot0, robot1, robot2]
+        self.cont = 0
 
+    def update_coordinates(self, frame):
+        for detection in frame["robots_blue"]:
+            for robot in self.robots:
+                if detection["robot_id"] == robot.robot_id:
+                    x_pos, y_pos, theta = detection["x"], detection["y"], detection["orientation"]
+                    robot.set_coordinates(x_pos, y_pos, theta)
 
-# Robôs amarelos (considerados como obstáculos)
-enemy_robot0 = Robot(robot_id=0, actuator=None)
-enemy_robot1 = Robot(robot_id=1, actuator=None)
+        for detection in frame["robots_yellow"]:
+            for enemy_robot in self.enemy_robots:
+                if detection["robot_id"] == enemy_robot.robot_id:
+                    x_pos, y_pos, theta = detection["x"], detection["y"], detection["orientation"]
+                    enemy_robot.set_coordinates(x_pos, y_pos, theta)
 
+    def control_loop(self):
+        while True:
+            t1 = time.time()
 
-enemy_robots = [enemy_robot0, enemy_robot1]
+            self.visao.update()
+            frame = self.visao.get_last_frame()
+            self.update_coordinates(frame)
 
+            self.cont += 1
 
-# Contador para garantir a leitura dos dados da câmera
-cont = 0
-cont_target = 0
+            if self.cont == 5:
 
+                # Exlude robot 0
+                other_robots = self.robots[1:]
 
-while True:
-    t1 = time.time()
+                vx, vy, w = go_to_point(self.robot0, 100, 500, other_robots, self.enemy_robots)
+                self.robot0.apply_velocity(vx, vy, w)
+                self.cont = 0
 
-    # Recebimento dos dados da visão
-    visao.update()
-    frame = visao.get_last_frame()
+            t2 = time.time()
 
-    # Detecção dos robôs azuis
-    for detection in frame["robots_blue"]:
-        for i in range(len(robots)):
-            if detection["robot_id"] == i:
-                x_pos, y_pos, theta = (
-                    detection["x"],
-                    detection["y"],
-                    detection["orientation"],
-                )
-                robots[i].set_coordinates(x_pos, y_pos, theta)
+            if (t2 - t1) < 1 / 300:
+                time.sleep(1 / 300 - (t2 - t1))
 
-    # Detecção dos robôs amarelos
-    for detection in frame["robots_yellow"]:
-        for i in range(len(enemy_robots)):
-            if detection["robot_id"] == i:
-                x_pos, y_pos, theta = (
-                    detection["x"],
-                    detection["y"],
-                    detection["orientation"],
-                )
-                enemy_robots[i].set_coordinates(x_pos, y_pos, theta)
-
-    cont += 1
-
-    # Se foi recebido ao menos 5 frames de visão, realizar o controle
-    if cont == 5:
-
-        vx, vy, w = go_to_point(robot0, 100, 0, robots, enemy_robots)
-        robot0.apply_velocity(vx, vy, w)
-        cont = 0
-
-    t2 = time.time()
-
-    if (t2 - t1) < 1 / 300:
-        time.sleep(1 / 300 - (t2 - t1))
+if __name__ == "__main__":
+    controller = RobotController(vision_ip="224.5.23.2", vision_port=10020, actuator_port=10301)
+    controller.control_loop()
