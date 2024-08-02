@@ -4,6 +4,7 @@ from path.visibilityGraph import VisibilityGraph
 import numpy as np
 import time
 
+
 def go_to_point(robot0, target_x, target_y, field, target_theta=0):
     """
     Move o robô para as coordenadas especificadas.
@@ -17,19 +18,11 @@ def go_to_point(robot0, target_x, target_y, field, target_theta=0):
     """
 
     # Define o alvo (inclui a atualização do mapa de obstáculos)
-    robot0.target.set_target(
-        robot0, (target_x, target_y), field, target_theta
-    )
+    robot0.target.set_target(robot0, (target_x, target_y), field, target_theta)
 
     # Atualiza o controle PID e define a velocidade do robô
-    vx, vy, w = robot0.calculate_velocity(
+    robot0.set_robot_velocity(
         robot0.target.get_coordinates().X,
         robot0.target.get_coordinates().Y,
         target_theta,
     )
-
-    # Opcional: Imprimir as velocidades para depuração
-    print(f"Velocidades definidas: vx={vx}, vy={vy}, w={w}")
-
-    # Retorna as velocidades para depuração ou controle adicional
-    return vx, vy, w
