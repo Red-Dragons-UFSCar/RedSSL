@@ -124,7 +124,6 @@ class VisibilityGraph:
         robots = field.get_ally_robots()
         enemy_robots = field.get_enemy_robots()
         vg_obstacles = []
-        print("Mapeando obstáculos:")
         
         # Filtra os robôs aliados para excluir o robô atual
         for robot in [robot for robot in robots if robot != current_robot]:
@@ -132,14 +131,12 @@ class VisibilityGraph:
                         obstacle = self.robot_triangle_obstacle(robot.obst, robot)
                         obstacle_vg = self.convert_to_vgPoly(obstacle)
                         vg_obstacles.append(obstacle_vg)
-                        print(f"Robô {robot.robot_id}: {obstacle}")
 
         for enemy_robot in enemy_robots:
                 if enemy_robot.obst.is_active:
                         obstacle = self.robot_triangle_obstacle(enemy_robot.obst, enemy_robot)
                         obstacle_vg = self.convert_to_vgPoly(obstacle)
                         vg_obstacles.append(obstacle_vg)
-                        print(f"Robô inimigo {enemy_robot.robot_id}: {obstacle}")
 
         self.update_obstacle_map(vg_obstacles)
 
