@@ -1,6 +1,7 @@
 from communication.vision import Vision
 from communication.actuator import Actuator
 from entities.Robot import Robot
+from entities.Field import Field
 from control.PID import PID
 from behavior.skills import *
 import time
@@ -11,31 +12,30 @@ class RobotController:
         self.visao = Vision(ip=vision_ip, port=vision_port)
         self.actuator = Actuator(team_port=actuator_port)
 
+        self.field = Field()
+
         self.robot0 = Robot(robot_id=0, actuator=self.actuator)
         self.robot1 = Robot(robot_id=1, actuator=None)
         self.robot2 = Robot(robot_id=2, actuator=None)
 
-        self.robots = [self.robot0, self.robot1, self.robot2]
+        self.field.add_blue_robot(self.robot0)
+        self.field.add_blue_robot(self.robot1)
+        self.field.add_blue_robot(self.robot2)
 
         self.enemy_robot0 = Robot(robot_id=0, actuator=None)
         self.enemy_robot1 = Robot(robot_id=1, actuator=None)
 
-        self.enemy_robots = [self.enemy_robot0, self.enemy_robot1]
+        self.field.add_yellow_robot(self.enemy_robot0)
+        self.field.add_yellow_robot(self.enemy_robot1)
 
         self.cont = 0
 
     def update_coordinates(self, frame):
         for detection in frame["robots_blue"]:
-            for robot in self.robots:
-                if detection["robot_id"] == robot.robot_id:
-                    x_pos, y_pos, theta = detection["x"], detection["y"], detection["orientation"]
-                    robot.set_coordinates(x_pos, y_pos, theta)
+            self.field.update_robot_position(detection["robot_id"], detection["x"], detection["y"], detection["orientation"], "blue")
 
         for detection in frame["robots_yellow"]:
-            for enemy_robot in self.enemy_robots:
-                if detection["robot_id"] == enemy_robot.robot_id:
-                    x_pos, y_pos, theta = detection["x"], detection["y"], detection["orientation"]
-                    enemy_robot.set_coordinates(x_pos, y_pos, theta)
+            self.field.update_robot_position(detection["robot_id"], detection["x"], detection["y"], detection["orientation"], "yellow")
 
     def control_loop(self):
         while True:
@@ -48,11 +48,7 @@ class RobotController:
             self.cont += 1
 
             if self.cont == 5:
-
-                # Exlude robot 0
-                other_robots = self.robots[1:]
-
-                vx, vy, w = go_to_point(self.robot0, 100, 500, other_robots, self.enemy_robots)
+                vx, vy, w = go_to_point(self.robot0, 100, 500, self.field)
                 self.robot0.apply_velocity(vx, vy, w)
                 self.cont = 0
 

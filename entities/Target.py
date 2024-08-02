@@ -7,9 +7,14 @@ class Target(KinematicBody):
         super().__init__()
         self.visibility_graph = VisibilityGraph()
 
-    def set_target(self, robot, robots, enemy_robots, target_x, target_y, cont_target):
+    def set_target(
+        self, robot, target_coordinates, field, target_rotation=0
+    ):
+        # Atualiza o mapa de obstáculos
+        self.visibility_graph.create_obstacle_map(field, robot)
 
+        target_x, target_y = target_coordinates
         new_target = self.visibility_graph.update_target_with_obstacles(
-            robot, robots, enemy_robots, target_x, target_y, cont_target
+            robot, field, [target_x], [target_y], 0
         )
-        self.set_coordinates(*new_target, rotation=0)
+        self.set_coordinates(*new_target, target_rotation)
