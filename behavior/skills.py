@@ -26,3 +26,7 @@ def go_to_point(robot0, target_x, target_y, field, target_theta=0):
         robot0.target.get_coordinates().Y,
         target_theta,
     )
+
+    if robot0.target_reached():
+        robot0.vx = 0
+        robot0.vy = 0

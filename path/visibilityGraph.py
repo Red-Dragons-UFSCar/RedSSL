@@ -110,7 +110,7 @@ class VisibilityGraph:
                 points:     Vetor de poligonos VisibilityGraph
         """
         self.obstacle_map = vg.VisGraph()
-        self.obstacle_map.build(vg_obstacles)
+        self.obstacle_map.build(vg_obstacles, status=False)
 
     def create_obstacle_map(self, field, current_robot):
         """
