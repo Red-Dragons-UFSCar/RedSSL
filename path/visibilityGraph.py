@@ -1,7 +1,6 @@
 import pyvisgraph as vg
 import numpy as np
 from commons.math import angle_between, rotate_vector
-from entities.Robot import Robot
 from entities.Obstacle import Obstacle
 
 
@@ -36,7 +35,7 @@ class VisibilityGraph:
         """
         self.target = vg.Point(coordinates[0], coordinates[1])
 
-    def robot_triangle_obstacle(self, obstacle: Obstacle, robot: Robot) -> np.ndarray:
+    def robot_triangle_obstacle(self, obstacle: Obstacle, robot) -> np.ndarray:
         """
         Descrição:
                 Função responsável por definir os pontos triangulares
@@ -111,7 +110,37 @@ class VisibilityGraph:
                 points:     Vetor de poligonos VisibilityGraph
         """
         self.obstacle_map = vg.VisGraph()
-        self.obstacle_map.build(vg_obstacles)
+        self.obstacle_map.build(vg_obstacles, status=False)
+
+    def create_obstacle_map(self, field, current_robot):
+        """
+        Descrição:
+                Função responsável por converter um conjunto de poligonos
+                VisibilityGraph em um mapa de obstáculos.
+        Entradas:
+                field:          Instância da classe Field.
+                current_robot:  O robô que está realizando a navegação.
+        """
+        robots = field.get_ally_robots()
+        enemy_robots = field.get_enemy_robots()
+        vg_obstacles = []
+        
+        # Filtra os robôs aliados para excluir o robô atual
+        for robot in [robot for robot in robots if robot != current_robot]:
+                if robot.obst.is_active:
+                        obstacle = self.robot_triangle_obstacle(robot.obst, robot)
+                        obstacle_vg = self.convert_to_vgPoly(obstacle)
+                        vg_obstacles.append(obstacle_vg)
+
+        for enemy_robot in enemy_robots:
+                if enemy_robot.obst.is_active:
+                        obstacle = self.robot_triangle_obstacle(enemy_robot.obst, enemy_robot)
+                        obstacle_vg = self.convert_to_vgPoly(obstacle)
+                        vg_obstacles.append(obstacle_vg)
+
+        self.update_obstacle_map(vg_obstacles)
+
+
 
     def get_path(self) -> list:
         """
@@ -124,9 +153,8 @@ class VisibilityGraph:
         path = self.obstacle_map.shortest_path(self.origin, self.target)
         return path
 
-    # Função de desvio de obstáculos
     def update_target_with_obstacles(
-        self, robot0, robots, enemy_robots, x_target, y_target, cont_target
+        self, robot0, field, x_target, y_target, cont_target
     ):
         """
         Descrição:
@@ -134,8 +162,7 @@ class VisibilityGraph:
                 calcula o próximo ponto no caminho gerado pelo algoritmo de visibilidade.
         Entradas:
                 robot0:         Objeto do robô controlado
-                robots:         Lista de objetos de robôs
-                enemy_robots:   Lista de objetos de robôs inimigos
+                field:          Instância da classe Field
                 x_target:       Lista de alvos no eixo x
                 y_target:       Lista de alvos no eixo y
                 cont_target:    Contador de alvo atual
@@ -144,29 +171,33 @@ class VisibilityGraph:
         """
         # Definir origem e alvo atuais
         current_position = np.array(
-            [robot0.get_coordinates().X, robot0.get_coordinates().Y]
+                [robot0.get_coordinates().X, robot0.get_coordinates().Y]
         )
         current_target = np.array([x_target[cont_target], y_target[cont_target]])
         self.set_origin(current_position)
         self.set_target(current_target)
 
         # Adicionar obstáculos ao mapa de visibilidade
+        robots = field.get_ally_robots()
+        enemy_robots = field.get_enemy_robots()
         vg_obstacles = []
-        obstacles = robots[1:] + enemy_robots
+        obstacles = [robot for robot in robots if robot != robot0] + enemy_robots
+
         for obstacle in obstacles:
-            triangle = self.robot_triangle_obstacle(obstacle, robot0)
-            vg_triangle = self.convert_to_vgPoly(triangle)
-            vg_obstacles.append(vg_triangle)
+                triangle = self.robot_triangle_obstacle(obstacle, robot0)
+                vg_triangle = self.convert_to_vgPoly(triangle)
+                vg_obstacles.append(vg_triangle)
 
         self.update_obstacle_map(vg_obstacles)
         path = self.get_path()
 
         if path:
-            # Pega o próximo ponto no caminho gerado pelo algoritmo de visibilidade
-            next_point = path[1] if len(path) > 1 else path[0]
-            next_target = np.array([next_point.x, next_point.y])
+                # Pega o próximo ponto no caminho gerado pelo algoritmo de visibilidade
+                next_point = path[1] if len(path) > 1 else path[0]
+                next_target = np.array([next_point.x, next_point.y])
         else:
-            # Se não há caminho, mantém o alvo atual
-            next_target = current_target
+                # Se não há caminho, mantém o alvo atual
+                next_target = current_target
 
         return next_target
+

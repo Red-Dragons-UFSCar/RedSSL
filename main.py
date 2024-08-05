@@ -1,84 +1,93 @@
 from communication.vision import Vision
 from communication.actuator import Actuator
 from entities.Robot import Robot
-from path.visibilityGraph import VisibilityGraph
+from entities.Field import Field
 from control.PID import PID
-from control.PID_discrete import PID_discrete
 from behavior.skills import *
 import time
 import numpy as np
 
 
-# Objeto de visão
-visao = Vision(ip="224.5.23.2", port=10020)
+class RobotController:
+    def __init__(self, vision_ip, vision_port, actuator_port):
+        # Inicializa a comunicação com a visão e o atuador
+        self.visao = Vision(ip=vision_ip, port=vision_port)
+        self.actuator = Actuator(team_port=actuator_port)
 
-# Visibilidade
-vg = VisibilityGraph()
+        # Inicializa o campo de jogo
+        self.field = Field()
 
-# Client de conexão de atuação do simulador
-actuator = Actuator(team_port=10301)
+        # Cria e adiciona um robô ao campo
+        self.robot0 = Robot(robot_id=0, actuator=self.actuator)
+        self.field.add_blue_robot(self.robot0)
 
-# Robôs azuis (o primeiro é o robô controlado, os outros são obstáculos)
-robot0 = Robot(
-    robot_id=0,
-    actuator=actuator,
-)
-robot1 = Robot(robot_id=1, actuator=None)
-robot2 = Robot(robot_id=2, actuator=None)
+        # self.robot1 = Robot(robot_id=1, actuator=None)
+        # self.robot2 = Robot(robot_id=2, actuator=None)
+        # self.field.add_blue_robot(self.robot1)
+        # self.field.add_blue_robot(self.robot2)
 
-robots = [robot0, robot1, robot2]
+        # Cria e adiciona robôs inimigos ao campo
+        self.enemy_robot0 = Robot(robot_id=0, actuator=None)
+        self.enemy_robot1 = Robot(robot_id=1, actuator=None)
+        self.field.add_yellow_robot(self.enemy_robot0)
+        self.field.add_yellow_robot(self.enemy_robot1)
 
-# Robôs amarelos (considerados como obstáculos)
-enemy_robot0 = Robot(robot_id=0, actuator=None)
-enemy_robot1 = Robot(robot_id=1, actuator=None)
+        # Contador para controle do loop
+        self.cont = 0
 
-enemy_robots = [enemy_robot0, enemy_robot1]
+    def update_coordinates(self, frame):
+        # Atualiza as posições dos robôs azuis no campo com base nas informações da visão
+        for detection in frame["robots_blue"]:
+            self.field.update_robot_position(
+                detection["robot_id"],
+                detection["x"],
+                detection["y"],
+                detection["orientation"],
+                "blue",
+            )
+
+        # Atualiza as posições dos robôs amarelos (inimigos) no campo com base nas informações da visão
+        for detection in frame["robots_yellow"]:
+            self.field.update_robot_position(
+                detection["robot_id"],
+                detection["x"],
+                detection["y"],
+                detection["orientation"],
+                "yellow",
+            )
+
+    def send_velocities(self):
+        # Envia as velocidades armazenadas para o atuador
+        robot0 = self.robot0
+        self.actuator.send_globalVelocity_message(
+            robot0.robot_id, robot0.vx, robot0.vy, robot0.w
+        )
+
+    def control_loop(self):
+        while True:
+            t1 = time.time()
+
+            self.visao.update()
+            frame = self.visao.get_last_frame()
+            self.update_coordinates(frame)
+
+            self.cont += 1
+
+            if self.cont == 5:
+                # Move o robô para as coordenadas especificadas e envia as velocidades para o atuador
+                go_to_point(self.robot0, 100, 500, self.field)
+                self.send_velocities()
+                self.cont = 0
+
+            t2 = time.time()
+
+            if (t2 - t1) < 1 / 300:
+                time.sleep(1 / 300 - (t2 - t1))
 
 
-# Contador para garantir a leitura dos dados da câmera
-cont = 0
-cont_target = 0
+if __name__ == "__main__":
 
-
-while True:
-    t1 = time.time()
-
-    # Recebimento dos dados da visão
-    visao.update()
-    frame = visao.get_last_frame()
-
-    # Detecção dos robôs azuis
-    for detection in frame["robots_blue"]:
-        for i in range(len(robots)):
-            if detection["robot_id"] == i:
-                x_pos, y_pos, theta = (
-                    detection["x"],
-                    detection["y"],
-                    detection["orientation"],
-                )
-                robots[i].set_coordinates(x_pos, y_pos, theta)
-
-    # Detecção dos robôs amarelos
-    for detection in frame["robots_yellow"]:
-        for i in range(len(enemy_robots)):
-            if detection["robot_id"] == i:
-                x_pos, y_pos, theta = (
-                    detection["x"],
-                    detection["y"],
-                    detection["orientation"],
-                )
-                enemy_robots[i].set_coordinates(x_pos, y_pos, theta)
-
-    cont += 1
-
-    # Se foi recebido ao menos 5 frames de visão, realizar o controle
-    if cont == 5:
-
-        go_to(robot0, 100, 0, robots, enemy_robots, vg)
-
-        cont = 0
-
-    t2 = time.time()
-
-    if (t2 - t1) < 1 / 300:
-        time.sleep(1 / 300 - (t2 - t1))
+    controller = RobotController(
+        vision_ip="224.5.23.2", vision_port=10020, actuator_port=10301
+    )
+    controller.control_loop()
