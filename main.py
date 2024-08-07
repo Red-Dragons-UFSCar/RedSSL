@@ -6,7 +6,16 @@ from control.PID import PID
 from behavior.skills import *
 import time
 import numpy as np
+import threading
 
+CONTROL_FPS = 60
+CAM_FPS = 5*CONTROL_FPS
+
+# Classe para interrupção de tempo
+class RepeatTimer(threading.Timer):  
+    def run(self):  
+        while not self.finished.wait(self.interval):  
+            self.function(*self.args,**self.kwargs)  
 
 class RobotController:
     def __init__(self, vision_ip, vision_port, actuator_port):
@@ -21,16 +30,16 @@ class RobotController:
         self.robot0 = Robot(robot_id=0, actuator=self.actuator)
         self.field.add_blue_robot(self.robot0)
 
-        # self.robot1 = Robot(robot_id=1, actuator=None)
+        self.robot1 = Robot(robot_id=1, actuator=None)
         # self.robot2 = Robot(robot_id=2, actuator=None)
-        # self.field.add_blue_robot(self.robot1)
+        self.field.add_blue_robot(self.robot1)
         # self.field.add_blue_robot(self.robot2)
 
         # Cria e adiciona robôs inimigos ao campo
         self.enemy_robot0 = Robot(robot_id=0, actuator=None)
-        self.enemy_robot1 = Robot(robot_id=1, actuator=None)
+        #self.enemy_robot1 = Robot(robot_id=1, actuator=None)
         self.field.add_yellow_robot(self.enemy_robot0)
-        self.field.add_yellow_robot(self.enemy_robot1)
+        #self.field.add_yellow_robot(self.enemy_robot1)
 
         # Contador para controle do loop
         self.cont = 0
@@ -63,14 +72,19 @@ class RobotController:
             robot0.robot_id, robot0.vx, robot0.vy, robot0.w
         )
 
+    def get_vision_frame(self):
+        self.visao.update()
+        frame = self.visao.get_last_frame()
+        self.update_coordinates(frame)
+
+    def start_vision_thread(self):
+        self.vision_thread = RepeatTimer((1/CAM_FPS), self.get_vision_frame)
+        self.vision_thread.start()
+
     def control_loop(self):
         while True:
             t1 = time.time()
-
-            self.visao.update()
-            frame = self.visao.get_last_frame()
-            self.update_coordinates(frame)
-
+            '''
             self.cont += 1
 
             if self.cont == 5:
@@ -78,11 +92,15 @@ class RobotController:
                 go_to_point(self.robot0, 100, 500, self.field)
                 self.send_velocities()
                 self.cont = 0
-
+            '''
+            go_to_point(self.robot0, 100, 500, self.field)
+            self.send_velocities()
+            self.cont = 0
+            print(self.robot0.get_coordinates().X)
             t2 = time.time()
 
-            if (t2 - t1) < 1 / 300:
-                time.sleep(1 / 300 - (t2 - t1))
+            if (t2 - t1) < 1 / 60:
+                time.sleep(1 / 60 - (t2 - t1))
 
 
 if __name__ == "__main__":
@@ -90,4 +108,5 @@ if __name__ == "__main__":
     controller = RobotController(
         vision_ip="224.5.23.2", vision_port=10020, actuator_port=10301
     )
+    controller.start_vision_thread()
     controller.control_loop()
