@@ -1,12 +1,8 @@
 import numpy as np
-from numpy import sqrt, zeros, int32
+from numpy import sqrt
 from entities.SpatialCoordinates import SpatialCoordinates
 from entities.Velocities import Velocities
 from commons.kalmanfilter import KalmanFilter
-from commons.math import get_dif
-
-
-# Units: cm, rad, s
 
 class KinematicBody:
     """Base class for all moving bodies"""
@@ -15,10 +11,10 @@ class KinematicBody:
         self._coordinates = SpatialCoordinates()
         self._velocities = Velocities()
         self._is_filtered = True
-        self.filter: KalmanFilter = KalmanFilter()
+        self.filter = KalmanFilter()
         self.unfiltered_coordinate_buffer = self._coordinates
 
-    def set_coordinates(self, x, y, rotation):
+    def set_coordinates(self, x, y, rotation=0):
         if self._is_filtered:
             self.filtered_coordinates(x, y, rotation)
         else:
@@ -51,15 +47,15 @@ class KinematicBody:
 
     def get_coordinates(self):
         """Returns coordinates"""
-        coordinates = SpatialCoordinates(self._coordinates.X, self._coordinates.Y, self._coordinates.rotation)
-        return coordinates
+        return SpatialCoordinates(self._coordinates.X, self._coordinates.Y, self._coordinates.rotation)
 
     def get_velocities(self):
         """Returns velocities"""
-        velocities = Velocities(self._velocities.linear, self._velocities.angular, self._velocities.v_top_right,
-                                self._velocities.v_top_left, self._velocities.v_bottom_right,
-                                self._velocities.v_bottom_left)
-        return velocities
+        return Velocities(
+            self._velocities.linear, self._velocities.angular,
+            self._velocities.v_top_right, self._velocities.v_top_left,
+            self._velocities.v_bottom_right, self._velocities.v_bottom_left
+        )
 
     def calculate_distance(self, body):
         """calculates the distance between self and another kinematic body"""
