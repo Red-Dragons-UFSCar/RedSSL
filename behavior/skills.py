@@ -12,7 +12,7 @@ def follow_ball_y(robot0, field, target_theta=0):
     mas apenas se a bola estiver no lado ofensivo do campo.
     """
     ball_position = field.ball.get_coordinates()
-    target_x = 133  # Fixa posição X do robô em 133
+    target_x = 368  # Fixa posição X do robô em 133
     target_y = ball_position.Y
 
     # Define o alvo e atualiza a velocidade do robô

@@ -13,14 +13,14 @@ def zagueiro(robot0, field):
     # Obtém a posição atual da bola
     offensive_line_x = 450.00 #meio de campo
     ball_position = field.ball.get_coordinates()
-    #print(f"Posição da Bola: X = {ball_position.X}, Y = {ball_position.Y}")
+    print(f"Posição da Bola: X = {ball_position.X}, Y = {ball_position.Y}")
 
     # Verifica se a bola está no lado ofensivo ou defensivo
     if ball_position.X >= offensive_line_x:
         # A bola está no lado ofensivo
         follow_ball_y(robot0, field)
-        print("rodando ball_pos_y")
+        #print("rodando ball_pos_y")
     else:
         # A bola está no lado defensivo
         pursue_ball(robot0, field)
-        print("rodando pursue_ball")
+        #print("rodando pursue_ball")
