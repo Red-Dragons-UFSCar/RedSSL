@@ -2,7 +2,15 @@ import pyvisgraph as vg
 import numpy as np
 from commons.math import angle_between, rotate_vector
 from entities.Obstacle import Obstacle
+import signal
+import time
+import threading
+import concurrent.futures
 
+def handle_timeout(signum, frame):
+    raise TimeoutError
+
+signal.signal(signal.SIGALRM, handle_timeout)
 
 class VisibilityGraph:
     """
@@ -16,6 +24,7 @@ class VisibilityGraph:
         self.obstacle_map = vg.VisGraph()  # Mapa de obstáculos do Visibility Graph
         self.origin = vg.Point(0, 0)  # Origem do path
         self.target = vg.Point(0, 0)  # Target do path
+        self.logger_obstacle = True  # Habilita o log de tempo da construção do mapa de obstaculos
 
     def set_origin(self, coordinates: np.ndarray) -> None:
         """
@@ -101,46 +110,14 @@ class VisibilityGraph:
             polygons.append(poly)
         return polygons
 
-    def update_obstacle_map(self, vg_obstacles) -> None:
+    def update_obstacle_map(self) -> None:
         """
         Descrição:
                 Função responsável por converter um conjunto de poligonos
                 VisibilityGraph em um mapa de obstaculos
-        Entradas:
-                points:     Vetor de poligonos VisibilityGraph
         """
         self.obstacle_map = vg.VisGraph()
-        self.obstacle_map.build(vg_obstacles, status=False)
-
-    def create_obstacle_map(self, field, current_robot):
-        """
-        Descrição:
-                Função responsável por converter um conjunto de poligonos
-                VisibilityGraph em um mapa de obstáculos.
-        Entradas:
-                field:          Instância da classe Field.
-                current_robot:  O robô que está realizando a navegação.
-        """
-        robots = field.get_ally_robots()
-        enemy_robots = field.get_enemy_robots()
-        vg_obstacles = []
-        
-        # Filtra os robôs aliados para excluir o robô atual
-        for robot in [robot for robot in robots if robot != current_robot]:
-                if robot.obst.is_active:
-                        obstacle = self.robot_triangle_obstacle(robot.obst, robot)
-                        obstacle_vg = self.convert_to_vgPoly(obstacle)
-                        vg_obstacles.append(obstacle_vg)
-
-        for enemy_robot in enemy_robots:
-                if enemy_robot.obst.is_active:
-                        obstacle = self.robot_triangle_obstacle(enemy_robot.obst, enemy_robot)
-                        obstacle_vg = self.convert_to_vgPoly(obstacle)
-                        vg_obstacles.append(obstacle_vg)
-
-        self.update_obstacle_map(vg_obstacles)
-
-
+        self.obstacle_map.build(self.vg_obstacles, status=False, workers=1)
 
     def get_path(self) -> list:
         """
@@ -154,7 +131,7 @@ class VisibilityGraph:
         return path
 
     def update_target_with_obstacles(
-        self, robot0, field, x_target, y_target, cont_target
+        self, robot, field, x_target, y_target, cont_target
     ):
         """
         Descrição:
@@ -171,7 +148,7 @@ class VisibilityGraph:
         """
         # Definir origem e alvo atuais
         current_position = np.array(
-                [robot0.get_coordinates().X, robot0.get_coordinates().Y]
+                [robot.get_coordinates().X, robot.get_coordinates().Y]
         )
         current_target = np.array([x_target[cont_target], y_target[cont_target]])
         self.set_origin(current_position)
@@ -181,14 +158,38 @@ class VisibilityGraph:
         robots = field.get_ally_robots()
         enemy_robots = field.get_enemy_robots()
         vg_obstacles = []
-        obstacles = [robot for robot in robots if robot != robot0] + enemy_robots
+        obstacles = [robot for robot in robots if robot != robot] + enemy_robots
 
         for obstacle in obstacles:
-                triangle = self.robot_triangle_obstacle(obstacle, robot0)
+                triangle = self.robot_triangle_obstacle(obstacle, robot)
                 vg_triangle = self.convert_to_vgPoly(triangle)
                 vg_obstacles.append(vg_triangle)
+        
+        self.vg_obstacles = vg_obstacles
 
-        self.update_obstacle_map(vg_obstacles)
+        t1 = time.time()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+                '''
+                  TODO: Avaliar a real necessidade desse trecho
+                  Objetivo: Limitar a execução da função self.update_obstacle_map para
+                  5ms. Aparentemente essa função não limita, só verifica se ele passou do limite ou não
+                '''
+                future = executor.submit(self.update_obstacle_map)
+                try:
+                        future.result(timeout=0.005)
+                        flag = True
+                except concurrent.futures.TimeoutError:
+                        flag = False
+        t2 = time.time()
+        if self.logger_obstacle:
+                print("---- LOGGER OBSTACULO -----")
+                print("Robô ", robot.robot_id)
+                print("Tempo de construção do mapa de obstáculo: ", (t2-t1)*1000)
+                if t2-t1 > 0.005:
+                        print("[TIMEOUT]")
+                print("----------------")
+        
+        #self.update_obstacle_map()
         path = self.get_path()
 
         if path:

@@ -8,11 +8,16 @@ import time
 import numpy as np
 import threading
 
-CONTROL_FPS = 60
-CAM_FPS = 5*CONTROL_FPS
+CONTROL_FPS = 60            # FPS original para o controle de posição
+CAM_FPS = 7*CONTROL_FPS     # FPS para processar os dados da visão
 
-# Classe para interrupção de tempo
-class RepeatTimer(threading.Timer):  
+
+class RepeatTimer(threading.Timer): 
+    """
+        Descrição:
+            Classe herdada de Timer para execução paralela da thread de visão
+            TODO: Verificar a utilização da biblioteca asyncio para isso.
+    """
     def run(self):  
         while not self.finished.wait(self.interval):  
             self.function(*self.args,**self.kwargs)  
@@ -31,15 +36,15 @@ class RobotController:
         self.field.add_blue_robot(self.robot0)
 
         self.robot1 = Robot(robot_id=1, actuator=None)
-        # self.robot2 = Robot(robot_id=2, actuator=None)
+        self.robot2 = Robot(robot_id=2, actuator=None)
         self.field.add_blue_robot(self.robot1)
-        # self.field.add_blue_robot(self.robot2)
+        self.field.add_blue_robot(self.robot2)
 
         # Cria e adiciona robôs inimigos ao campo
         self.enemy_robot0 = Robot(robot_id=0, actuator=None)
-        #self.enemy_robot1 = Robot(robot_id=1, actuator=None)
+        self.enemy_robot1 = Robot(robot_id=1, actuator=None)
         self.field.add_yellow_robot(self.enemy_robot0)
-        #self.field.add_yellow_robot(self.enemy_robot1)
+        self.field.add_yellow_robot(self.enemy_robot1)
 
         # Contador para controle do loop
         self.cont = 0
@@ -71,36 +76,41 @@ class RobotController:
         self.actuator.send_globalVelocity_message(
             robot0.robot_id, robot0.vx, robot0.vy, robot0.w
         )
+        robot1 = self.robot1
+        self.actuator.send_globalVelocity_message(
+            robot1.robot_id, robot1.vx, robot1.vy, robot1.w
+        )
 
     def get_vision_frame(self):
+        """
+            Descrição:
+                Função para adquirir os dados de visão e atualizar eles
+                nos respectivos robôs
+        """
         self.visao.update()
         frame = self.visao.get_last_frame()
         self.update_coordinates(frame)
 
     def start_vision_thread(self):
+        """
+            Descrição:
+                Função que inicia a thread da visão
+        """
         self.vision_thread = RepeatTimer((1/CAM_FPS), self.get_vision_frame)
         self.vision_thread.start()
 
     def control_loop(self):
         while True:
             t1 = time.time()
-            '''
-            self.cont += 1
-
-            if self.cont == 5:
-                # Move o robô para as coordenadas especificadas e envia as velocidades para o atuador
-                go_to_point(self.robot0, 100, 500, self.field)
-                self.send_velocities()
-                self.cont = 0
-            '''
             go_to_point(self.robot0, 100, 500, self.field)
+            go_to_point(self.robot1, 500, 500, self.field)
             self.send_velocities()
-            self.cont = 0
-            print(self.robot0.get_coordinates().X)
             t2 = time.time()
 
             if (t2 - t1) < 1 / 60:
                 time.sleep(1 / 60 - (t2 - t1))
+            else:
+                print("[TIMEOUT] - Execução de controle excedida: ", (t2 - t1)*1000)
 
 
 if __name__ == "__main__":
