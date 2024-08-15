@@ -1,4 +1,5 @@
 from behavior.skills import follow_ball_y, pursue_ball
+import numpy as np
 
 def zagueiro(robot0, field):
     """
@@ -11,20 +12,27 @@ def zagueiro(robot0, field):
     - field: Instância da classe Field.
     """
     # Obtém a posição atual da bola
-    offensive_line_x = 450.00 #meio de campo
+    offensive_line_x = 450.00  # Meio de campo
     ball_position = field.ball.get_coordinates()
     #print(f"Posição da Bola: X = {ball_position.X}, Y = {ball_position.Y}")
 
-    #obtém posição atual do robô (para fins de informação)
+    # Obtém posição atual do robô
     robot_position = robot0.get_coordinates()
-    print(f"Posição do Robô: X = {robot_position.X}, Y = {robot_position.Y}")
+    #print(f"Posição do Robô: X = {robot_position.X}, Y = {robot_position.Y}")
+
+    # Calcula o ângulo do robô em relação ao eixo X
+    delta_x = ball_position.X - robot_position.X
+    delta_y = ball_position.Y - robot_position.Y
+    angle_to_ball = np.arctan2(delta_y, delta_x)
+
+    print(f"Ângulo do Robô em relação à Bola: {np.degrees(angle_to_ball):.2f}°")
 
     # Verifica se a bola está no lado ofensivo ou defensivo
     if ball_position.X >= offensive_line_x:
         # A bola está no lado ofensivo
         follow_ball_y(robot0, field)
-        #print("rodando ball_pos_y")
+        #print("Rodando follow_ball_y")
     else:
         # A bola está no lado defensivo
-        pursue_ball(robot0, field)
-        #print("rodando pursue_ball")
+        pursue_ball(robot0, field, target_theta=angle_to_ball)
+        #print("Rodando pursue_ball")
