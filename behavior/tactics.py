@@ -25,7 +25,7 @@ def zagueiro(robot0, field):
     delta_y = ball_position.Y - robot_position.Y
     angle_to_ball = np.arctan2(delta_y, delta_x)
 
-    print(f"Ângulo do Robô em relação à Bola: {np.degrees(angle_to_ball):.2f}°")
+    #print(f"Ângulo do Robô em relação à Bola: {np.degrees(angle_to_ball):.2f}°")
 
     # Verifica se a bola está no lado ofensivo ou defensivo
     if ball_position.X >= offensive_line_x:
