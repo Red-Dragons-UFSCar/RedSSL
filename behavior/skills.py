@@ -54,7 +54,7 @@ def pursue_ball(robot0, field, target_theta=0):
     O robô se aproxima da bola por trás e, em seguida, a transforma em seu alvo.
 
     - Se o ângulo do robô em relação à bola estiver entre -45° e 45°,
-      ele avança 10 unidades além da bola para atacá-la.
+      ele avança nas coordenadas da bola para atacá-la.
     - Caso contrário, ele se posiciona atrás da bola, ajustando sua posição
       para evitar a bola se o robô estiver nos 3º ou 4º quadrantes.
     """
@@ -69,7 +69,7 @@ def pursue_ball(robot0, field, target_theta=0):
     if -(np.pi)/4 < angle_to_ball < (np.pi)/4:  # Ativado se o ângulo para a bola for entre -45° e 45°
         # O robô avança para atacar a bola, movendo-se 10 unidades além da bola
         print("Atacando a bola!!")
-        target_x = ball_position.X  # Avançar 10 unidades além da bola
+        target_x = ball_position.X
         target_y = ball_position.Y
 
         # Aponta diretamente para a bola com o ângulo configurado
