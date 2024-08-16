@@ -50,13 +50,18 @@ def pursue_ball(robot0, field, target_theta=0):
         delta_y = ball_position.Y - robot_position.Y
         angle_to_ball = np.arctan2(delta_y, delta_x)
 
-        if -(np.pi)/4 < angle_to_ball < (np.pi)/4:
+        # Verifica se o ângulo atual do robô está dentro de um intervalo de ±10° em radianos
+        robot_rotation = robot0.get_coordinates().rotation
+        rotation_diff = abs(robot_rotation - target_theta)
+
+        if -(np.pi)/6 < angle_to_ball < (np.pi)/6 and rotation_diff <= np.radians(45):
             # Move o robô para atacar a bola, avançando 10 unidades além da bola
-            target_x = ball_position.X + 10
+            print("Atacar")
+            target_x = ball_position.X
             target_y = ball_position.Y
         else:
             # O robô se aproxima por trás da bola
-            approach_offset = -100
+            approach_offset = -50
             target_x = ball_position.X + approach_offset
             target_y = ball_position.Y
 
@@ -67,3 +72,4 @@ def pursue_ball(robot0, field, target_theta=0):
                 target_y += 20
 
     go_to_point(robot0, target_x, target_y, field, target_theta)
+    #go_to_point(robot0, robot0.get_coordinates().X, robot0.get_coordinates().Y, field, target_theta) #fins de teste
