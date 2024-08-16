@@ -27,21 +27,21 @@ class Robot(KinematicBody):
 
         # Parâmetros PID
         Kp_x = 6.551
-        Kd_x = 1.004
-        Ki_x = 0
+        Kd_x = 2.5
+        Ki_x = 1.5
         N_x = 1 / 0.01898
         Kp_y = 4.857
-        Kd_y = 1.077
-        Ki_y = 0
+        Kd_y = 1.4
+        Ki_y = 1
         N_y = 1 / 0.01805
-        Kp_theta = 1.5
+        Kp_theta = 5
         Kd_theta = 0
         Ki_theta = 0
 
         # Controladores PID
         self.control_PID_x = PID_discrete(Kp_x, Kd_x, Ki_x, saturation=1, N=N_x)
         self.control_PID_y = PID_discrete(Kp_y, Kd_y, Ki_y, saturation=1, N=N_y)
-        self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=1)
+        self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=3)
 
     def sim_set_vel(self, v_top_right, v_top_left, v_bottom_right, v_bottom_left):
         # Define as velocidades dos motores
