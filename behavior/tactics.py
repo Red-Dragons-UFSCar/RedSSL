@@ -20,11 +20,14 @@ def zagueiro(robot0, field):
     robot_position = robot0.get_coordinates()
     #print(f"Posição do Robô: X = {robot_position.X}, Y = {robot_position.Y}")
 
-    # Calcula o ângulo do robô em relação ao eixo X
+    # Obtém a rotação atual do robô (em radianos)
+    robot_rotation = robot_position.rotation
+    #print(f"Rotação do Robô: {np.degrees(robot_rotation):.2f}°")
+
+    # Calcula o ângulo do robô em relação ao eixo X (em radianos)
     delta_x = ball_position.X - robot_position.X
     delta_y = ball_position.Y - robot_position.Y
     angle_to_ball = np.arctan2(delta_y, delta_x)
-
     #print(f"Ângulo do Robô em relação à Bola: {np.degrees(angle_to_ball):.2f}°")
 
     # Verifica se a bola está no lado ofensivo ou defensivo
