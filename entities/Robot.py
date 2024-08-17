@@ -31,7 +31,7 @@ class Robot(KinematicBody):
         Ki_x = 1.5
         N_x = 1 / 0.01898
         Kp_y = 4.857
-        Kd_y = 1.4
+        Kd_y = 1.8
         Ki_y = 1
         N_y = 1 / 0.01805
         Kp_theta = 5
