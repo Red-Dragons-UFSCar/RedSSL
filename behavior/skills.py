@@ -26,14 +26,11 @@ def follow_ball_y(robot0, field, target_theta=0):
     """
     ball_position = field.ball.get_coordinates()
     robot_position = robot0.get_coordinates()
-    delta_x = ball_position.X - robot_position.X
-    delta_y = ball_position.Y - robot_position.Y
-    angle_to_ball = np.arctan2(delta_y, delta_x)
 
     target_x = 355  # Fixa a posição X do robô
     target_y = ball_position.Y
 
-    go_to_point(robot0, target_x, target_y, field, angle_to_ball)
+    go_to_point(robot0, target_x, target_y, field, target_theta=0)
 
 def pursue_ball(robot0, field, target_theta=0):
     """
