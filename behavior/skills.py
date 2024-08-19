@@ -59,15 +59,15 @@ def pursue_ball(robot0, field, target_theta=0):
         robot_rotation = robot_position.rotation
         rotation_diff = abs(robot_rotation - angle_to_ball)
 
-        if -(np.pi)/6 < angle_to_ball < (np.pi)/6:
+        if -(np.pi)/6 < angle_to_ball < (np.pi)/6 and rotation_diff <= 30:
             # O robô está alinhado para atacar
-            print("Atacar")
+            #print("Atacar")
             target_x = ball_position.X
             target_y = ball_position.Y
-            target_theta = robot_rotation  # Mantém o ângulo atual
+            #target_theta = robot_rotation  # Mantém o ângulo atual
         else:
             # O robô se posiciona para atacar por trás da bola
-            print("Posicionar")
+            #print("Posicionar")
             approach_offset = -50  # Define uma posição atrás da bola
             target_x = ball_position.X + approach_offset
             target_y = ball_position.Y
@@ -75,8 +75,8 @@ def pursue_ball(robot0, field, target_theta=0):
 
             # Ajusta o alvo para evitar a bola no 3º ou 4º quadrante
             if 90 <= np.degrees(angle_to_ball) <= 180:
-                target_y -= 30
+                target_y -= 35
             elif -180 <= np.degrees(angle_to_ball) <= -90:
-                target_y += 30
+                target_y += 35
 
     go_to_point(robot0, target_x, target_y, field, target_theta)
