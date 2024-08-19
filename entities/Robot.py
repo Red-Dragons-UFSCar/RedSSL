@@ -10,7 +10,7 @@ import numpy as np
 class Robot(KinematicBody):
     """Armazena dados sobre os robôs no jogo."""
 
-    def __init__(self, robot_id, actuator):
+    def __init__(self, robot_id:int, actuator:Actuator):
         super().__init__()
         self.robot_id = robot_id
         self.actuator = actuator
@@ -39,8 +39,8 @@ class Robot(KinematicBody):
         Ki_theta = 0
 
         # Controladores PID
-        self.control_PID_x = PID_discrete(Kp_x, Kd_x, Ki_x, saturation=2, N=N_x)
-        self.control_PID_y = PID_discrete(Kp_y, Kd_y, Ki_y, saturation=2, N=N_y)
+        self.control_PID_x = PID_discrete(Kp_x, Kd_x, Ki_x, saturation=1, N=N_x)
+        self.control_PID_y = PID_discrete(Kp_y, Kd_y, Ki_y, saturation=1, N=N_y)
         self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=1)
 
     def sim_set_vel(self, v_top_right, v_top_left, v_bottom_right, v_bottom_left):

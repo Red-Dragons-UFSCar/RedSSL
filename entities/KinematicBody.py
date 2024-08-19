@@ -14,7 +14,7 @@ class KinematicBody:
     def __init__(self):
         self._coordinates = SpatialCoordinates()
         self._velocities = Velocities()
-        self._is_filtered = True
+        self._is_filtered = False
         self.filter: KalmanFilter = KalmanFilter()
         self.unfiltered_coordinate_buffer = self._coordinates
 
