@@ -2,15 +2,8 @@ import pyvisgraph as vg
 import numpy as np
 from commons.math import angle_between, rotate_vector
 from entities.Obstacle import Obstacle
-import signal
 import time
-import threading
 import concurrent.futures
-
-def handle_timeout(signum, frame):
-    raise TimeoutError
-
-signal.signal(signal.SIGALRM, handle_timeout)
 
 class VisibilityGraph:
     """
@@ -24,7 +17,7 @@ class VisibilityGraph:
         self.obstacle_map = vg.VisGraph()  # Mapa de obstáculos do Visibility Graph
         self.origin = vg.Point(0, 0)  # Origem do path
         self.target = vg.Point(0, 0)  # Target do path
-        self.logger_obstacle = True  # Habilita o log de tempo da construção do mapa de obstaculos
+        self.logger_obstacle = False  # Habilita o log de tempo da construção do mapa de obstaculos
 
     def set_origin(self, coordinates: np.ndarray) -> None:
         """
@@ -170,9 +163,11 @@ class VisibilityGraph:
         t1 = time.time()
         with concurrent.futures.ThreadPoolExecutor() as executor:
                 '''
-                  TODO: Avaliar a real necessidade desse trecho
+                  TODO #1: Avaliar a real necessidade desse trecho
                   Objetivo: Limitar a execução da função self.update_obstacle_map para
-                  5ms. Aparentemente essa função não limita, só verifica se ele passou do limite ou não
+                  5ms.
+                  Aparentemente essa função não limita, só verifica se ele passou do limite ou não
+                  TODO #2: Tentar fazer esse processamento com o asynco.
                 '''
                 future = executor.submit(self.update_obstacle_map)
                 try:

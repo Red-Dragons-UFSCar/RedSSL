@@ -2,10 +2,8 @@ from communication.vision import Vision
 from communication.actuator import Actuator
 from entities.Robot import Robot
 from entities.Field import Field
-from control.PID import PID
 from behavior.skills import *
 import time
-import numpy as np
 import threading
 
 CONTROL_FPS = 60            # FPS original para o controle de posição
@@ -43,8 +41,10 @@ class RobotController:
         # Cria e adiciona robôs inimigos ao campo
         self.enemy_robot0 = Robot(robot_id=0, actuator=None)
         self.enemy_robot1 = Robot(robot_id=1, actuator=None)
+        self.enemy_robot2 = Robot(robot_id=2, actuator=None)
         self.field.add_yellow_robot(self.enemy_robot0)
         self.field.add_yellow_robot(self.enemy_robot1)
+        self.field.add_yellow_robot(self.enemy_robot2)
 
         # Contador para controle do loop
         self.cont = 0
@@ -72,13 +72,14 @@ class RobotController:
 
     def send_velocities(self):
         # Envia as velocidades armazenadas para o atuador
-        robot0 = self.robot0
         self.actuator.send_globalVelocity_message(
-            robot0.robot_id, robot0.vx, robot0.vy, robot0.w
+            self.robot0.robot_id, self.robot0.vx, self.robot0.vy, self.robot0.w
         )
-        robot1 = self.robot1
         self.actuator.send_globalVelocity_message(
-            robot1.robot_id, robot1.vx, robot1.vy, robot1.w
+            self.robot1.robot_id, self.robot1.vx, self.robot1.vy, self.robot1.w
+        )
+        self.actuator.send_globalVelocity_message(
+            self.robot2.robot_id, self.robot2.vx, self.robot2.vy, self.robot2.w
         )
 
     def get_vision_frame(self):
@@ -104,6 +105,7 @@ class RobotController:
             t1 = time.time()
             go_to_point(self.robot0, 100, 500, self.field)
             go_to_point(self.robot1, 500, 500, self.field)
+            go_to_point(self.robot2, 0, 250, self.field)
             self.send_velocities()
             t2 = time.time()
 
