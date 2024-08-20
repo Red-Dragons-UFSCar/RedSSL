@@ -14,7 +14,7 @@ def zagueiro(robot0, field):
     # Obtém a posição atual da bola
     offensive_line_x = 450.00  # Meio de campo
     ball_position = field.ball.get_coordinates()
-    #print(f"Posição da Bola: X = {ball_position.X}, Y = {ball_position.Y}")
+    print(f"Posição da Bola: X = {ball_position.X}, Y = {ball_position.Y}")
 
     # Obtém posição atual do robô
     robot_position = robot0.get_coordinates()

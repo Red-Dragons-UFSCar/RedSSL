@@ -25,9 +25,8 @@ def follow_ball_y(robot0, field, target_theta=0):
     Move o robô para seguir a bola ao longo do eixo Y, mantendo uma posição fixa no eixo X.
     """
     ball_position = field.ball.get_coordinates()
-    robot_position = robot0.get_coordinates()
 
-    target_x = 355  # Fixa a posição X do robô
+    target_x = 400  # Fixa a posição X do robô
     target_y = ball_position.Y
 
     go_to_point(robot0, target_x, target_y, field, target_theta=0)
@@ -41,8 +40,8 @@ def pursue_ball(robot0, field, target_theta=0):
     robot_position = robot0.get_coordinates()
 
     # Verifica se a bola está na área do goleiro
-    if ball_position.X <= 100 and 200 <= ball_position.Y <= 400:
-        target_x = 130  # Fixa a posição X do robô
+    if ball_position.X <= 278 and 228 <= ball_position.Y <= 370:
+        target_x = 292  # Fixa a posição X do robô
         target_y = ball_position.Y
         print("Bola na área do goleiro, seguindo ao longo do eixo Y...")
     
@@ -56,7 +55,7 @@ def pursue_ball(robot0, field, target_theta=0):
         robot_rotation = robot_position.rotation
         rotation_diff = abs(robot_rotation - angle_to_ball)
 
-        if -(np.pi)/6 < angle_to_ball < (np.pi)/6 and rotation_diff <= 30:
+        if -(np.pi)/6 < angle_to_ball < (np.pi)/6:
             # O robô está alinhado para atacar
             #print("Atacar")
             target_x = ball_position.X
