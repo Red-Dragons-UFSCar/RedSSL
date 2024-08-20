@@ -1,11 +1,13 @@
 from entities.Robot import Robot
 from entities.Target import Target
 from path.visibilityGraph import VisibilityGraph
+from entities.Ball import Ball
 import numpy as np
 import time
+from commons import math
+import random
 
-
-def go_to_point(robot0, target_x, target_y, field, target_theta=0):
+def go_to_point(robot0, target_x, target_y, field, target_theta):
     """
     Move o robô para as coordenadas especificadas.
 

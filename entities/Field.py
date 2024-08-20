@@ -7,6 +7,8 @@ class Field:
         self.yellow_robots = []
         self.obstacles = []
         self.ball = Ball()
+        self.width = 900
+        self.height = 600
 
     def add_blue_robot(self, robot):
         self.blue_robots.append(robot)
@@ -23,6 +25,12 @@ class Field:
     def get_ally_robots(self):
         return self.blue_robots
 
+    def get_width(self):
+        return self.width
+
+    def get_height(self):
+        return self.height
+
     def get_enemy_robots(self):
         return self.yellow_robots
 
@@ -36,3 +44,6 @@ class Field:
             if robot.robot_id == robot_id:
                 robot.set_coordinates(x, y, theta)
                 break
+    
+    def update_ball_position(self, x, y):
+        self.ball.set_coordinates(x,y)

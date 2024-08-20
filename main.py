@@ -3,10 +3,9 @@ from communication.actuator import Actuator
 from entities.Robot import Robot
 from entities.Field import Field
 from control.PID import PID
-from behavior.skills import *
+from behavior.tactics import attack_behav
 import time
 import numpy as np
-
 
 class RobotController:
     def __init__(self, vision_ip, vision_port, actuator_port):
@@ -20,11 +19,6 @@ class RobotController:
         # Cria e adiciona um robô ao campo
         self.robot0 = Robot(robot_id=0, actuator=self.actuator)
         self.field.add_blue_robot(self.robot0)
-
-        # self.robot1 = Robot(robot_id=1, actuator=None)
-        # self.robot2 = Robot(robot_id=2, actuator=None)
-        # self.field.add_blue_robot(self.robot1)
-        # self.field.add_blue_robot(self.robot2)
 
         # Cria e adiciona robôs inimigos ao campo
         self.enemy_robot0 = Robot(robot_id=0, actuator=None)
@@ -56,6 +50,14 @@ class RobotController:
                 "yellow",
             )
 
+        # Atualiza a posição da bola com base nas informações da visão
+        if "ball" in frame:
+            ball_detection = frame["ball"]
+            self.field.update_ball_position(
+                ball_detection["x"],
+                ball_detection["y"]
+            )
+
     def send_velocities(self):
         # Envia as velocidades armazenadas para o atuador
         robot0 = self.robot0
@@ -74,11 +76,11 @@ class RobotController:
             self.cont += 1
 
             if self.cont == 5:
-                # Move o robô para as coordenadas especificadas e envia as velocidades para o atuador
-                go_to_point(self.robot0, 100, 500, self.field)
+                # Executa a função zagueiro para controlar o robô
+                attack_behav(self.robot0, self.field)
+                # Envia as velocidades calculadas para o atuador
                 self.send_velocities()
-                self.cont = 0
-
+                self.cont = 0   
             t2 = time.time()
 
             if (t2 - t1) < 1 / 300:
@@ -86,8 +88,7 @@ class RobotController:
 
 
 if __name__ == "__main__":
-
     controller = RobotController(
-        vision_ip="224.5.23.2", vision_port=10020, actuator_port=10301
+        vision_ip="224.0.0.1", vision_port=10002, actuator_port=10301
     )
     controller.control_loop()
