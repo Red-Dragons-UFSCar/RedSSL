@@ -69,9 +69,9 @@ def attack_ball(robot0, field, ball_position, robot_position, angle_to_ball):
         target_theta = angle_to_ball  # Alinha o robô com a bola
 
         if 90 <= np.degrees(angle_to_ball) <= 180:
-            target_y -= 35
+            target_y -= 20
         elif -180 <= np.degrees(angle_to_ball) <= -90:
-            target_y += 35
+            target_y += 20
 
     go_to_point(robot0, target_x, target_y, field, target_theta)
 
