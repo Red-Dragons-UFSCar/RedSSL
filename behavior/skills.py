@@ -61,7 +61,7 @@ def attack_ball(robot0, field, ball_position, robot_position, angle_to_ball):
     if -(np.pi)/2.5 < angle_to_ball < (np.pi)/2.5:
         target_x = ball_position.X
         target_y = ball_position.Y
-        target_theta = angle_to_ball  # Mantém o ângulo atual
+        target_theta = angle_to_ball
     else:
         approach_offset = -50  # Define uma posição atrás da bola
         target_x = ball_position.X + approach_offset
