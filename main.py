@@ -3,6 +3,7 @@ from communication.actuator import Actuator
 from entities.Robot import Robot
 from entities.Field import Field
 from behavior.skills import *
+from behavior.tactics import *
 import time
 import threading
 
@@ -70,6 +71,9 @@ class RobotController:
                 "yellow",
             )
 
+         # Detecção da bola
+        self.field.ball.set_coordinates(frame["ball"]["x"], frame["ball"]["y"], 0)
+
     def send_velocities(self):
         # Envia as velocidades armazenadas para o atuador
         self.actuator.send_globalVelocity_message(
@@ -103,12 +107,13 @@ class RobotController:
     def control_loop(self):
         while True:
             t1 = time.time()
-            go_to_point(self.robot0, 100, 500, self.field)
-            go_to_point(self.robot1, 500, 500, self.field)
+            go_to_point(self.robot0, 100, 500, self.field) 
+            go_to_point(self.robot1, 500, 500, self.field) 
             go_to_point(self.robot2, 0, 250, self.field)
+            goalie (self.robot0, self.field)
             self.send_velocities()
             t2 = time.time()
-
+            
             if (t2 - t1) < 1 / 60:
                 time.sleep(1 / 60 - (t2 - t1))
             else:
