@@ -20,9 +20,6 @@ class Target(KinematicBody):
         - target_rotation: rotação alvo (padrão é 0).
         """
 
-        # Atualiza o mapa de obstáculos no grafo de visibilidade
-        self.visibility_graph.create_obstacle_map(field, robot)
-
         # Extrai as coordenadas do alvo
         target_x, target_y = target_coordinates
 

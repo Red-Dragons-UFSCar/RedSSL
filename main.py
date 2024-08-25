@@ -2,10 +2,25 @@ from communication.vision import Vision
 from communication.actuator import Actuator
 from entities.Robot import Robot
 from entities.Field import Field
-from control.PID import PID
 from behavior.tactics import zagueiro
 import time
-import numpy as np
+import threading
+
+CONTROL_FPS = 60  # FPS original para o controle de posição
+CAM_FPS = 7 * CONTROL_FPS  # FPS para processar os dados da visão
+
+
+class RepeatTimer(threading.Timer):
+    """
+    Descrição:
+        Classe herdada de Timer para execução paralela da thread de visão
+        TODO: Verificar a utilização da biblioteca asyncio para isso.
+    """
+
+    def run(self):
+        while not self.finished.wait(self.interval):
+            self.function(*self.args, **self.kwargs)
+
 
 class RobotController:
     def __init__(self, vision_ip, vision_port, actuator_port):
@@ -20,11 +35,18 @@ class RobotController:
         self.robot0 = Robot(robot_id=0, actuator=self.actuator)
         self.field.add_blue_robot(self.robot0)
 
+        self.robot1 = Robot(robot_id=1, actuator=None)
+        self.robot2 = Robot(robot_id=2, actuator=None)
+        self.field.add_blue_robot(self.robot1)
+        self.field.add_blue_robot(self.robot2)
+
         # Cria e adiciona robôs inimigos ao campo
         self.enemy_robot0 = Robot(robot_id=0, actuator=None)
         self.enemy_robot1 = Robot(robot_id=1, actuator=None)
+        self.enemy_robot2 = Robot(robot_id=2, actuator=None)
         self.field.add_yellow_robot(self.enemy_robot0)
         self.field.add_yellow_robot(self.enemy_robot1)
+        self.field.add_yellow_robot(self.enemy_robot2)
 
         # Contador para controle do loop
         self.cont = 0
@@ -53,42 +75,56 @@ class RobotController:
         # Atualiza a posição da bola com base nas informações da visão
         if "ball" in frame:
             ball_detection = frame["ball"]
-            self.field.update_ball_position(
-                ball_detection["x"],
-                ball_detection["y"]
-            )
+            self.field.update_ball_position(ball_detection["x"], ball_detection["y"])
 
     def send_velocities(self):
         # Envia as velocidades armazenadas para o atuador
-        robot0 = self.robot0
         self.actuator.send_globalVelocity_message(
-            robot0.robot_id, robot0.vx, robot0.vy, robot0.w
+            self.robot0.robot_id, self.robot0.vx, self.robot0.vy, self.robot0.w
         )
+        self.actuator.send_globalVelocity_message(
+            self.robot1.robot_id, self.robot1.vx, self.robot1.vy, self.robot1.w
+        )
+        self.actuator.send_globalVelocity_message(
+            self.robot2.robot_id, self.robot2.vx, self.robot2.vy, self.robot2.w
+        )
+
+    def get_vision_frame(self):
+        """
+        Descrição:
+            Função para adquirir os dados de visão e atualizar eles
+            nos respectivos robôs
+        """
+        self.visao.update()
+        frame = self.visao.get_last_frame()
+        self.update_coordinates(frame)
+
+    def start_vision_thread(self):
+        """
+        Descrição:
+            Função que inicia a thread da visão
+        """
+        self.vision_thread = RepeatTimer((1 / CAM_FPS), self.get_vision_frame)
+        self.vision_thread.start()
 
     def control_loop(self):
         while True:
             t1 = time.time()
-
-            self.visao.update()
-            frame = self.visao.get_last_frame()
-            self.update_coordinates(frame)
-
-            self.cont += 1
-
-            if self.cont == 5:
-                # Executa a função zagueiro para controlar o robô
-                zagueiro(self.robot0, self.field)
-                # Envia as velocidades calculadas para o atuador
-                self.send_velocities()
-                self.cont = 0   
+            go_to_point(self.robot0, 100, 500, self.field)
+            go_to_point(self.robot1, 500, 500, self.field)
+            go_to_point(self.robot2, 0, 250, self.field)
+            self.send_velocities()
             t2 = time.time()
 
-            if (t2 - t1) < 1 / 300:
-                time.sleep(1 / 300 - (t2 - t1))
+            if (t2 - t1) < 1 / 60:
+                time.sleep(1 / 60 - (t2 - t1))
+            else:
+                print("[TIMEOUT] - Execução de controle excedida: ", (t2 - t1) * 1000)
 
 
 if __name__ == "__main__":
     controller = RobotController(
         vision_ip="224.5.23.2", vision_port=10020, actuator_port=10301
     )
+    controller.start_vision_thread()
     controller.control_loop()

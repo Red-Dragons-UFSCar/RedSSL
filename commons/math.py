@@ -28,7 +28,11 @@ def unit_vector(vector):
     Saídas:
             v_unit: Vetor normalizado numpy [1x2]
     """
-    return vector / np.linalg.norm(vector)
+    if np.linalg.norm(vector) == 0:
+        value = vector
+    else:
+        value = vector / np.linalg.norm(vector)
+    return value
 
 
 def angle_between(v1, v2):

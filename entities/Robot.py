@@ -10,7 +10,7 @@ import numpy as np
 class Robot(KinematicBody):
     """Armazena dados sobre os robôs no jogo."""
 
-    def __init__(self, robot_id, actuator):
+    def __init__(self, robot_id: int, actuator: Actuator):
         super().__init__()
         self.robot_id = robot_id
         self.actuator = actuator
