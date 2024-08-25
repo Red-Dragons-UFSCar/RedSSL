@@ -4,6 +4,7 @@ from entities.Robot import Robot
 from entities.Field import Field
 from behavior.tactics import zagueiro
 from behavior.skills import go_to_point
+from behavior.plays import estrategia_basica
 from behavior.tactics import *
 import time
 import threading
@@ -37,7 +38,7 @@ class RobotController:
         self.robot0 = Robot(robot_id=0, actuator=self.actuator)
         self.field.add_blue_robot(self.robot0)
 
-        self.robot1 = Robot(robot_id=1, actuator=None)
+        self.robot1 = Robot(robot_id=1, actuator=self.actuator)
         self.robot2 = Robot(robot_id=2, actuator=None)
         self.field.add_blue_robot(self.robot1)
         self.field.add_blue_robot(self.robot2)
@@ -112,10 +113,10 @@ class RobotController:
     def control_loop(self):
         while True:
             t1 = time.time()
-            go_to_point(self.robot0, 100, 500, self.field)
-            go_to_point(self.robot1, 500, 500, self.field)
-            go_to_point(self.robot2, 0, 250, self.field)
-            goalie(self.robot0, self.field)
+            estrategia_basica(self.robot0, self.robot1, self.field)
+            # go_to_point(self.robot0, 100, 500, self.field)
+            # go_to_point(self.robot1, 500, 500, self.field)
+            # go_to_point(self.robot2, 0, 250, self.field)
             self.send_velocities()
             t2 = time.time()
 

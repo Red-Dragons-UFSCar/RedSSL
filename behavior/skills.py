@@ -92,9 +92,9 @@ def pursue_ball(robot0, field):
     ball_position = field.ball.get_coordinates()
     robot_position = robot0.get_coordinates()
 
-    if ball_position.X <= 278 and 228 <= ball_position.Y <= 370:
+    if ball_position.X <= 55 and 85 <= ball_position.Y <= 225:
         # A bola está na área do goleiro
-        follow_ball_y(robot0, field, fixed_x=292, target_theta=np.pi)
+        follow_ball_y(robot0, field, fixed_x=190, target_theta=np.pi)
     else:
         # Atacar a bola
         attack_ball(
