@@ -4,6 +4,7 @@ from entities.Robot import Robot
 from entities.Field import Field
 from behavior.tactics import zagueiro
 from behavior.skills import go_to_point
+from behavior.tactics import *
 import time
 import threading
 
@@ -111,9 +112,10 @@ class RobotController:
     def control_loop(self):
         while True:
             t1 = time.time()
-            zagueiro(self.robot0, self.field)
-            # go_to_point(self.robot1, 150, 150, self.field)
-            # go_to_point(self.robot2, 300, 250, self.field)
+            go_to_point(self.robot0, 100, 500, self.field)
+            go_to_point(self.robot1, 500, 500, self.field)
+            go_to_point(self.robot2, 0, 250, self.field)
+            goalie(self.robot0, self.field)
             self.send_velocities()
             t2 = time.time()
 
