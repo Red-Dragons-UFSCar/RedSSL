@@ -1,6 +1,7 @@
 import math
 import numpy as np
 
+
 def go_to_point(robot0, target_x, target_y, field, target_theta=0):
     """
     Move o robô para as coordenadas especificadas.
@@ -23,6 +24,7 @@ def go_to_point(robot0, target_x, target_y, field, target_theta=0):
         robot0.vx = 0
         robot0.vy = 0
 
+
 def follow_ball_y(robot0, field, fixed_x=None, target_theta=0):
     """
     Move o robô para seguir a bola ao longo do eixo Y, mantendo uma posição fixa no eixo X ou na área do goleiro.
@@ -35,10 +37,13 @@ def follow_ball_y(robot0, field, fixed_x=None, target_theta=0):
     """
     ball_position = field.ball.get_coordinates()
 
-    target_x = fixed_x if fixed_x is not None else 400  # X padrão é 400, pode ser sobrescrito
+    target_x = (
+        fixed_x if fixed_x is not None else 150
+    )  # X padrão é 400, pode ser sobrescrito
     target_y = ball_position.Y
 
     go_to_point(robot0, target_x, target_y, field, target_theta)
+
 
 def attack_ball(robot0, field, ball_position, robot_position, angle_to_ball):
     """
@@ -58,7 +63,7 @@ def attack_ball(robot0, field, ball_position, robot_position, angle_to_ball):
     robot_rotation = robot_position.rotation
     rotation_diff = abs(robot_rotation - angle_to_ball)
 
-    if -(np.pi)/2.5 < angle_to_ball < (np.pi)/2.5:
+    if -(np.pi) / 2.5 < angle_to_ball < (np.pi) / 2.5:
         target_x = ball_position.X
         target_y = ball_position.Y
         target_theta = angle_to_ball
@@ -74,6 +79,7 @@ def attack_ball(robot0, field, ball_position, robot_position, angle_to_ball):
             target_y += 20
 
     go_to_point(robot0, target_x, target_y, field, target_theta)
+
 
 def pursue_ball(robot0, field):
     """
@@ -91,4 +97,6 @@ def pursue_ball(robot0, field):
         follow_ball_y(robot0, field, fixed_x=292, target_theta=np.pi)
     else:
         # Atacar a bola
-        attack_ball(robot0, field, ball_position, robot_position, robot_position.rotation)
+        attack_ball(
+            robot0, field, ball_position, robot_position, robot_position.rotation
+        )

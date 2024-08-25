@@ -3,6 +3,7 @@ from communication.actuator import Actuator
 from entities.Robot import Robot
 from entities.Field import Field
 from behavior.tactics import zagueiro
+from behavior.skills import go_to_point
 import time
 import threading
 
@@ -41,12 +42,12 @@ class RobotController:
         self.field.add_blue_robot(self.robot2)
 
         # Cria e adiciona robôs inimigos ao campo
-        self.enemy_robot0 = Robot(robot_id=0, actuator=None)
-        self.enemy_robot1 = Robot(robot_id=1, actuator=None)
-        self.enemy_robot2 = Robot(robot_id=2, actuator=None)
-        self.field.add_yellow_robot(self.enemy_robot0)
-        self.field.add_yellow_robot(self.enemy_robot1)
-        self.field.add_yellow_robot(self.enemy_robot2)
+        # self.enemy_robot0 = Robot(robot_id=0, actuator=None)
+        # self.enemy_robot1 = Robot(robot_id=1, actuator=None)
+        # self.enemy_robot2 = Robot(robot_id=2, actuator=None)
+        # self.field.add_yellow_robot(self.enemy_robot0)
+        # self.field.add_yellow_robot(self.enemy_robot1)
+        # self.field.add_yellow_robot(self.enemy_robot2)
 
         # Contador para controle do loop
         self.cont = 0
@@ -110,9 +111,9 @@ class RobotController:
     def control_loop(self):
         while True:
             t1 = time.time()
-            go_to_point(self.robot0, 100, 500, self.field)
-            go_to_point(self.robot1, 500, 500, self.field)
-            go_to_point(self.robot2, 0, 250, self.field)
+            zagueiro(self.robot0, self.field)
+            # go_to_point(self.robot1, 150, 150, self.field)
+            # go_to_point(self.robot2, 300, 250, self.field)
             self.send_velocities()
             t2 = time.time()
 
