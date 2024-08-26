@@ -2,23 +2,28 @@ from communication.vision import Vision
 from communication.actuator import Actuator
 from entities.Robot import Robot
 from entities.Field import Field
-from behavior.skills import *
+from entities.Coach import Coach
+from behavior.skills import go_to_point
+from behavior.plays import estrategia_basica
+from behavior.tactics import *
 import time
 import threading
 
-CONTROL_FPS = 60            # FPS original para o controle de posição
-CAM_FPS = 7*CONTROL_FPS     # FPS para processar os dados da visão
+CONTROL_FPS = 60  # FPS original para o controle de posição
+CAM_FPS = 7 * CONTROL_FPS  # FPS para processar os dados da visão
 
 
-class RepeatTimer(threading.Timer): 
+class RepeatTimer(threading.Timer):
     """
-        Descrição:
-            Classe herdada de Timer para execução paralela da thread de visão
-            TODO: Verificar a utilização da biblioteca asyncio para isso.
+    Descrição:
+        Classe herdada de Timer para execução paralela da thread de visão
+        TODO: Verificar a utilização da biblioteca asyncio para isso.
     """
-    def run(self):  
-        while not self.finished.wait(self.interval):  
-            self.function(*self.args,**self.kwargs)  
+
+    def run(self):
+        while not self.finished.wait(self.interval):
+            self.function(*self.args, **self.kwargs)
+
 
 class RobotController:
     def __init__(self, vision_ip, vision_port, actuator_port):
@@ -29,22 +34,25 @@ class RobotController:
         # Inicializa o campo de jogo
         self.field = Field()
 
+        # Inicializa o coach
+        self.coach = Coach(self.field)
+
         # Cria e adiciona um robô ao campo
         self.robot0 = Robot(robot_id=0, actuator=self.actuator)
         self.field.add_blue_robot(self.robot0)
 
-        self.robot1 = Robot(robot_id=1, actuator=None)
-        self.robot2 = Robot(robot_id=2, actuator=None)
+        self.robot1 = Robot(robot_id=1, actuator=self.actuator)
+        self.robot2 = Robot(robot_id=2, actuator=self.actuator)
         self.field.add_blue_robot(self.robot1)
         self.field.add_blue_robot(self.robot2)
 
         # Cria e adiciona robôs inimigos ao campo
-        self.enemy_robot0 = Robot(robot_id=0, actuator=None)
-        self.enemy_robot1 = Robot(robot_id=1, actuator=None)
-        self.enemy_robot2 = Robot(robot_id=2, actuator=None)
-        self.field.add_yellow_robot(self.enemy_robot0)
-        self.field.add_yellow_robot(self.enemy_robot1)
-        self.field.add_yellow_robot(self.enemy_robot2)
+        # self.enemy_robot0 = Robot(robot_id=0, actuator=None)
+        # self.enemy_robot1 = Robot(robot_id=1, actuator=None)
+        # self.enemy_robot2 = Robot(robot_id=2, actuator=None)
+        # self.field.add_yellow_robot(self.enemy_robot0)
+        # self.field.add_yellow_robot(self.enemy_robot1)
+        # self.field.add_yellow_robot(self.enemy_robot2)
 
         # Contador para controle do loop
         self.cont = 0
@@ -69,6 +77,11 @@ class RobotController:
                 detection["orientation"],
                 "yellow",
             )
+
+        # Atualiza a posição da bola com base nas informações da visão
+        if "ball" in frame:
+            ball_detection = frame["ball"]
+            self.field.update_ball_position(ball_detection["x"], ball_detection["y"])
 
     def send_velocities(self):
         # Envio de velocidades no sistema global
@@ -97,9 +110,9 @@ class RobotController:
 
     def get_vision_frame(self):
         """
-            Descrição:
-                Função para adquirir os dados de visão e atualizar eles
-                nos respectivos robôs
+        Descrição:
+            Função para adquirir os dados de visão e atualizar eles
+            nos respectivos robôs
         """
         self.visao.update()
         frame = self.visao.get_last_frame()
@@ -107,29 +120,26 @@ class RobotController:
 
     def start_vision_thread(self):
         """
-            Descrição:
-                Função que inicia a thread da visão
+        Descrição:
+            Função que inicia a thread da visão
         """
-        self.vision_thread = RepeatTimer((1/CAM_FPS), self.get_vision_frame)
+        self.vision_thread = RepeatTimer((1 / CAM_FPS), self.get_vision_frame)
         self.vision_thread.start()
 
     def control_loop(self):
         while True:
             t1 = time.time()
-            go_to_point(self.robot0, 0, 300, self.field)
-            go_to_point(self.robot1, 0, 0, self.field)
-            go_to_point(self.robot2, 450, 300, self.field)
+            Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
             self.send_velocities()
             t2 = time.time()
 
             if (t2 - t1) < 1 / 60:
                 time.sleep(1 / 60 - (t2 - t1))
             else:
-                print("[TIMEOUT] - Execução de controle excedida: ", (t2 - t1)*1000)
+                print("[TIMEOUT] - Execução de controle excedida: ", (t2 - t1) * 1000)
 
 
 if __name__ == "__main__":
-
     controller = RobotController(
         vision_ip="224.5.23.2", vision_port=10020, actuator_port=10301
     )
