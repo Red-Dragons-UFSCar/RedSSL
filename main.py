@@ -3,10 +3,9 @@ from communication.actuator import Actuator
 from entities.Robot import Robot
 from entities.Field import Field
 from entities.Coach import Coach
-from behavior.tactics import zagueiro
 from behavior.skills import go_to_point
 from behavior.plays import estrategia_basica
-from behavior.tactics import *
+from behavior.tactics import * 
 import time
 import threading
 
@@ -117,7 +116,7 @@ class RobotController:
     def control_loop(self):
         while True:
             t1 = time.time()
-            Coach.escolher_estrategia(self.coach, self.robot0, self.robot1)
+            Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
             self.send_velocities()
             t2 = time.time()
 
