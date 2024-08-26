@@ -60,23 +60,63 @@ def attack_ball(robot0, field, ball_position, robot_position, angle_to_ball):
     delta_y = ball_position.Y - robot_position.Y
     angle_to_ball = np.arctan2(delta_y, delta_x)
 
-    robot_rotation = robot_position.rotation
-    rotation_diff = abs(robot_rotation - angle_to_ball)
+    approach_offset = -20  # Define uma posição atrás da bola
 
-    if -(np.pi) / 2.5 < angle_to_ball < (np.pi) / 2.5:
-        target_x = ball_position.X
-        target_y = ball_position.Y
-        target_theta = angle_to_ball
-    else:
-        approach_offset = -50  # Define uma posição atrás da bola
-        target_x = ball_position.X + approach_offset
-        target_y = ball_position.Y
-        target_theta = angle_to_ball  # Alinha o robô com a bola
+    # Condição para atacar a bola com um ângulo que force a bola para dentro do campo
+    if ball_position.Y < 50:
+        # Bola está no lado inferior do campo (1º quadrante)
+        if (np.pi) / 6 < angle_to_ball < (np.pi) / 3:
+            target_x = ball_position.X
+            target_y = ball_position.Y
+            target_theta = angle_to_ball
+        else:
+            target_x = ball_position.X + approach_offset
+            target_y = ball_position.Y - 20  # Força o ataque em direção ao centro do campo
+            target_theta = angle_to_ball  # Alinha o robô com a bola
 
+        # Ajusta a posição y do robô com base no ângulo
+        if 90 <= np.degrees(angle_to_ball) <= 180: #Não é o ideal ter um if desse pra cada condição, mas por algum motivo que meu cérebro é incapaz de compreender (ou apenas sono), o código não respeita essa condição no fim da função, então botei sapoha pra cada posição de y. Lidem com isso.
+            target_y -= 20
+        elif -180 <= np.degrees(angle_to_ball) <= -90:
+            target_y += 20
+
+        go_to_point(robot0, target_x, target_y, field, target_theta)
+
+    elif ball_position.Y > 250:
+        # Bola está no lado superior do campo (4º quadrante)
+        if -(np.pi) / 3 < angle_to_ball < -(np.pi) / 6:
+            target_x = ball_position.X
+            target_y = ball_position.Y
+            target_theta = angle_to_ball
+        else:
+            target_x = ball_position.X + approach_offset
+            target_y = ball_position.Y + 20  # Força o ataque em direção ao centro do campo
+            target_theta = angle_to_ball  # Alinha o robô com a bola
+
+        # Ajusta a posição y do robô com base no ângulo
         if 90 <= np.degrees(angle_to_ball) <= 180:
             target_y -= 20
         elif -180 <= np.degrees(angle_to_ball) <= -90:
             target_y += 20
+
+        go_to_point(robot0, target_x, target_y, field, target_theta)
+
+    # Parte da função que deve ser executada apenas quando ball_position.Y não está nos intervalos especiais
+    else:
+        if -(np.pi) / 6 < angle_to_ball < (np.pi) / 6:
+            target_x = ball_position.X
+            target_y = ball_position.Y
+            target_theta = angle_to_ball
+        else:
+            target_x = ball_position.X + approach_offset
+            target_y = ball_position.Y
+            target_theta = angle_to_ball  # Alinha o robô com a bola
+
+        # Ajusta a posição y do robô com base no ângulo
+    if 90 <= np.degrees(angle_to_ball) <= 180:
+        target_y -= 20
+    elif -180 <= np.degrees(angle_to_ball) <= -90:
+        target_y += 20
 
     go_to_point(robot0, target_x, target_y, field, target_theta)
 
