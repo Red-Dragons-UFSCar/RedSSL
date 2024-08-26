@@ -5,7 +5,7 @@ from entities.Field import Field
 from entities.Coach import Coach
 from behavior.skills import go_to_point
 from behavior.plays import estrategia_basica
-from behavior.tactics import * 
+from behavior.tactics import *
 import time
 import threading
 
@@ -42,7 +42,7 @@ class RobotController:
         self.field.add_blue_robot(self.robot0)
 
         self.robot1 = Robot(robot_id=1, actuator=self.actuator)
-        self.robot2 = Robot(robot_id=2, actuator=None)
+        self.robot2 = Robot(robot_id=2, actuator=self.actuator)
         self.field.add_blue_robot(self.robot1)
         self.field.add_blue_robot(self.robot2)
 

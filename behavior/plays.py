@@ -24,4 +24,4 @@ def posicionar_robos(robot_goalie, robot_zagueiro, robot_atacante, field):
     go_to_point(robot_zagueiro, 150, 150, field, 0)
 
     print("Posicionando robô atacante no ponto específico.")
-    go_to_point(robot_atacante, 200, 150, field, 0)
+    go_to_point(robot_atacante, 300, 150, field, 0)

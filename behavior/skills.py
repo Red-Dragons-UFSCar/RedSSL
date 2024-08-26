@@ -71,11 +71,15 @@ def attack_ball(robot0, field, ball_position, robot_position, angle_to_ball):
             target_theta = angle_to_ball
         else:
             target_x = ball_position.X + approach_offset
-            target_y = ball_position.Y - 20  # Força o ataque em direção ao centro do campo
+            target_y = (
+                ball_position.Y - 20
+            )  # Força o ataque em direção ao centro do campo
             target_theta = angle_to_ball  # Alinha o robô com a bola
 
         # Ajusta a posição y do robô com base no ângulo
-        if 90 <= np.degrees(angle_to_ball) <= 180: #Não é o ideal ter um if desse pra cada condição, mas por algum motivo que meu cérebro é incapaz de compreender (ou apenas sono), o código não respeita essa condição no fim da função, então botei sapoha pra cada posição de y. Lidem com isso.
+        if (
+            90 <= np.degrees(angle_to_ball) <= 180
+        ):  # Não é o ideal ter um if desse pra cada condição, mas por algum motivo que meu cérebro é incapaz de compreender (ou apenas sono), o código não respeita essa condição no fim da função, então botei sapoha pra cada posição de y. Lidem com isso.
             target_y -= 20
         elif -180 <= np.degrees(angle_to_ball) <= -90:
             target_y += 20
@@ -90,7 +94,9 @@ def attack_ball(robot0, field, ball_position, robot_position, angle_to_ball):
             target_theta = angle_to_ball
         else:
             target_x = ball_position.X + approach_offset
-            target_y = ball_position.Y + 20  # Força o ataque em direção ao centro do campo
+            target_y = (
+                ball_position.Y + 20
+            )  # Força o ataque em direção ao centro do campo
             target_theta = angle_to_ball  # Alinha o robô com a bola
 
         # Ajusta a posição y do robô com base no ângulo
@@ -133,6 +139,27 @@ def pursue_ball(robot0, field):
     robot_position = robot0.get_coordinates()
 
     if ball_position.X <= 55 and 85 <= ball_position.Y <= 225:
+        # A bola está na área do goleiro
+        follow_ball_y(robot0, field, fixed_x=190, target_theta=np.pi)
+    else:
+        # Atacar a bola
+        attack_ball(
+            robot0, field, ball_position, robot_position, robot_position.rotation
+        )
+
+
+def shoot(robot0, field):
+    """
+    Faz com que o robô persiga a bola e se alinhe para o lado ofensivo do campo.
+
+    Parâmetros:
+    - robot0: Instância do robô a ser movido.
+    - field: Instância da classe Field.
+    """
+    ball_position = field.ball.get_coordinates()
+    robot_position = robot0.get_coordinates()
+
+    if ball_position.X >= 400 and 85 <= ball_position.Y <= 225:
         # A bola está na área do goleiro
         follow_ball_y(robot0, field, fixed_x=190, target_theta=np.pi)
     else:

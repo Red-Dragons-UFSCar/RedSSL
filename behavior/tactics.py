@@ -47,22 +47,13 @@ def zagueiro(robot0, field):
         follow_ball_y(robot0, field)
     else:
         pursue_ball(robot0, field)
+
+
 def atacante(robot0, field):
     ball_position = field.ball.get_coordinates()
-    if (400 < ball_position.X <= 450) & (87.5 <= ball_position.Y <= 222.5):
+    if (
+        (400 < ball_position.X <= 450) and (87.5 <= ball_position.Y <= 222.5)
+    ) or ball_position.X < 225:
         follow_ball_y(robot0, field, 380)
     else:
-        va = (450-ball_position.X, 180-ball_position.Y)
-        vb = (450-ball_position.X, 158-ball_position.Y)
-        vc = (450-ball_position.X, 150-ball_position.Y)
-        vd = (450-ball_position.X, 142-ball_position.Y)
-        ve = (450-ball_position.X, 120-ball_position.Y)
-        angle1 = math.angle_between(va,vc)
-        angle2 = math.angle_between(vb,vc)
-        angle3 = math.angle_between(vd,vc)
-        angle4 = math.angle_between(ve,vc)
-        range1 = (-angle1, -angle2)
-        range2 = (angle3, angle4)
-        range = random.choice([range1, range2])
-        target_theta = random.uniform(range[0], range[1])
-        go_to_point(robot0, ball_position.X, ball_position.Y, field, target_theta)
+        shoot(robot0, field)

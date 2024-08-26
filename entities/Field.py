@@ -1,14 +1,15 @@
 from entities.Ball import Ball
 from entities.Robot import Robot
 
+
 class Field:
     def __init__(self):
         self.blue_robots = []
         self.yellow_robots = []
         self.obstacles = []
         self.ball = Ball()
-        self.width = 450  # Exemplo de largura do campo em cm
-        self.height = 300  # Exemplo de altura do campo em cm
+        self.width = 900  # Exemplo de largura do campo em cm
+        self.height = 600  # Exemplo de altura do campo em cm
 
     def add_blue_robot(self, robot):
         self.blue_robots.append(robot)
