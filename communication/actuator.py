@@ -1,5 +1,7 @@
 import socket
-import struct
+import numpy as np
+
+from commons.math import rotate_vector
 from communication.proto.ssl_simulation_robot_control_pb2 import RobotControl, MoveWheelVelocity, MoveGlobalVelocity, MoveLocalVelocity
 
 
@@ -155,6 +157,34 @@ class Actuator():
 
 
         self.send_socket(robot_control.SerializeToString())
+
+    
+    def send_wheel_from_global(self, robot, velocity_x, velocity_y, angular):
+        '''
+        Descrição:  
+                Método responsável pelo envio da velocidade de cada roda do robô 
+                em função da velocidade global (vx, vy, w) dele.
+        '''
+        angle = robot.get_coordinates().rotation # Angulo do robô
+
+        vector_vel = [velocity_x, velocity_y] # Vetor de velocidades
+        vector_vel = np.array(vector_vel)
+
+        # Transformação do vetor em global para o local do robô
+        vector_vel_local = rotate_vector(vector_vel, angle) 
+        vx_local = vector_vel_local[0]
+        vy_local = vector_vel_local[1]
+
+        # Transformação do vetor local de velocidades do robô para as rodas
+        # Fonte: grSim/src/robot.cpp
+        dw1 =  (1.0 / robot.wheel_radius) * (( (robot.robot_radius * angular) - (vx_local * np.sin(robot.phi1)) + (vy_local * np.cos(robot.phi1))) )
+        dw2 =  (1.0 / robot.wheel_radius) * (( (robot.robot_radius * angular) - (vx_local * np.sin(robot.phi2)) + (vy_local * np.cos(robot.phi2))) )
+        dw3 =  (1.0 / robot.wheel_radius) * (( (robot.robot_radius * angular) - (vx_local * np.sin(robot.phi3)) + (vy_local * np.cos(robot.phi3))) )
+        dw4 =  (1.0 / robot.wheel_radius) * (( (robot.robot_radius * angular) - (vx_local * np.sin(robot.phi4)) + (vy_local * np.cos(robot.phi4))) )
+
+        # Por algum motivo os motores precisam ir de 4 até 1... 
+        # O simulador inverteu os motores
+        self.send_wheelVelocity_message(robot.robot_id, dw4, dw3, dw2, dw1)
 
 
 if __name__ == '__main__':

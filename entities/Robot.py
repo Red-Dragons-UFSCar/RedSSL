@@ -43,6 +43,15 @@ class Robot(KinematicBody):
         self.control_PID_y = PID_discrete(Kp_y, Kd_y, Ki_y, saturation=1, N=N_y)
         self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=3)
 
+        # Parâmetros construtivos do robo
+        # Todos esses parâmetros do grSim estão em grSim/config/Parsian.ini
+        self.phi1 = 60 * np.pi/180
+        self.phi2 = 135 * np.pi/180
+        self.phi3 = 225 * np.pi/180
+        self.phi4 = 300 * np.pi/180
+        self.robot_radius = 0.09
+        self.wheel_radius = 0.027
+
     def sim_set_vel(self, v_top_right, v_top_left, v_bottom_right, v_bottom_left):
         # Define as velocidades dos motores
         self.v_top_right = v_top_left
