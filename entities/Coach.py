@@ -28,7 +28,7 @@ class Coach:
         if (
             ball_position.Y > 300
             or ball_position.Y < 0
-            or ball_position.X > 400
+            or ball_position.X > 450
             or ball_position.X < 0
         ):
             self.game_stopped = True
@@ -39,16 +39,16 @@ class Coach:
             self.game_on = True
             return True  # Bola dentro de campo
 
-    def escolher_estrategia(self, robot_goalie, robot_zagueiro):
+    def escolher_estrategia(self, robot_goalie, robot_zagueiro, robot_atacante):
         """
         Escolhe e executa a estratégia baseada na situação do jogo.
         """
         if not self.verificar_bola_em_campo():
             # Se o jogo estiver parado, move os robôs para pontos específicos
             print("Jogo parado. Posicionando robôs.")
-            posicionar_robos(robot_goalie, robot_zagueiro, self.field)
+            posicionar_robos(robot_goalie, robot_zagueiro, robot_atacante, self.field)
         else:
             # Se o jogo estiver em andamento, usa a estratégia básica
             if self.game_on:
                 print("Estrategia basica em açao")
-                estrategia_basica(robot_goalie, robot_zagueiro, self.field)
+                estrategia_basica(robot_goalie, robot_zagueiro, robot_atacante, self.field)
