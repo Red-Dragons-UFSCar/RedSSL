@@ -85,7 +85,7 @@ class RobotController:
 
     def send_velocities(self):
         # Envio de velocidades no sistema global
-        '''
+        #'''
         # Envia as velocidades armazenadas para o atuador
         self.actuator.send_globalVelocity_message(
             self.robot0.robot_id, self.robot0.vx, self.robot0.vy, self.robot0.w
@@ -107,6 +107,7 @@ class RobotController:
         self.actuator.send_wheel_from_global(
             self.robot2, self.robot2.vx, self.robot2.vy, self.robot2.w
         )
+        #'''
 
     def get_vision_frame(self):
         """
