@@ -132,58 +132,9 @@ class RobotController:
 
     def control_loop(self):
 
-        #/////////////////////////////////////////////////////////////////////////////////////////////////////////
-        #definição manualmente das situações de penalti (posteriormente, juiz)
-        print("penalti ofensivo = 1, penalti defensivo = 0")
-        situacao = int(input())
-        if situacao == 1:
-                penalti_ofensivo = 1
-                penalti_defensivo = 0
-        else: 
-            penalti_ofensivo = 0
-            penalti_defensivo = 1
-        #/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
         while True:
             t1 = time.time()
-            #Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
-                        #Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
-
-            #/////////////////////////////////////////////////////////////////////////////////////////////////////////
-            #verificação das condições de penalti na main para facilitar testes. elas devem ser implementadas no coach
-            if penalti_defensivo == 1: 
-                if self.penalty_start_time is None:
-                    self.penalty_start_time = time.time() #assume tempo atual
-    
-                tempo_decorrido = time.time() - self.penalty_start_time
-                tempo_de_cobranca = 10 #espera 10 segundos para cobrança (posteriormente, apito)
-
-                if tempo_decorrido <= tempo_de_cobranca:
-                    estrategia_penalti_defensivo(self.robot0, self.robot1, self.robot2, self.field, 0)
-                else: 
-                    estrategia_penalti_defensivo(self.robot0, self.robot1, self.robot2, self.field, 1)
-            else: 
-                if penalti_ofensivo == 0: #verifica se não é uma situação de penalti ofensivo pra não quebrar o código
-                    self.penalty_start_time = 0 # "zerando" novamentre o contador de penalti caso aconteça alguma situação de penalti no jogo novamente.
-            
-
-            if (penalti_ofensivo == 1): 
-                if self.penalty_start_time is None:
-                    self.penalty_start_time = time.time() #assume tempo atual
-                
-                tempo_decorrido = time.time() - self.penalty_start_time
-                tempo_de_cobranca = 10
-
-                if tempo_decorrido <= tempo_de_cobranca:
-                    estrategia_penalti_ofensivo(self.robot0, self.robot1, self.robot2, self.field, 0)
-                else: 
-                    estrategia_penalti_ofensivo(self.robot0, self.robot1, self.robot2, self.field, 1)
-            else: 
-                if penalti_defensivo == 0: 
-                    self.penalty_start_time = None # "zerando" novamentre o contador de penalti caso aconteça alguma situação de penalti no jogo novamente.
-
-            #/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+            Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
             self.send_velocities()
             t2 = time.time()
 
