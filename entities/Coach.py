@@ -45,10 +45,10 @@ class Coach:
         """
         if not self.verificar_bola_em_campo():
             # Se o jogo estiver parado, move os robôs para pontos específicos
-            print("Jogo parado. Posicionando robôs.")
+            #print("Jogo parado. Posicionando robôs.")
             posicionar_robos(robot_goalie, robot_zagueiro, robot_atacante, self.field)
         else:
             # Se o jogo estiver em andamento, usa a estratégia básica
             if self.game_on:
-                print("Estrategia basica em açao")
+                #print("Estrategia basica em açao")
                 estrategia_basica(robot_goalie, robot_zagueiro, robot_atacante, self.field)

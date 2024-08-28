@@ -165,15 +165,30 @@ class Actuator():
                 Método responsável pelo envio da velocidade de cada roda do robô 
                 em função da velocidade global (vx, vy, w) dele.
         '''
+
+        mod_v = np.sqrt(velocity_x*velocity_x + velocity_y*velocity_y)
+
+        # v_max = 1.5
+        
+        # if mod_v > v_max:
+        #     velocity_x = velocity_x * v_max/mod_v
+        #     velocity_y = velocity_y * v_max/mod_v
+
         angle = robot.get_coordinates().rotation # Angulo do robô
 
         vector_vel = [velocity_x, velocity_y] # Vetor de velocidades
         vector_vel = np.array(vector_vel)
 
         # Transformação do vetor em global para o local do robô
-        vector_vel_local = rotate_vector(vector_vel, angle) 
+        print("Vetor original:")
+        print(vector_vel)
+        print("Orientação: ")
+        print(angle*180/np.pi)
+        vector_vel_local = rotate_vector(vector_vel, - angle) 
         vx_local = vector_vel_local[0]
         vy_local = vector_vel_local[1]
+        print("Vetor velocidades: ")
+        print(vector_vel_local)
 
         # Transformação do vetor local de velocidades do robô para as rodas
         # Fonte: grSim/src/robot.cpp
