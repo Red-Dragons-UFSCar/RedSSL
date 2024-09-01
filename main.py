@@ -26,9 +26,9 @@ class RepeatTimer(threading.Timer):
 
 
 class RobotController:
-    def __init__(self, vision_ip, vision_port, actuator_port):
+    def __init__(self, vision_ip, vision_port, actuator_port, is_right_side):
         # Inicializa a comunicação com a visão e o atuador
-        self.visao = Vision(ip=vision_ip, port=vision_port)
+        self.visao = Vision(ip=vision_ip, port=vision_port, is_right_side=is_right_side)
         self.actuator = Actuator(team_port=actuator_port)
 
         # Inicializa o campo de jogo
@@ -142,7 +142,7 @@ class RobotController:
 
 if __name__ == "__main__":
     controller = RobotController(
-        vision_ip="224.5.23.2", vision_port=10020, actuator_port=10301
+        vision_ip="224.5.23.2", vision_port=10020, actuator_port=10301, is_right_side=True
     )
     controller.start_vision_thread()
     controller.control_loop()
