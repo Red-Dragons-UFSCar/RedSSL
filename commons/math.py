@@ -59,3 +59,42 @@ def get_dif(points, dt=1 / 60):
         dif.append([d_x, d_y])
 
     return np.array(dif)
+
+def convert_coordinates(robots_blue, robots_yellow, balls, length, width, is_right_side):
+    """
+    Descrição:
+            Função que converte as coordenadas dos robôs e da bola, se necessário, 
+            de acordo com o lado do campo (direito ou esquerdo).
+    Entradas:
+            robots_blue:        Lista de robôs azuis com atributos x, y e orientation.
+            robots_yellow:      Lista de robôs amarelos com atributos x, y e orientation.
+            balls:              Lista de bolas com atributos x e y.
+            length:             Comprimento do campo de jogo.
+            width:              Largura do campo de jogo.
+            is_right_side:      Booleano que indica se o time está do lado direito do campo.
+            convert_coordinates: Booleano que indica se a conversão de coordenadas deve ser realizada.
+    Saídas:
+            Nenhuma. A função altera os valores das coordenadas dos robôs e da bola diretamente.
+    """
+
+    correction_position_x = length / 2
+    correction_position_y = width / 2
+
+    if is_right_side:
+        for robot in robots_blue + robots_yellow:
+            robot.x = (correction_position_x - robot.x) / 10
+            robot.y = (correction_position_y - robot.y) / 10   
+            robot.orientation = (robot.orientation + np.pi) % (2 * np.pi)
+
+        if balls:
+            balls[0].x = (correction_position_x - balls[0].x) / 10
+            balls[0].y = (correction_position_y - balls[0].y) / 10
+
+    else:
+        for robot in robots_blue + robots_yellow:
+            robot.x = (robot.x + correction_position_x) / 10
+            robot.y = (robot.y + correction_position_y) / 10
+
+        if balls:
+            balls[0].x = (balls[0].x + correction_position_x) / 10
+            balls[0].y = (balls[0].y + correction_position_y) / 10
