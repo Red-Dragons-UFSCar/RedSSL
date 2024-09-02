@@ -78,20 +78,19 @@ def clear_ball(robot0, field, ball_position, robot_position, angle_to_ball):
 
     if current_state == STATE_A:
         # Estágio A: Se posicionar atrás da bola
-        approach_offset = 50
-        target_x = ball_position.X - approach_offset * np.cos(angle_to_ball)
-        target_y = ball_position.Y - approach_offset * np.sin(angle_to_ball)
+        target_x = ball_position.X + approach_offset
+        target_y = ball_position.Y
         target_theta = angle_to_ball
 
         # Se o robô está alinhado com a bola, transita para o estado B
-        if -(np.pi) / 10 < angle_to_ball < (np.pi) / 10:
+        if robot0.target_reached():
             current_state = STATE_B
         elif 90 <= np.degrees(angle_to_ball) <= 180 or -180 <= np.degrees(angle_to_ball) <= -90:
             current_state = STATE_D
 
     elif current_state == STATE_B:
         # Estágio B: Ir até a bola
-        target_x = ball_position.X
+        target_x = ball_position.X - 10
         target_y = ball_position.Y
         target_theta = angle_to_ball
 
