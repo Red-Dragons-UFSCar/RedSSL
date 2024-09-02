@@ -61,7 +61,12 @@ def clear_ball(robot0, field, ball_position, robot_position, angle_to_ball):
     - robot_position: Coordenadas atuais do robô.
     - angle_to_ball: Ângulo entre o robô e a bola.
     """
-    global current_state
+    STATE_A = "A"  # Se posicionar atrás da bola
+    STATE_B = "B"  # Avançar na bola
+    STATE_C = "C"  # Avançar até o alvo
+    STATE_D = "D"  # Desviar da bola
+
+    current_state = STATE_A
 
     angle_to_ball = np.arctan2(ball_position.Y - robot_position.Y,
                                ball_position.X - robot_position.X)
