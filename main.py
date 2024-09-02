@@ -4,7 +4,7 @@ from entities.Robot import Robot
 from entities.Field import Field
 from entities.Coach import Coach
 from behavior.skills import go_to_point
-from behavior.plays import estrategia_basica
+from behavior.plays import estrategia_basica, estrategia_penalti_defensivo, estrategia_penalti_ofensivo
 from behavior.tactics import *
 import time
 import threading
@@ -56,6 +56,9 @@ class RobotController:
 
         # Contador para controle do loop
         self.cont = 0
+
+        #flag para habilitar penalti: 
+        self.penalty_start_time = None
 
     def update_coordinates(self, frame):
         # Atualiza as posições dos robôs azuis no campo com base nas informações da visão
@@ -128,6 +131,7 @@ class RobotController:
         self.vision_thread.start()
 
     def control_loop(self):
+
         while True:
             t1 = time.time()
             Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
