@@ -26,9 +26,9 @@ class RepeatTimer(threading.Timer):
 
 
 class RobotController:
-    def __init__(self, vision_ip, vision_port, actuator_port):
+    def __init__(self, vision_ip, vision_port, actuator_port, is_right_side):
         # Inicializa a comunicação com a visão e o atuador
-        self.visao = Vision(ip=vision_ip, port=vision_port)
+        self.visao = Vision(ip=vision_ip, port=vision_port, is_right_side=is_right_side)
         self.actuator = Actuator(team_port=actuator_port)
 
         # Inicializa o campo de jogo
@@ -91,13 +91,13 @@ class RobotController:
         #'''
         # Envia as velocidades armazenadas para o atuador
         self.actuator.send_globalVelocity_message(
-            self.robot0.robot_id, self.robot0.vx, self.robot0.vy, self.robot0.w
+            self.robot0, self.robot0.vx, self.robot0.vy, self.robot0.w
         )
         self.actuator.send_globalVelocity_message(
-            self.robot1.robot_id, self.robot1.vx, self.robot1.vy, self.robot1.w
+            self.robot1, self.robot1.vx, self.robot1.vy, self.robot1.w
         )
         self.actuator.send_globalVelocity_message(
-            self.robot2.robot_id, self.robot2.vx, self.robot2.vy, self.robot2.w
+            self.robot2, self.robot2.vx, self.robot2.vy, self.robot2.w
         )
         '''
         # Envio de velocidades do sistema global diretamente para as rodas
@@ -146,7 +146,7 @@ class RobotController:
 
 if __name__ == "__main__":
     controller = RobotController(
-        vision_ip="224.5.23.2", vision_port=10020, actuator_port=10301
+        vision_ip="224.5.23.2", vision_port=10020, actuator_port=10301, is_right_side=False
     )
     controller.start_vision_thread()
     controller.control_loop()

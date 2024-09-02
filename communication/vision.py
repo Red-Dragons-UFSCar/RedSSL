@@ -1,5 +1,6 @@
 import socket
 import struct
+from commons.math import convert_coordinates
 from communication.proto.ssl_vision_wrapper_pb2 import SSL_WrapperPacket
 
 
@@ -10,6 +11,7 @@ class Vision:
         port: int = 10002,
         logger: bool = False,
         convert_coordinates: bool = True,
+        is_right_side = False
     ) -> None:
         """
         Descrição:
@@ -37,6 +39,7 @@ class Vision:
 
         # Configuração de conversão de coordenadas
         self.convert_coordinates = convert_coordinates
+        self.is_right_side = is_right_side
         self.last_frame = self._initialize_frame()  # Inicializa o frame vazio
 
         # Criação do socket de conexão
@@ -116,20 +119,7 @@ class Vision:
 
         # Conversão de coordenadas, se necessário
         if self.convert_coordinates:
-            correction_position_x = self.length / 2
-            correction_position_y = self.width / 2
-
-            for robot in robots_blue:
-                robot.x = (robot.x + correction_position_x) / 10
-                robot.y = (robot.y + correction_position_y) / 10
-
-            for robot in robots_yellow:
-                robot.x = (robot.x + correction_position_x) / 10
-                robot.y = (robot.y + correction_position_y) / 10
-
-            if balls:
-                balls[0].x = (balls[0].x + correction_position_x) / 10
-                balls[0].y = (balls[0].y + correction_position_y) / 10
+            convert_coordinates(list(robots_blue), list(robots_yellow), list(balls), self.length, self.width, self.is_right_side)
 
         # Atualiza o frame com os novos dados recebidos
         ball = (

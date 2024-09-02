@@ -98,12 +98,21 @@ class Actuator():
         
 
 
-    def send_globalVelocity_message(self, index,velocity_x, velocity_y, angular):
+    def send_globalVelocity_message(self, robot,velocity_x, velocity_y, angular):
         '''
         Descrição:  
                 Método responsável pelo envio da velocidade global do robô
         '''
-        self.robot_id = index
+
+        # Módulo da velocidade linear
+        mod_v = np.sqrt(velocity_x*velocity_x + velocity_y*velocity_y)
+        
+        # Correção da velocidade para os limites desejados
+        if mod_v > robot.v_max:
+            velocity_x = velocity_x * robot.v_max/mod_v
+            velocity_y = velocity_y * robot.v_max/mod_v
+        
+        self.robot_id = robot.robot_id
         self.velocity_x = velocity_x
         self.velocity_y = velocity_y
         self.angular = angular
@@ -165,13 +174,22 @@ class Actuator():
                 Método responsável pelo envio da velocidade de cada roda do robô 
                 em função da velocidade global (vx, vy, w) dele.
         '''
+
+        # Módulo da velocidade linear
+        mod_v = np.sqrt(velocity_x*velocity_x + velocity_y*velocity_y)
+        
+        # Correção da velocidade para os limites desejados
+        if mod_v > robot.v_max:
+            velocity_x = velocity_x * robot.v_max/mod_v
+            velocity_y = velocity_y * robot.v_max/mod_v
+
         angle = robot.get_coordinates().rotation # Angulo do robô
 
         vector_vel = [velocity_x, velocity_y] # Vetor de velocidades
         vector_vel = np.array(vector_vel)
 
         # Transformação do vetor em global para o local do robô
-        vector_vel_local = rotate_vector(vector_vel, angle) 
+        vector_vel_local = rotate_vector(vector_vel, - angle) 
         vx_local = vector_vel_local[0]
         vy_local = vector_vel_local[1]
 
