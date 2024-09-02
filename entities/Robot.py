@@ -41,7 +41,7 @@ class Robot(KinematicBody):
         # Controladores PID
         self.control_PID_x = PID_discrete(Kp_x, Kd_x, Ki_x, saturation=1, N=N_x)
         self.control_PID_y = PID_discrete(Kp_y, Kd_y, Ki_y, saturation=1, N=N_y)
-        self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=3)
+        self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=7)
 
         # Parâmetros construtivos do robo
         # Todos esses parâmetros do grSim estão em grSim/config/Parsian.ini
