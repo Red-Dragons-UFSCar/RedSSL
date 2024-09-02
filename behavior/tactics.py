@@ -9,7 +9,7 @@ from commons import math
 import time
 
 
-def goalie(robot0, field):
+def goleiro(robot0, field):
 
     Goalie_Chase_line = 75  # limite para considerar perto
     Goaie_Y_Enable = 300  # quando o goleiro começa a perseguir a bola

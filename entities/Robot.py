@@ -25,6 +25,9 @@ class Robot(KinematicBody):
         self.vy = 0  # Velocidade Y do robô
         self.w = 0  # Velocidade angular do robô
 
+        # Valores máximos do robô móvel
+        self.v_max = 1.5  # Velocidade linear máxima em módulo
+
         # Parâmetros PID
         Kp_x = 6.551
         Kd_x = 0
@@ -39,8 +42,8 @@ class Robot(KinematicBody):
         Ki_theta = 0
 
         # Controladores PID
-        self.control_PID_x = PID_discrete(Kp_x, Kd_x, Ki_x, saturation=1, N=N_x)
-        self.control_PID_y = PID_discrete(Kp_y, Kd_y, Ki_y, saturation=1, N=N_y)
+        self.control_PID_x = PID_discrete(Kp_x, Kd_x, Ki_x, saturation=2, N=N_x)
+        self.control_PID_y = PID_discrete(Kp_y, Kd_y, Ki_y, saturation=2, N=N_y)
         self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=3)
 
         # Parâmetros construtivos do robo
