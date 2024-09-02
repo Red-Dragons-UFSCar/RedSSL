@@ -180,15 +180,15 @@ class Actuator():
         vector_vel = np.array(vector_vel)
 
         # Transformação do vetor em global para o local do robô
-        print("Vetor original:")
-        print(vector_vel)
-        print("Orientação: ")
-        print(angle*180/np.pi)
+        #print("Vetor original:")
+        #print(vector_vel)
+        #print("Orientação: ")
+        #print(angle*180/np.pi)
         vector_vel_local = rotate_vector(vector_vel, - angle) 
         vx_local = vector_vel_local[0]
         vy_local = vector_vel_local[1]
-        print("Vetor velocidades: ")
-        print(vector_vel_local)
+        #print("Vetor velocidades: ")
+        #print(vector_vel_local)
 
         # Transformação do vetor local de velocidades do robô para as rodas
         # Fonte: grSim/src/robot.cpp

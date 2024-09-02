@@ -1,6 +1,7 @@
 from behavior.skills import *
 from entities.Robot import Robot
 from entities.Target import Target
+from entities.Obstacle import Obstacle
 from path.visibilityGraph import VisibilityGraph
 import random
 import numpy as np
@@ -51,6 +52,14 @@ def zagueiro(robot0, field):
 
 def atacante(robot0, field):
     ball_position = field.ball.get_coordinates()
+
+    for robot_field in field.yellow_robots:
+        obst = Obstacle()
+        obst.set_obst(robot_field.get_coordinates().X, 
+                      robot_field.get_coordinates().Y, 
+                      robot_field.get_coordinates().rotation)
+        robot0.map_obstacle.add_obstacle(obst)
+    
     if (
         (400 < ball_position.X <= 450) and (87.5 <= ball_position.Y <= 222.5)
     ) or ball_position.X < 225:
@@ -58,4 +67,4 @@ def atacante(robot0, field):
     else:
         shoot(robot0, field)
 
-    #avoid_ball_stop_game_defending(robot0, field)
+    

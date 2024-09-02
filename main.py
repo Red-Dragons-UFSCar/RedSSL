@@ -47,12 +47,12 @@ class RobotController:
         self.field.add_blue_robot(self.robot2)
 
         # Cria e adiciona robôs inimigos ao campo
-        # self.enemy_robot0 = Robot(robot_id=0, actuator=None)
-        # self.enemy_robot1 = Robot(robot_id=1, actuator=None)
-        # self.enemy_robot2 = Robot(robot_id=2, actuator=None)
-        # self.field.add_yellow_robot(self.enemy_robot0)
-        # self.field.add_yellow_robot(self.enemy_robot1)
-        # self.field.add_yellow_robot(self.enemy_robot2)
+        self.enemy_robot0 = Robot(robot_id=0, actuator=None)
+        self.enemy_robot1 = Robot(robot_id=1, actuator=None)
+        self.enemy_robot2 = Robot(robot_id=2, actuator=None)
+        self.field.add_yellow_robot(self.enemy_robot0)
+        self.field.add_yellow_robot(self.enemy_robot1)
+        self.field.add_yellow_robot(self.enemy_robot2)
 
         # Contador para controle do loop
         self.cont = 0
@@ -134,10 +134,16 @@ class RobotController:
             self.send_velocities()
             t2 = time.time()
 
+            self.robot0.map_obstacle.clear_map()
+            self.robot1.map_obstacle.clear_map()
+            self.robot2.map_obstacle.clear_map()
+            
+
             if (t2 - t1) < 1 / 60:
                 time.sleep(1 / 60 - (t2 - t1))
             else:
-                print("[TIMEOUT] - Execução de controle excedida: ", (t2 - t1) * 1000)
+                continue
+                #print("[TIMEOUT] - Execução de controle excedida: ", (t2 - t1) * 1000)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 from entities.KinematicBody import KinematicBody
 from communication.actuator import Actuator
-from entities.Obstacle import Obstacle
+from entities.Obstacle import ObstacleMap
 from entities.Target import Target
 from control.PID import PID
 from control.PID_discrete import PID_discrete
@@ -14,7 +14,7 @@ class Robot(KinematicBody):
         super().__init__()
         self.robot_id = robot_id
         self.actuator = actuator
-        self.obst = Obstacle(self)
+        self.map_obstacle = ObstacleMap()
         self.cont_target = 0  # Adicionado cont_target como atributo do robô
         self.target = Target()
         self.v_bottom_right = 0  # Velocidade do motor inferior direito
