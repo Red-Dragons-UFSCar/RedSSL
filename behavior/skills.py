@@ -285,7 +285,6 @@ def avoid_ball_stop_game_defending(robot, field):
 
         dist_ball_robot = np.sqrt( (ball.get_coordinates().X - robot.get_coordinates().X )**2 +
                          (ball.get_coordinates().Y - robot.get_coordinates().Y)**2 )
-        print("Distância: ", dist_ball_robot)
 
         go_to_point(robot, new_x, new_y, field, target_robot.rotation)
 
