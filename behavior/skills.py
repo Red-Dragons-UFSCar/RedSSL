@@ -66,36 +66,37 @@ def clear_ball(robot0, field, ball_position, robot_position, angle_to_ball):
     STATE_C = "C"  # Avançar até o alvo
     STATE_D = "D"  # Desviar da bola
 
-    current_state = STATE_A
-
     angle_to_ball = np.arctan2(ball_position.Y - robot_position.Y,
-                               ball_position.X - robot_position.X)
+                               ball_position.X - robot_position.X) 
 
+    current_state = field.zagueiro_current_state
+
+    print(f"Estado atual {current_state}")
     # Define uma posição atrás da bola
-    approach_offset = -20  
-
-    print(f"Estado atual (zagueiro): {current_state}")
+    approach_offset = -40  
 
     if current_state == STATE_A:
         # Estágio A: Se posicionar atrás da bola
         target_x = ball_position.X + approach_offset
         target_y = ball_position.Y
-        target_theta = angle_to_ball
+        target_theta = 0
 
         # Se o robô está alinhado com a bola, transita para o estado B
-        if robot0.target_reached():
+        if robot0.target_reached(8):
             current_state = STATE_B
+            print("Transitando para B")
         elif 90 <= np.degrees(angle_to_ball) <= 180 or -180 <= np.degrees(angle_to_ball) <= -90:
             current_state = STATE_D
 
     elif current_state == STATE_B:
         # Estágio B: Ir até a bola
-        target_x = ball_position.X - 10
+        target_x = ball_position.X - 20
         target_y = ball_position.Y
-        target_theta = angle_to_ball
-
+        target_theta = 0
+        robot0.v_max=1.25
+        
         # Se o robô alcança a bola, transita para o estado C
-        if robot0.target_reached():
+        if robot0.target_reached(8):
             current_state = STATE_C
         elif 90 <= np.degrees(angle_to_ball) <= 180 or -180 <= np.degrees(angle_to_ball) <= -90:
             current_state = STATE_D
@@ -104,8 +105,8 @@ def clear_ball(robot0, field, ball_position, robot_position, angle_to_ball):
         # Estágio C: Limpar a bola, movendo-a para o meio campo
         target_x = 225 + 10  # Meio campo + 10 em X
         target_y = ball_position.Y  # Mantém o Y da bola
-        target_theta = angle_to_ball
-
+        target_theta = 0
+        robot0.v_max=1.25
 
         # Se o robô não está mais alinhado com a bola, volta para o estado B
         if not (-(np.pi) / 6 < angle_to_ball < (np.pi) / 6):
@@ -117,7 +118,7 @@ def clear_ball(robot0, field, ball_position, robot_position, angle_to_ball):
         # Estágio D: Evitar a bola nos 2º ou 3º quadrantes
         target_x = ball_position.X - 25
         target_y = ball_position.Y
-        target_theta = angle_to_ball
+        target_theta = 0
 
         # Evitar a bola ajustando a posição Y do alvo
         if 90 <= np.degrees(angle_to_ball) <= 180:
@@ -129,9 +130,10 @@ def clear_ball(robot0, field, ball_position, robot_position, angle_to_ball):
         if robot0.target_reached():
             current_state = STATE_B
 
+    field.zagueiro_current_state = current_state
+
     # Move o robô para o ponto alvo
     go_to_point(robot0, target_x, target_y, field, target_theta)
-
 
 
 def attack_ball(robot0, field, ball_position, robot_position, angle_to_ball):
@@ -232,7 +234,7 @@ def pursue_ball(robot0, field):
         follow_ball_y(robot0, field, fixed_x=190, target_theta=np.pi)
     else:
         # Atacar a bola
-        attack_ball(
+        clear_ball(
             robot0, field, ball_position, robot_position, robot_position.rotation
         )
 
