@@ -11,6 +11,9 @@ class Field:
         self.width = 900  # Exemplo de largura do campo em cm
         self.height = 600  # Exemplo de altura do campo em cm
 
+        # Máquina de estados do zagueiro
+        self.zagueiro_current_state = "A" 
+
     def add_blue_robot(self, robot):
         self.blue_robots.append(robot)
 
