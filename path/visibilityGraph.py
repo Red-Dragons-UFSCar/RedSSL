@@ -56,6 +56,8 @@ class VisibilityGraph:
         robot_coords = robot.get_coordinates()
         robot_coords = np.array([robot_coords.X, robot_coords.Y])
 
+        self.r_obstacle = obstacle.radius
+
         # Pontos do triângulo padrão - Origem do sistema coordenado
         p1_x = self.r_obstacle
         p1_y = -np.sqrt(3) * self.r_obstacle
@@ -148,10 +150,14 @@ class VisibilityGraph:
         self.set_target(current_target)
 
         # Adicionar obstáculos ao mapa de visibilidade
+        '''
         robots = field.get_ally_robots()
         enemy_robots = field.get_enemy_robots()
         vg_obstacles = []
         obstacles = [robot for robot in robots if robot != robot] + enemy_robots
+        '''
+        vg_obstacles = []
+        obstacles = robot.map_obstacle.get_map_obstacle()
 
         for obstacle in obstacles:
                 triangle = self.robot_triangle_obstacle(obstacle, robot)

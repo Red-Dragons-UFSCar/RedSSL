@@ -1,6 +1,6 @@
 from entities.KinematicBody import KinematicBody
 from communication.actuator import Actuator
-from entities.Obstacle import Obstacle
+from entities.Obstacle import ObstacleMap
 from entities.Target import Target
 from control.PID import PID
 from control.PID_discrete import PID_discrete
@@ -14,7 +14,7 @@ class Robot(KinematicBody):
         super().__init__()
         self.robot_id = robot_id
         self.actuator = actuator
-        self.obst = Obstacle(self)
+        self.map_obstacle = ObstacleMap()
         self.cont_target = 0  # Adicionado cont_target como atributo do robô
         self.target = Target()
         self.v_bottom_right = 0  # Velocidade do motor inferior direito
@@ -24,6 +24,9 @@ class Robot(KinematicBody):
         self.vx = 0  # Velocidade X do robô
         self.vy = 0  # Velocidade Y do robô
         self.w = 0  # Velocidade angular do robô
+
+        # Valores máximos do robô móvel
+        self.v_max = 1.5  # Velocidade linear máxima em módulo
 
         # Parâmetros PID
         Kp_x = 6.551
@@ -39,9 +42,9 @@ class Robot(KinematicBody):
         Ki_theta = 0
 
         # Controladores PID
-        self.control_PID_x = PID_discrete(Kp_x, Kd_x, Ki_x, saturation=1, N=N_x)
-        self.control_PID_y = PID_discrete(Kp_y, Kd_y, Ki_y, saturation=1, N=N_y)
-        self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=7)
+        self.control_PID_x = PID_discrete(Kp_x, Kd_x, Ki_x, saturation=2, N=N_x)
+        self.control_PID_y = PID_discrete(Kp_y, Kd_y, Ki_y, saturation=2, N=N_y)
+        self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=3)
 
         # Parâmetros construtivos do robo
         # Todos esses parâmetros do grSim estão em grSim/config/Parsian.ini
