@@ -44,7 +44,7 @@ class Robot(KinematicBody):
         # Controladores PID
         self.control_PID_x = PID_discrete(Kp_x, Kd_x, Ki_x, saturation=2, N=N_x)
         self.control_PID_y = PID_discrete(Kp_y, Kd_y, Ki_y, saturation=2, N=N_y)
-        self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=3)
+        self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=5)
 
         # Parâmetros construtivos do robo
         # Todos esses parâmetros do grSim estão em grSim/config/Parsian.ini
@@ -89,7 +89,7 @@ class Robot(KinematicBody):
         # Define o alvo do robô
         self.target = target
 
-    def target_reached(self):
+    def target_reached(self, treshold=10):
         # Verifica se o robô alcançou o alvo
         if self.target is None:
             return False
@@ -100,7 +100,7 @@ class Robot(KinematicBody):
             [self.target.get_coordinates().X, self.target.get_coordinates().Y]
         )
         distance_to_target = np.linalg.norm(current_position - target_position)
-        return distance_to_target < 10
+        return distance_to_target < treshold
 
     def set_robot_velocity(self, target_velocity_x, target_velocity_y, target_angular):
         # Define as velocidades alvo nos controladores PID
