@@ -60,11 +60,9 @@ def atacante(robot0, field):
                       robot_field.get_coordinates().rotation)
         robot0.map_obstacle.add_obstacle(obst)
     
-    if (
-        (400 < ball_position.X <= 450) and (87.5 <= ball_position.Y <= 222.5)
-    ) or ball_position.X < 225:
+    if (400 < ball_position.X <= 450) and (87.5 <= ball_position.Y <= 222.5):
+        follow_ball_y(robot0, field, 380)
+    elif ball_position.X < 225:
         follow_ball_y(robot0, field, 300)
     else:
         shoot(robot0, field)
-
-    
