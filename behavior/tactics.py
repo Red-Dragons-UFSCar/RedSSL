@@ -63,7 +63,7 @@ def atacante(robot0, field):
     if (
         (400 < ball_position.X <= 450) and (87.5 <= ball_position.Y <= 222.5)
     ) or ball_position.X < 225:
-        follow_ball_y(robot0, field, 380)
+        follow_ball_y(robot0, field, 300)
     else:
         shoot(robot0, field)
 
