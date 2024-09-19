@@ -12,7 +12,11 @@ class Field:
         self.height = 600  # Exemplo de altura do campo em cm
 
         # Máquina de estados do zagueiro
-        self.zagueiro_current_state = "A" 
+        self.zagueiro_current_state = "A"
+
+        # Máquina de estados do atacante
+        self.atacante_current_state = "A" 
+
 
     def add_blue_robot(self, robot):
         self.blue_robots.append(robot)
