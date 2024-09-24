@@ -131,7 +131,8 @@ class RobotController:
         self.vision_thread.start()
 
     def control_loop(self):
-
+        self.field.game_stopped = True
+        self.field.game_on = False
         while True:
             t1 = time.time()
             Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)

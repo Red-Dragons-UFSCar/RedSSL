@@ -14,6 +14,11 @@ class Field:
         # Máquina de estados do zagueiro
         self.zagueiro_current_state = "A" 
 
+        # Flags para estados de jogo
+        self.game_on = False
+        self.game_stopped = True
+        self.defending_foul = True
+
     def add_blue_robot(self, robot):
         self.blue_robots.append(robot)
 

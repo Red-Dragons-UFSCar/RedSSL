@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from entities.Obstacle import Obstacle
 
 STATE_A = "A"  # Se posicionar atrás da bola
 STATE_B = "B"  # Avançar na bola
@@ -353,6 +354,13 @@ def avoid_ball_stop_game_defending(robot, field):
 
     target_robot = robot.target.get_coordinates()
 
+    obst = Obstacle()
+    obst.set_obst(ball.get_coordinates().X, 
+                    ball.get_coordinates().Y, 
+                    0,
+                    radius = 50)
+    robot.map_obstacle.add_obstacle(obst)
+
     x_target = target_robot.X
     y_target = target_robot.Y
 
@@ -378,4 +386,6 @@ def avoid_ball_stop_game_defending(robot, field):
                          (ball.get_coordinates().Y - robot.get_coordinates().Y)**2 )
 
         go_to_point(robot, new_x, new_y, field, target_robot.rotation)
+    else:
+        go_to_point(robot, x_target, y_target, field, target_robot.rotation)
 
