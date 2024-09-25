@@ -145,6 +145,7 @@ class RobotController:
 
             if (t2 - t1) < 1 / 60:
                 time.sleep(1 / 60 - (t2 - t1))
+                print("Tempo de execução: ", (t2 - t1) * 1000)
             else:
                 print("[TIMEOUT] - Execução de controle excedida: ", (t2 - t1) * 1000)
 

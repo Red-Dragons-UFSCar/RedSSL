@@ -1,9 +1,15 @@
-import pyvisgraph as vg
+#import pyvisgraph as vg
 import numpy as np
 from commons.math import angle_between, rotate_vector
 from entities.Obstacle import Obstacle
 import time
 import concurrent.futures
+
+import sys
+import os
+#sys.path.insert(0, 
+#    os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import path.cppvisgraph.build.cppyvisgraph as vg
 
 class VisibilityGraph:
     """
@@ -161,26 +167,30 @@ class VisibilityGraph:
 
         for obstacle in obstacles:
                 triangle = self.robot_triangle_obstacle(obstacle, robot)
+                print(triangle)
                 vg_triangle = self.convert_to_vgPoly(triangle)
                 vg_obstacles.append(vg_triangle)
-        
+        print(vg_obstacles)
         self.vg_obstacles = vg_obstacles
 
         t1 = time.time()
+        self.update_obstacle_map
+        '''
         with concurrent.futures.ThreadPoolExecutor() as executor:
-                '''
-                  TODO #1: Avaliar a real necessidade desse trecho
-                  Objetivo: Limitar a execução da função self.update_obstacle_map para
-                  5ms.
-                  Aparentemente essa função não limita, só verifica se ele passou do limite ou não
-                  TODO #2: Tentar fazer esse processamento com o asynco.
-                '''
+                
+                #  TODO #1: Avaliar a real necessidade desse trecho
+                #  Objetivo: Limitar a execução da função self.update_obstacle_map para
+                #  5ms.
+                #  Aparentemente essa função não limita, só verifica se ele passou do limite ou não
+                #  TODO #2: Tentar fazer esse processamento com o asynco.
+                
                 future = executor.submit(self.update_obstacle_map)
                 try:
                         future.result(timeout=0.005)
                         flag = True
                 except concurrent.futures.TimeoutError:
                         flag = False
+        '''
         t2 = time.time()
         if self.logger_obstacle:
                 print("---- LOGGER OBSTACULO -----")
