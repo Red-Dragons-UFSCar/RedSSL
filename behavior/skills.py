@@ -19,11 +19,6 @@ def go_to_point(robot0, target_x, target_y, field, target_theta=0):
         target_theta,
     )
 
-    if robot0.target_reached():
-        robot0.vx = 0
-        robot0.vy = 0
-
-
 def follow_ball_y(robot0, field, fixed_x=None, target_theta=0):
     """
     Move o robô para seguir a bola ao longo do eixo Y, mantendo uma posição fixa no eixo X ou na área do goleiro.
@@ -185,7 +180,7 @@ def attack_ball(robot0, field, ball_position, robot_position, angle_to_ball):
         print("Estado A")
 
         # Se o robô está alinhado com a bola, transita para o estado B
-        if abs(angle_diff) <= 10:
+        if robot0.target_reached(6):
             current_state = STATE_B
             print("Transitando para B")
         elif 90 <= np.degrees(angle_robot_to_ball) <= 180 or -180 <= np.degrees(angle_robot_to_ball) <= -90:
@@ -200,7 +195,7 @@ def attack_ball(robot0, field, ball_position, robot_position, angle_to_ball):
         print("Estado B")
 
         # Se o robô alcança a bola, transita para o estado C
-        if abs(angle_diff) <= 30:
+        if robot0.target_reached(6):
             current_state = STATE_C
         elif 90 <= np.degrees(angle_robot_to_ball) <= 180 or -180 <= np.degrees(angle_robot_to_ball) <= -90:
             current_state = STATE_D
