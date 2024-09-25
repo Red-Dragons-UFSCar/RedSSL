@@ -31,14 +31,14 @@ class Robot(KinematicBody):
         # Parâmetros PID
         Kp_x = 6.551
         Kd_x = 0.5
-        Ki_x = 1
+        Ki_x = 1.5
         N_x = 1 / 0.01898
         Kp_y = 4.857
-        Kd_y = 0
+        Kd_y = 0.2
         Ki_y = 2
         N_y = 1 / 0.01805
         Kp_theta = 5
-        Kd_theta = 0
+        Kd_theta = 0.1
         Ki_theta = 0
 
         # Controladores PID

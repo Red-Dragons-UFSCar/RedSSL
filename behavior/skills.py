@@ -19,6 +19,11 @@ def go_to_point(robot0, target_x, target_y, field, target_theta=0):
         target_theta,
     )
 
+    if robot0.target_reached():
+        robot0.vx = 0
+        robot0.vy = 0
+
+
 def follow_ball_y(robot0, field, fixed_x=None, target_theta=0):
     """
     Move o robô para seguir a bola ao longo do eixo Y, mantendo uma posição fixa no eixo X ou na área do goleiro.
