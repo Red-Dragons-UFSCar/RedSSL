@@ -122,8 +122,12 @@ class VisibilityGraph:
                 VisibilityGraph em um mapa de obstaculos
         """
         self.obstacle_map = vg.VisGraph()
-        if len(self.vg_obstacles) > 0:
-                self.obstacle_map.build(self.vg_obstacles)
+        if IS_PYTHON_MODULE:
+                self.obstacle_map.build(self.vg_obstacles, status=False, workers=1)
+        else:
+                if len(self.vg_obstacles) > 0:
+                        self.obstacle_map.build(self.vg_obstacles)
+
 
     def get_path(self) -> list:
         """
@@ -178,22 +182,7 @@ class VisibilityGraph:
 
         t1 = time.time()
         self.update_obstacle_map()
-        '''
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-                
-                #  TODO #1: Avaliar a real necessidade desse trecho
-                #  Objetivo: Limitar a execução da função self.update_obstacle_map para
-                #  5ms.
-                #  Aparentemente essa função não limita, só verifica se ele passou do limite ou não
-                #  TODO #2: Tentar fazer esse processamento com o asynco.
-                
-                future = executor.submit(self.update_obstacle_map)
-                try:
-                        future.result(timeout=0.005)
-                        flag = True
-                except concurrent.futures.TimeoutError:
-                        flag = False
-        '''
+
         t2 = time.time()
         if self.logger_obstacle:
                 print("---- LOGGER OBSTACULO -----")
@@ -203,7 +192,6 @@ class VisibilityGraph:
                         print("[TIMEOUT]")
                 print("----------------")
         
-        #self.update_obstacle_map()
         path = self.get_path()
 
         if path:
