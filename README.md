@@ -25,5 +25,5 @@ Além disso, é necessário que o Google Protobuff esteja instalado de acordo co
 Para execução do código em sua totalidade, basta executar o script main da raiz do repositório.
 
 ```sh
-bash python3 main.py
+python3 main.py
 ```
