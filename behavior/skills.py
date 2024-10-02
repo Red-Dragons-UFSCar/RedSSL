@@ -178,18 +178,19 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
     target_x_final = 450
     target_y_final = 150
 
-    # Calcula o ângulo entre o robô e a bola
-    angle_robot_to_ball =   np.arctan2(ball_position.Y - robot_position.Y, ball_position.X - robot_position.X)
-    angle_ball_to_target =  np.arctan2(target_y_final - ball_position.Y, target_x_final - ball_position.X)
-
     # Ajusta o alvo com base na posição da bola
     if 110 < ball_position.Y < 190:
         target_y_final = ball_position.Y
         print("Bola no alvo")
     else:
-        target_y_final = target_y_final + (-40 if ball_position.Y < 150 else 40)
+        target_y_final = target_y_final + (-30 if ball_position.Y < 150 else 30)
 
     current_state = field.atacante_current_state
+
+    # Calcula o ângulo entre o robô e a bola
+    angle_robot_to_ball =   np.arctan2(ball_position.Y - robot_position.Y, ball_position.X - robot_position.X)
+    angle_ball_to_target =  np.arctan2(target_y_final - ball_position.Y, target_x_final - ball_position.X)
+
 
     # Calcula a diferença angular entre o robô e a bola em relação ao alvo
     angle_diff = np.degrees(angle_ball_to_target - angle_robot_to_ball)
@@ -331,7 +332,7 @@ def follow_ball_y_elipse(robot0, field, target_theta=0):
     ball_position = field.ball.get_coordinates()
     robot_position = robot0.get_coordinates()
 
-    # Maximmo intervalo de y para ficar na àrea:
+    # Máximo intervalo de y para ficar na área:
     limite_inferior_y = center_y - 60
     limite_superior_y = center_y + 60
 
@@ -341,7 +342,7 @@ def follow_ball_y_elipse(robot0, field, target_theta=0):
 
     if (
         limite_inferior_y <= ball_position.Y <= limite_superior_y
-    ):  # caso a bola esteja nas condiçẽos ideais para seguir em y (dentro dos limites da area)
+    ):  # caso a bola esteja nas condições ideais para seguir em y (dentro dos limites da area)
         target_y = ball_position.Y  # assume mesmo y da bola
         target_x = center_x + a * np.sqrt(
             1 - ((target_y - center_y) ** 2) / b**2
