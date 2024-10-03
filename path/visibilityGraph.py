@@ -1,9 +1,19 @@
-import pyvisgraph as vg
 import numpy as np
 from commons.math import angle_between, rotate_vector
 from entities.Obstacle import Obstacle
 import time
 import concurrent.futures
+
+IS_PYTHON_MODULE = False
+
+if IS_PYTHON_MODULE:
+        import pyvisgraph as vg
+else:
+        import sys
+        import os
+        #sys.path.insert(0, 
+        #    os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        import path.cppvisgraph.build.cppyvisgraph as vg
 
 class VisibilityGraph:
     """
@@ -85,7 +95,7 @@ class VisibilityGraph:
         p1[0], p1[1] = p1[0] + obst_coords[0], p1[1] + obst_coords[1]
         p2[0], p2[1] = p2[0] + obst_coords[0], p2[1] + obst_coords[1]
         p3[0], p3[1] = p3[0] + obst_coords[0], p3[1] + obst_coords[1]
-        triangle = np.array([p1, p2, p3])
+        triangle = [p1, p2, p3]
 
         return triangle
 
@@ -112,7 +122,12 @@ class VisibilityGraph:
                 VisibilityGraph em um mapa de obstaculos
         """
         self.obstacle_map = vg.VisGraph()
-        self.obstacle_map.build(self.vg_obstacles, status=False, workers=1)
+        if IS_PYTHON_MODULE:
+                self.obstacle_map.build(self.vg_obstacles, status=False, workers=1)
+        else:
+                if len(self.vg_obstacles) > 0:
+                        self.obstacle_map.build(self.vg_obstacles)
+
 
     def get_path(self) -> list:
         """
@@ -163,24 +178,11 @@ class VisibilityGraph:
                 triangle = self.robot_triangle_obstacle(obstacle, robot)
                 vg_triangle = self.convert_to_vgPoly(triangle)
                 vg_obstacles.append(vg_triangle)
-        
         self.vg_obstacles = vg_obstacles
 
         t1 = time.time()
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-                '''
-                  TODO #1: Avaliar a real necessidade desse trecho
-                  Objetivo: Limitar a execução da função self.update_obstacle_map para
-                  5ms.
-                  Aparentemente essa função não limita, só verifica se ele passou do limite ou não
-                  TODO #2: Tentar fazer esse processamento com o asynco.
-                '''
-                future = executor.submit(self.update_obstacle_map)
-                try:
-                        future.result(timeout=0.005)
-                        flag = True
-                except concurrent.futures.TimeoutError:
-                        flag = False
+        self.update_obstacle_map()
+
         t2 = time.time()
         if self.logger_obstacle:
                 print("---- LOGGER OBSTACULO -----")
@@ -190,7 +192,6 @@ class VisibilityGraph:
                         print("[TIMEOUT]")
                 print("----------------")
         
-        #self.update_obstacle_map()
         path = self.get_path()
 
         if path:
