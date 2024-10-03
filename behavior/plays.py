@@ -1,5 +1,6 @@
 from behavior.tactics import goleiro, zagueiro, atacante
 from behavior.skills import go_to_point
+import behavior.skills as skills
 
 
 def estrategia_basica(robot_goalie, robot_zagueiro, robot_atacante, field):
@@ -61,6 +62,36 @@ def estrategia_penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, 
         goleiro(robot_goleiro, field)
 
 
-   
+def basic_stop_behaviour_defensive(robot_goleiro, robot_zagueiro, robot_atacante, field):
+    """
+    Descrição: Comportamento básico de stop em casos de faltas defensivas, que 
+               precisa estar longe da bola. Os robôs desviam da bola e mudam o target
+               se estiver perto da bola
+    """
+    estrategia_basica(robot_goleiro, robot_zagueiro, robot_atacante, field)
+    skills.avoid_ball_stop_game(robot_goleiro, field)
+    skills.avoid_ball_stop_game(robot_zagueiro, field)
+    skills.avoid_ball_stop_game(robot_atacante, field)
+
+def basic_stop_behaviour_ofensive(robot_goleiro, robot_zagueiro, robot_atacante, field):
+    """
+    Descrição: Comportamento básico de stop em casos de faltas ofensivas, que 
+               precisa estar longe da bola. Os robôs desviam da bola e mudam o target
+               se estiver perto da bola. A depender da posição da bola, um robô ou 
+               outro vai até a cobrança (kicker)
+    """
+    estrategia_basica(robot_goleiro, robot_zagueiro, robot_atacante, field)
+
+    ball = field.ball
+
+    skills.avoid_ball_stop_game(robot_goleiro, field)
+    if ball.get_coordinates().X < 450/2:
+        skills.avoid_ball_stop_game(robot_zagueiro, field, kicker=True)
+        skills.avoid_ball_stop_game(robot_atacante, field)
+    else:
+        skills.avoid_ball_stop_game(robot_zagueiro, field)
+        skills.avoid_ball_stop_game(robot_atacante, field, kicker=True)
+
+    
 
 

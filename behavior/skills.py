@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from entities.Obstacle import Obstacle
 
 def go_to_point(robot0, target_x, target_y, field, target_theta=0):
     """
@@ -393,7 +394,7 @@ def basic_tackle(robot0, field):
 def stay_on_center(robot0, field):
     go_to_point(robot0, 30, 150, field, 0)
 
-def avoid_ball_stop_game_defending(robot, field):
+def avoid_ball_stop_game(robot, field, kicker=False):
     '''
     Altera o target do robô para ficar longe da bola segundo as regras do SSL-EL.
     Caso o target do robô esteja em um raio d_limiar da bola, esse alvo é espelhado
@@ -407,29 +408,49 @@ def avoid_ball_stop_game_defending(robot, field):
 
     target_robot = robot.target.get_coordinates()
 
+    if kicker:
+        ball_obst_radius = 15
+        d_limiar = 15
+    else:
+        ball_obst_radius = 50
+        d_limiar = 60
+
+    # TODO: Aumentar as bordas do obstáculo da bola, ou mudar a orientação
+    obst = Obstacle()  # Configura a bola como obstáculo de raio 50
+    obst.set_obst(ball.get_coordinates().X, 
+                    ball.get_coordinates().Y, 
+                    0,
+                    radius = ball_obst_radius)
+    robot.map_obstacle.add_obstacle(obst)
+
     x_target = target_robot.X
     y_target = target_robot.Y
 
+    # Distancia da bola até o target
     dist_ball = np.sqrt( (ball.get_coordinates().X - x_target)**2 +
-                         (ball.get_coordinates().Y - y_target)**2 )
+                         (ball.get_coordinates().Y - y_target)**2 )  
 
+    # Angulo da bola em relação ao target
     angle_to_ball = np.arctan2((ball.get_coordinates().Y - y_target),
-                               (ball.get_coordinates().X - x_target))
+                               (ball.get_coordinates().X - x_target))  
     
-    d_limiar = 60
+    #d_limiar = 60
 
-    if dist_ball < d_limiar-10:
+    if dist_ball < (d_limiar-10): # Se a bola está em um circulo de raio (d_limiar-10) do ponto alvo
+        # Centraliza o target em um circulo de raio d_limiar e projeta o ponto alvo
+        # radialmente no contorno da circunferência, com o mesmo ângulo.
+        # - Garante que quanto game_on, o robô percorra o menor caminho até seu alvo
 
-        d_avoid_ball = d_limiar - dist_ball
+        d_avoid_ball = d_limiar - dist_ball  # Distância do alvo até o contorno
 
-        d_target_x = d_avoid_ball * np.cos(angle_to_ball)
+        d_target_x = d_avoid_ball * np.cos(angle_to_ball)  # Projeção coordenada até o contorno
         d_target_y = d_avoid_ball * np.sin(angle_to_ball)
 
-        new_x = x_target - d_target_x
+        new_x = x_target - d_target_x  # Novo alvo no contorno
         new_y = y_target - d_target_y
 
-        dist_ball_robot = np.sqrt( (ball.get_coordinates().X - robot.get_coordinates().X )**2 +
-                         (ball.get_coordinates().Y - robot.get_coordinates().Y)**2 )
-
         go_to_point(robot, new_x, new_y, field, target_robot.rotation)
+
+    else:  # Se a bola está longe, continue normalmente
+        go_to_point(robot, x_target, y_target, field, target_robot.rotation)
 
