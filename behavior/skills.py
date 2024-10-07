@@ -25,7 +25,7 @@ def go_to_point(robot0, target_x, target_y, field, target_theta=0):
         robot0.vy = 0
 
 
-def go_to_point_angled(robot0, target_x, target_y, field, target_theta):
+def go_to_point_angled(robot0, target_x, target_y, field, target_theta, v_max = 1.5):
     """
     Move o robô para as coordenadas especificadas, com velocidades decompostas em x e y.
 
@@ -47,7 +47,6 @@ def go_to_point_angled(robot0, target_x, target_y, field, target_theta):
                                       target_x - ball_position.X)
 
     # Define a velocidade máxima
-    v_max = 1.5
     robot0.vx = v_max * np.cos(angle_ball_to_target)
     robot0.vy = v_max * np.sin(angle_ball_to_target)
 
@@ -161,7 +160,7 @@ def clear_ball(robot0, field, ball_position, robot_position, angle_to_ball):
     go_to_point(robot0, target_x, target_y, field, target_theta)
 
 
-def attack_ball(robot0, field, ball_position, robot_position, target_theta):
+def attack_ball(robot0, field, ball_position, robot_position, target_theta, v_max = 1.5):
     """
     Alinha o robô para atacar a bola no gol.
 
@@ -171,6 +170,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
     - ball_position: Coordenadas atuais da bola.
     - robot_position: Coordenadas atuais do robô.
     - target_theta: Ângulo alvo.
+    - v_max (opcional): Velocidade máxima do robô. Definido como 1.5 de forma padrão
     """
     # Definição dos estados
     STATE_A, STATE_B, STATE_C, STATE_D = "A", "B", "C", "D"
@@ -203,7 +203,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         target_x = ball_position.X + approach_offset * np.cos(angle_ball_to_target)
         target_y = ball_position.Y + approach_offset * np.sin(angle_ball_to_target)
         target_theta = angle_ball_to_target
-        robot0.v_max = 1.25
+        robot0.v_max = v_max
         print("Estado A")
 
         if robot0.target_reached():
@@ -217,7 +217,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         target_x = ball_position.X - 20 * np.cos(angle_ball_to_target)
         target_y = ball_position.Y - 20 * np.sin(angle_ball_to_target)
         target_theta = angle_ball_to_target
-        robot0.v_max = 1.5
+        robot0.v_max = v_max
         print("Estado B")
 
         if robot0.target_reached():
@@ -230,7 +230,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         target_x = target_x_final
         target_y = target_y_final
         target_theta = angle_ball_to_target
-        robot0.v_max = 1.5
+        robot0.v_max = v_max
         print("Estado C")
 
         if not abs(angle_diff) <= 30:
@@ -243,7 +243,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         target_x = ball_position.X - 25
         target_y = ball_position.Y
         target_theta = angle_ball_to_target
-        robot0.v_max = 1.5
+        robot0.v_max = v_max
         print("Estado D")
 
         # Ajusta a posição Y do alvo para evitar a bola
@@ -264,7 +264,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
 
     # Usa a função adequada para mover o robô
     if current_state == STATE_C:
-        go_to_point_angled(robot0, target_x, target_y, field, target_theta)
+        go_to_point_angled(robot0, target_x, target_y, field, target_theta, v_max)
     else:
         go_to_point(robot0, target_x, target_y, field, target_theta)
 
@@ -290,7 +290,7 @@ def pursue_ball(robot0, field):
         )
 
 
-def shoot(robot0, field):
+def shoot(robot0, field, v_max = 1.5):
     """
     Faz com que o robô persiga a bola e se alinhe para o lado ofensivo do campo.
 
@@ -307,7 +307,7 @@ def shoot(robot0, field):
     else:
         # Atacar a bola
         attack_ball(
-            robot0, field, ball_position, robot_position, robot_position.rotation
+            robot0, field, ball_position, robot_position, robot_position.rotation, v_max
         )
 
 

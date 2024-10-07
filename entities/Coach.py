@@ -19,7 +19,7 @@ class Coach:
         self.game_stopped = False
         self.penalty_start_time = None
         self.penalty_mode = None
-        self.tempo_de_cobranca = 10 
+        self.tempo_de_cobranca = 10
 
     def verificar_bola_em_campo(self):
         """
