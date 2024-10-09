@@ -71,7 +71,7 @@ def clear_ball(robot0, field, ball_position, robot_position, angle_to_ball):
 
     current_state = field.zagueiro_current_state
 
-    print(f"Estado atual {current_state}")
+    # print(f"Estado atual {current_state}")
     # Define uma posição atrás da bola
     approach_offset = -40  
 

@@ -80,14 +80,14 @@ class Coach:
 
 
                     if self.penalty_mode == 1: 
-                        print ("estratégia de penalti defensivo em ação")
+                        # print ("estratégia de penalti defensivo em ação")
                         estrategia_penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, self.field, referee_whistle)
                     else:
                         if self.penalty_mode == 2: 
-                            print ("estratégia de penalti ofensivo em ação")
+                            # print ("estratégia de penalti ofensivo em ação")
                             estrategia_penalti_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, self.field, referee_whistle)
                         else: 
                             self.penalty_start_time = None # "zerando" tempo de incio do penalti após a cobrança
                 else:
-                    print("Estrategia basica em açao")
+                    # print("Estrategia basica em açao")
                     estrategia_basica(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
