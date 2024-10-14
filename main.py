@@ -155,7 +155,7 @@ class RobotController:
 
 if __name__ == "__main__":
     controller = RobotController(
-        vision_ip="224.5.23.2", vision_port=10021, actuator_port=10302, is_right_side=True
+        vision_ip="224.5.23.2", vision_port=10020, actuator_port=10301, is_right_side=False
     )
     controller.start_vision_thread()
     controller.control_loop()
