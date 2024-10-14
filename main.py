@@ -4,7 +4,12 @@ from entities.Robot import Robot
 from entities.Field import Field
 from entities.Coach import Coach
 from behavior.skills import go_to_point
-from behavior.plays import estrategia_basica, estrategia_penalti_defensivo, estrategia_penalti_ofensivo
+from behavior.plays import (
+    estrategia_basica,
+    estrategia_penalti_defensivo,
+    estrategia_penalti_ofensivo,
+)
+from communication.referee_events import handle_referee_command
 from behavior.tactics import *
 import time
 import threading
@@ -16,6 +21,7 @@ CAM_FPS = 7 * CONTROL_FPS  # FPS para processar os dados da visão
 REFEREE_IP = "224.5.23.1"  # IP para receber as mensagens do árbitro
 REFEREE_PORT = 10003  # Porta usada pelo árbitro
 
+
 class RepeatTimer(threading.Timer):
     """
     Descrição:
@@ -26,6 +32,7 @@ class RepeatTimer(threading.Timer):
     def run(self):
         while not self.finished.wait(self.interval):
             self.function(*self.args, **self.kwargs)
+
 
 class RobotController:
     def __init__(self, vision_ip, vision_port, actuator_port, is_right_side):
@@ -57,12 +64,16 @@ class RobotController:
         self.field.add_yellow_robot(self.enemy_robot2)
 
         # Inicializa o socket para receber mensagens do árbitro
-        self.referee_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.referee_socket = socket.socket(
+            socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP
+        )
         self.referee_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.referee_socket.bind((REFEREE_IP, REFEREE_PORT))
         mreq = socket.inet_aton(REFEREE_IP) + socket.inet_aton("0.0.0.0")
-        self.referee_socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
-        
+        self.referee_socket.setsockopt(
+            socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq
+        )
+
         # Variável para armazenar o estado do árbitro
         self.referee_state = None
 
@@ -138,58 +149,7 @@ class RobotController:
 
             # Recebe a mensagem do árbitro
             self.get_referee_message()
-
-            # Exemplo de tratamento de mensagem de árbitro
-            if self.referee_state:
-                if self.referee_state.command == Referee.Command.HALT:
-                    print("HALT - Parar o jogo!")
-                    # Lógica para parar os robôs aqui
-
-                elif self.referee_state.command == Referee.Command.STOP:
-                    print("STOP - Pausar o jogo!")
-
-                elif self.referee_state.command == Referee.Command.NORMAL_START:
-                    print("NORMAL START - Retomar o jogo!")
-
-                elif self.referee_state.command == Referee.Command.FORCE_START:
-                    print("FORCE START - Começar imediatamente!")
-
-                elif self.referee_state.command == Referee.Command.PREPARE_KICKOFF_BLUE:
-                    print("PREPARE KICKOFF BLUE - Preparar início para o time azul")
-
-                elif self.referee_state.command == Referee.Command.PREPARE_KICKOFF_YELLOW:
-                    print("PREPARE KICKOFF YELLOW - Preparar início para o time amarelo")
-
-                elif self.referee_state.command == Referee.Command.PREPARE_PENALTY_BLUE:
-                    print("PREPARE PENALTY BLUE - Preparar pênalti para o time azul")
-
-                elif self.referee_state.command == Referee.Command.PREPARE_PENALTY_YELLOW:
-                    print("PREPARE PENALTY YELLOW - Preparar pênalti para o time amarelo")
-
-                elif self.referee_state.command == Referee.Command.DIRECT_FREE_BLUE:
-                    print("DIRECT FREE BLUE - Tiro livre direto para o time azul")
-
-                elif self.referee_state.command == Referee.Command.DIRECT_FREE_YELLOW:
-                    print("DIRECT FREE YELLOW - Tiro livre direto para o time amarelo")
-
-                elif self.referee_state.command == Referee.Command.INDIRECT_FREE_BLUE:
-                    print("INDIRECT FREE BLUE - Tiro livre indireto para o time azul")
-
-                elif self.referee_state.command == Referee.Command.INDIRECT_FREE_YELLOW:
-                    print("INDIRECT FREE YELLOW - Tiro livre indireto para o time amarelo")
-
-                elif self.referee_state.command == Referee.Command.TIMEOUT_BLUE:
-                    print("TIMEOUT BLUE - Timeout para o time azul")
-
-                elif self.referee_state.command == Referee.Command.TIMEOUT_YELLOW:
-                    print("TIMEOUT YELLOW - Timeout para o time amarelo")
-
-                elif self.referee_state.command == Referee.Command.BALL_PLACEMENT_BLUE:
-                    print("BALL PLACEMENT BLUE - Colocação de bola para o time azul")
-
-                elif self.referee_state.command == Referee.Command.BALL_PLACEMENT_YELLOW:
-                    print("BALL PLACEMENT YELLOW - Colocação de bola para o time amarelo")
-
+            handle_referee_command(self.referee_state)
 
             Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
             self.send_velocities()
@@ -203,12 +163,15 @@ class RobotController:
             if (t2 - t1) < 1 / CONTROL_FPS:
                 time.sleep(1 / CONTROL_FPS - (t2 - t1))
             # else:
-                # print("[TIMEOUT] - Execução de controle excedida: ", (t2 - t1) * 1000)
+            # print("[TIMEOUT] - Execução de controle excedida: ", (t2 - t1) * 1000)
 
 
 if __name__ == "__main__":
     controller = RobotController(
-        vision_ip="224.5.23.2", vision_port=10020, actuator_port=10301, is_right_side=False
+        vision_ip="224.5.23.2",
+        vision_port=10020,
+        actuator_port=10301,
+        is_right_side=False,
     )
     controller.start_vision_thread()
     controller.control_loop()
