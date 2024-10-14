@@ -88,7 +88,7 @@ class RobotController:
 
     def send_velocities(self):
         # Envio de velocidades no sistema global
-        #'''
+        '''
         # Envia as velocidades armazenadas para o atuador
         self.actuator.send_globalVelocity_message(
             self.robot0, self.robot0.vx, self.robot0.vy, self.robot0.w
@@ -155,7 +155,7 @@ class RobotController:
 
 if __name__ == "__main__":
     controller = RobotController(
-        vision_ip="224.5.23.2", vision_port=10020, actuator_port=10301, is_right_side=False
+        vision_ip="224.5.23.2", vision_port=10021, actuator_port=10302, is_right_side=True
     )
     controller.start_vision_thread()
     controller.control_loop()
