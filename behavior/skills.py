@@ -2,7 +2,7 @@ import math
 import numpy as np
 from entities.Obstacle import Obstacle
 
-def go_to_point(robot0, target_x, target_y, field, target_theta=0):
+def go_to_point(robot0, target_x, target_y, field, target_theta = 0, threshold = 10):
     """
     Move o robô para as coordenadas especificadas.
 
@@ -20,12 +20,12 @@ def go_to_point(robot0, target_x, target_y, field, target_theta=0):
         target_theta,
     )
 
-    if robot0.target_reached():
+    if robot0.target_reached(threshold):
         robot0.vx = 0
         robot0.vy = 0
 
 
-def go_to_point_angled(robot0, target_x, target_y, field, target_theta):
+def go_to_point_angled(robot0, target_x, target_y, field, target_theta = 0, threshold = 10):
     """
     Move o robô para as coordenadas especificadas, com velocidades decompostas em x e y.
 
@@ -197,6 +197,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
     angle_diff = np.degrees(angle_ball_to_target - angle_robot_to_ball)
     
     approach_offset = -50
+    threshold = 2
 
     if current_state == STATE_A:
         # Estado A: Se posicionar atrás da bola
@@ -206,7 +207,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         robot0.v_max = 1.25
         print("Estado A")
 
-        if robot0.target_reached():
+        if robot0.target_reached(threshold):
             current_state = STATE_B
             print("Transitando para o estado B")
         elif 90 <= np.degrees(angle_robot_to_ball) <= 180 or -180 <= np.degrees(angle_robot_to_ball) <= -90:
@@ -220,7 +221,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         robot0.v_max = 1.5
         print("Estado B")
 
-        if robot0.target_reached():
+        if robot0.target_reached(threshold):
             current_state = STATE_C
         elif 90 <= np.degrees(angle_robot_to_ball) <= 180 or -180 <= np.degrees(angle_robot_to_ball) <= -90:
             current_state = STATE_D
@@ -252,7 +253,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         elif -180 <= np.degrees(angle_robot_to_ball) <= -90:
             target_y += 20
 
-        if robot0.target_reached():
+        if robot0.target_reached(threshold):
             current_state = STATE_B
 
     # Atualiza o estado atual do atacante
@@ -264,9 +265,9 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
 
     # Usa a função adequada para mover o robô
     if current_state == STATE_C:
-        go_to_point_angled(robot0, target_x, target_y, field, target_theta)
+        go_to_point_angled(robot0, target_x, target_y, field, target_theta, threshold)
     else:
-        go_to_point(robot0, target_x, target_y, field, target_theta)
+        go_to_point(robot0, target_x, target_y, field, target_theta, threshold)
 
 
 def pursue_ball(robot0, field):
