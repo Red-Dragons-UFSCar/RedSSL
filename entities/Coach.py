@@ -4,7 +4,7 @@ from entities.Target import Target
 from path.visibilityGraph import VisibilityGraph
 import numpy as np
 import time
-from behavior.plays import estrategia_basica, estrategia_penalti_defensivo, estrategia_penalti_ofensivo
+from behavior.plays import estrategia_basica, estrategia_penalti_defensivo, estrategia_penalti_ofensivo, estrategia_desvantagem
 from behavior.plays import posicionar_robos
 
 
@@ -19,7 +19,10 @@ class Coach:
         self.game_stopped = False
         self.penalty_start_time = None
         self.penalty_mode = None
-        self.tempo_de_cobranca = 10 
+        self.tempo_de_cobranca = 10
+        
+        # Número de robôs da equipe em campo
+        self.quantidade_robos = 2
 
     def verificar_bola_em_campo(self):
         """
@@ -44,17 +47,33 @@ class Coach:
         
     def situacao_de_penalti(self, referee_penalty):
         """
-        verificar se é uma situação de penalti 
+        Verificar se é uma situação de pênalti 
         """
         if referee_penalty == 0:
             return False
         else:
-            if referee_penalty == 2: #penalti ofensivo
+            if referee_penalty == 2: # pênalti ofensivo
                 self.penalty_mode = 2 #modo de penalty ofensivo
             else: 
-                if referee_penalty == 1: #penalti defensivo
+                if referee_penalty == 1: # pênalti defensivo
                     self.penalty_mode = 1 #modo de penalty defensivo
             return True
+        
+    def expulsao(self, referee_red_card = 0):
+        """
+        Altera a quantidade de robôs em campo se um for expulso.
+
+        :param referee_red_card: Flag indicando se um robô foi expulso (True ou False)
+        """
+        if referee_red_card == 1:  # Se a flag de cartão vermelho for ativada
+            if self.quantidade_robos > 1:  # Verifica se ainda há mais de um robô em campo
+                self.quantidade_robos -= 1  # Remove um robô do campo
+                print(f"Um robô foi expulso. Restam {self.quantidade_robos} robôs.")
+            else:
+                print("Não é possível expulsar mais robôs, só resta um em campo.")
+        else:
+            print("Nenhum robô foi expulso.")
+
 
     def escolher_estrategia(self, robot_goleiro, robot_zagueiro, robot_atacante):
         """
@@ -67,9 +86,9 @@ class Coach:
         else:
             # Se o jogo estiver em andamento, usa a estratégia básica
             if self.game_on:
-                if self.situacao_de_penalti(0):   # passando os valores manualmente para testes. 0 não ha penalti, 1, penalti defensivo, 2 ofensivo.
+                if self.situacao_de_penalti(0):   # Passando os valores manualmente para testes. 0 não há pênalti, 1, pênalti defensivo, 2 ofensivo.
                     if self.penalty_start_time is None:
-                        self.penalty_start_time = time.time() #assume tempo atual
+                        self.penalty_start_time = time.time() # Assume tempo atual
             
                     #improviso apito do juiz
                     tempo_decorrido = time.time() - self.penalty_start_time
@@ -88,6 +107,11 @@ class Coach:
                             estrategia_penalti_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, self.field, referee_whistle)
                         else: 
                             self.penalty_start_time = None # "zerando" tempo de incio do penalti após a cobrança
+                
+                elif self.quantidade_robos < 3:
+                    print("Estratégia com desvantagem em ação")
+                    estrategia_desvantagem(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
+                
                 else:
-                    print("Estrategia basica em açao")
+                    print("Estrategia basica em ação")
                     estrategia_basica(robot_goleiro, robot_zagueiro, robot_atacante, self.field)

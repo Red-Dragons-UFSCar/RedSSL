@@ -30,8 +30,8 @@ def estrategia_penalti_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, f
 
     if enable == 0 : #posição inicial, antes da cobrança 
         """
-        Posciona zagueiro e goleiro em posições fixas no campo de defesa e
-        o atacante para cobrar o penalti, em seguida chamadno a função de atacante para cobrança.
+        Posiciona zagueiro e goleiro em posições fixas no campo de defesa e
+        o atacante para cobrar o pênalti, em seguida chamando a função de atacante para cobrança.
         """
         go_to_point(robot_goleiro, 30, 150, field, 0)
 
@@ -46,8 +46,8 @@ def estrategia_penalti_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, f
 
 def estrategia_penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, field, enable):
     """
-    Posciona zagueiro e goleiro em posições fixas no campo de defesa e
-    o atacante para cobrar o penalti, em seguida chamadno a função de atacante para cobrança.
+    Posiciona zagueiro e goleiro em posições fixas no campo de defesa e
+    o atacante para cobrar o pênalti, em seguida chamando a função de atacante para cobrança.
     """
     if enable == 0:
         #posicionamento inicial:
@@ -61,6 +61,16 @@ def estrategia_penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, 
         goleiro(robot_goleiro, field)
 
 
-   
+def estrategia_desvantagem(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Quando a bola estiver na defesa, um robô se torna goleiro, o outro zagueiro.
+    Quando a bola estiver no ataque, o robô que era goleiro se torna zagueiro e o outro atacante.
+    """
+    ball_position = field.ball.get_coordinates()
+    
+    if ball_position.X < 225:
+        goleiro(robot_goalie, field)
+        zagueiro(robot_zagueiro, field)
 
-
+    else:
+        atacante(robot_zagueiro, field)

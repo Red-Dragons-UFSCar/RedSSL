@@ -66,3 +66,4 @@ def atacante(robot0, field):
         follow_ball_y(robot0, field, 300)
     else:
         shoot(robot0, field)
+
