@@ -1,4 +1,4 @@
-from behavior.tactics import goleiro, zagueiro, atacante
+from behavior.tactics import goleiro, zagueiro, atacante, atacante_campo_todo
 from behavior.skills import go_to_point
 
 
@@ -66,11 +66,6 @@ def estrategia_desvantagem(robot_goalie, robot_zagueiro, robot_atacante, field):
     Quando a bola estiver na defesa, um robô se torna goleiro, o outro zagueiro.
     Quando a bola estiver no ataque, o robô que era goleiro se torna zagueiro e o outro atacante.
     """
-    ball_position = field.ball.get_coordinates()
     
-    if ball_position.X < 225:
-        goleiro(robot_goalie, field)
-        zagueiro(robot_zagueiro, field)
-
-    else:
-        atacante(robot_zagueiro, field)
+    goleiro(robot_goalie, field)
+    atacante_campo_todo(robot_zagueiro, field)
