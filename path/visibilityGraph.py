@@ -1,5 +1,5 @@
 import numpy as np
-from commons.math import angle_between, rotate_vector
+from commons.math import angle_between, rotate_vector, ortogonal_projection
 from entities.Obstacle import Obstacle
 import time
 import concurrent.futures
@@ -165,19 +165,14 @@ class VisibilityGraph:
         self.set_target(current_target)
 
         # Adicionar obstáculos ao mapa de visibilidade
-        '''
-        robots = field.get_ally_robots()
-        enemy_robots = field.get_enemy_robots()
-        vg_obstacles = []
-        obstacles = [robot for robot in robots if robot != robot] + enemy_robots
-        '''
         vg_obstacles = []
         obstacles = robot.map_obstacle.get_map_obstacle()
 
-        for obstacle in obstacles:
-                triangle = self.robot_triangle_obstacle(obstacle, robot)
-                vg_triangle = self.convert_to_vgPoly(triangle)
-                vg_obstacles.append(vg_triangle)
+        for obstacle in obstacles: 
+                if not self.ignore_obstacle(robot, field.ball, obstacle):
+                        triangle = self.robot_triangle_obstacle(obstacle, robot)
+                        vg_triangle = self.convert_to_vgPoly(triangle)
+                        vg_obstacles.append(vg_triangle)
         self.vg_obstacles = vg_obstacles
 
         t1 = time.time()
@@ -203,4 +198,34 @@ class VisibilityGraph:
                 next_target = current_target
 
         return next_target
+    
+    def ignore_obstacle(self, robot, ball, obstacle):
+        """
+        Descrição:
+                Função que indica se um obstáculo deve ser desconsiderado.
+                Caso a bola esteja entre o robô controlado e o obstáculo, mas dentro
+                do obstáculo, então considera-se que esse a bola é acessível ao nosso
+                robô e o obstáculo é indicado a ser desconsiderado.
+
+                Por meio da projeção da posição do obstáculo (vetor u) e o vetor da reta 
+                entre o robô e a bola, se a operação u*v/(v*v), sendo * o produto 
+                escalar, for menor que 1, então quer dizer que a bola está depois do
+                obstáculo e então ele não deve ser ignorado.
+        Entradas:
+                robot:          Robô realizando o percurso
+                ball:           Objeto da bola
+                obstacle:       Obstaculo em analise
+        Saídas:
+                ignore?:        Booleana que indica se deve ou não ignorar o obstaculo
+        """
+        p_robot = np.array([robot.get_coordinates().X, robot.get_coordinates().Y])  # Ponto coordenado robô
+        p_ball = np.array([ball.get_coordinates().X, ball.get_coordinates().Y])  # Ponto coordenado bola
+        p_obstacle = np.array([obstacle.get_coordinates().X, obstacle.get_coordinates().Y])  # Ponto coordenado obstáculo
+        # Projeção ortogonal do obstáculo na reta robô-bola
+        [_, t] = ortogonal_projection(p_robot, p_ball, p_obstacle)  
+
+        if t>1:
+              return True
+        else:
+              return False
 

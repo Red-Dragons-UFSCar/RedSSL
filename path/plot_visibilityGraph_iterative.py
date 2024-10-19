@@ -2,12 +2,13 @@ from path.visibilityGraph import VisibilityGraph
 from communication.vision import Vision
 from entities.Robot import Robot
 from entities.Ball import Ball
+from entities.Obstacle import Obstacle
+from entities.Field import Field
 
 from matplotlib.patches import Polygon
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from numpy import array
-import time
 
 
 # Objeto de visão
@@ -17,22 +18,22 @@ visao = Vision(ip="224.5.23.2", port=10020)
 robot0 = Robot(robot_id=0, actuator=None)
 robot1 = Robot(robot_id=1, actuator=None)
 robot2 = Robot(robot_id=2, actuator=None)
-robot3 = Robot(robot_id=3, actuator=None)
-robot4 = Robot(robot_id=4, actuator=None)
 
-robots = [robot0, robot1, robot2, robot3, robot4]
+robots = [robot0, robot1, robot2]
 
 # Robos amarelos
 enemy_robot0 = Robot(robot_id=0, actuator=None)
 enemy_robot1 = Robot(robot_id=1, actuator=None)
 enemy_robot2 = Robot(robot_id=2, actuator=None)
-enemy_robot3 = Robot(robot_id=3, actuator=None)
-enemy_robot4 = Robot(robot_id=4, actuator=None)
 
-enemy_robots = [enemy_robot0, enemy_robot1, enemy_robot2, enemy_robot3, enemy_robot4]
+enemy_robots = [enemy_robot0, enemy_robot1, enemy_robot2]
 
 # Bola
 ball = Ball()
+
+# Field
+field = Field()
+field.ball = ball
 
 # Classe de path planning
 vg = VisibilityGraph()
@@ -47,11 +48,20 @@ def plot_path(i):
     '''
         Função para realizar o plot do campo com os robôs de obstáculo e o path
     '''
+
+    # ------------------------------
+    #  CRIAÇÃO DO GRÁFICO
+    # ------------------------------
+
     plt.cla()
     ax = fig.gca()
     # Limites do gráfico
-    ax.set_xlim(left = 000, right = 1000)
-    ax.set_ylim(top = 600, bottom = 000)
+    ax.set_xlim(left = 000, right = 450)
+    ax.set_ylim(top = 300, bottom = 000)
+
+    # ------------------------------
+    #  AQUISIÇÃO DAS INFORMAÇÕES DE VISÃO
+    # ------------------------------
 
     counter=0
     while counter < 100:
@@ -77,17 +87,19 @@ def plot_path(i):
                     enemy_robots[i].set_coordinates(x_pos, y_pos, theta)
         
         # Detecção da bola
-        ball.set_coordinates(frame["ball"]["x"], frame["ball"]["y"], 0)
+        ball.set_coordinates(frame["ball"]["x"], frame["ball"]["y"])
         
         # Log dos robôs
         print("Robot 0: ", robots[0].get_coordinates().X)
         print("Robot 1: ", robots[1].get_coordinates().X)
         print("Robot 2: ", robots[2].get_coordinates().X)
-        print("Robot 3: ", robots[3].get_coordinates().X)
-        print("Robot 4: ", robots[4].get_coordinates().X)
         print("----")
 
         counter=counter+1
+
+    # ------------------------------
+    #  INÍCIO E FIM DE PATH
+    # ------------------------------
 
     # Definição de origem e target do path
     origin = array([robots[0].get_coordinates().X,
@@ -95,10 +107,22 @@ def plot_path(i):
             
     target = array([ball.get_coordinates().X,
                     ball.get_coordinates().Y])
+    robots[0].target.set_coordinates(ball.get_coordinates().X, ball.get_coordinates().Y, 0)
+
+    # ------------------------------
+    #  DEFINIÇÃO DE OBSTÁCULOS
+    # ------------------------------
 
     vg_obstacles = []
 
-    obstacles = robots[1:] + enemy_robots
+    for robot_field in enemy_robots+robots[1:]:  # Para todos os robôs em campo tirando o 0, defini-los como obstáculo
+        obst = Obstacle()
+        obst.set_obst(robot_field.get_coordinates().X, 
+                      robot_field.get_coordinates().Y, 
+                      robot_field.get_coordinates().rotation)
+        robot0.map_obstacle.add_obstacle(obst)
+
+    obstacles = robot0.map_obstacle.get_map_obstacle()
 
     # Obstaculos
     for i in range(len(obstacles)):
@@ -109,13 +133,13 @@ def plot_path(i):
         vg_triangle = vg.convert_to_vgPoly(pts)
         vg_obstacles.append(vg_triangle)
     
-    vg.update_obstacle_map(vg_obstacles)
-    vg.set_origin(origin)
-    vg.set_target(target)
+    # ------------------------------
+    #  OBJETOS VISUAIS DO GRÁFICO
+    # ------------------------------
 
+    # Criação do path
+    vg.update_target_with_obstacles(robot0, field, [robots[0].target.get_coordinates().X], [robots[0].target.get_coordinates().Y], 0)
     path = vg.get_path()
-
-    #plot_path(robots[0], obstacles, origin, target, path)
 
     robot=robots[0]
 
@@ -174,6 +198,8 @@ def plot_path(i):
 
     # Plot do path
     ax.add_line(line_path)
+
+    robot0.map_obstacle.clear_map()
 
 ani = FuncAnimation(plt.gcf(), plot_path, interval=100)
 plt.show()
