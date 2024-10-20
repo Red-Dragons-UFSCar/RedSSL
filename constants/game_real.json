@@ -1,0 +1,13 @@
+{
+    "team":{
+        "color": "blue",
+        "right_side": true,
+        "id_goalkeeper": 3,
+        "id_defender": 5,
+        "id_attacker": 2
+    },
+    "game":{
+        "game_on_max_velocity": 1,
+        "game_stop_max_velocity": 0.5
+    }
+}

@@ -2,9 +2,9 @@
     "team":{
         "color": "blue",
         "right_side": false,
-        "id_goalkeeper": 3,
-        "id_defender": 5,
-        "id_attacker": 0
+        "id_goalkeeper": 0,
+        "id_defender": 1,
+        "id_attacker": 2
     },
     "game":{
         "game_on_max_velocity": 1.5,

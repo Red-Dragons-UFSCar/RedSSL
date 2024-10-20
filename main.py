@@ -28,9 +28,18 @@ class RobotController:
         # Lendo os valores de IP e Porta
         with open('constants/network.json', 'r') as file:
             network = json.load(file)
-        # Lendo as configurações de jogo
-        with open('constants/game.json', 'r') as file:
-            game = json.load(file)
+        # Lendo os valores de IP e Porta
+        with open('constants/mode_playing.json', 'r') as file:
+            mode_playing = json.load(file)
+        
+        if mode_playing['simulated_mode']:
+            # Lendo as configurações de jogo para simulação
+            with open('constants/game.json', 'r') as file:
+                game = json.load(file)
+        else:
+            # Lendo as configurações de jogo para vida real
+            with open('constants/game_real.json', 'r') as file:
+                game = json.load(file)
         
         # Inicializa a comunicação com a visão e o atuador
         self.visao = Vision(ip=network['vision']['ip'], port=network['vision']['port'], is_right_side=game['team']['right_side'])
