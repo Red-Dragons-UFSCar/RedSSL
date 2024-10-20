@@ -25,12 +25,15 @@ class RepeatTimer(threading.Timer):
 
 class RobotController:
     def __init__(self, is_right_side):
-        # Abrindo e lendo o arquivo JSON
+        # Lendo os valores de IP e Porta
         with open('constants/network.json', 'r') as file:
             network = json.load(file)
+        # Lendo as configurações de jogo
+        with open('constants/game.json', 'r') as file:
+            game = json.load(file)
         
         # Inicializa a comunicação com a visão e o atuador
-        self.visao = Vision(ip=network['vision']['ip'], port=network['vision']['port'], is_right_side=is_right_side)
+        self.visao = Vision(ip=network['vision']['ip'], port=network['vision']['port'], is_right_side=game['team']['right_side'])
         self.actuator = Actuator(ip=network['command']['ip'], team_port=network['command']['port'])
 
         # Inicializa o campo de jogo
