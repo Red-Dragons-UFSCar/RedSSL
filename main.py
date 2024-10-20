@@ -3,11 +3,9 @@ from communication.actuator import Actuator
 from entities.Robot import Robot
 from entities.Field import Field
 from entities.Coach import Coach
-from behavior.skills import go_to_point
-from behavior.plays import estrategia_basica, estrategia_penalti_defensivo, estrategia_penalti_ofensivo
-from behavior.tactics import *
 import time
 import threading
+import json
 
 CONTROL_FPS = 60  # FPS original para o controle de posição
 CAM_FPS = 7 * CONTROL_FPS  # FPS para processar os dados da visão
@@ -26,10 +24,14 @@ class RepeatTimer(threading.Timer):
 
 
 class RobotController:
-    def __init__(self, vision_ip, vision_port, actuator_port, is_right_side):
+    def __init__(self, is_right_side):
+        # Abrindo e lendo o arquivo JSON
+        with open('constants/network.json', 'r') as file:
+            network = json.load(file)
+        
         # Inicializa a comunicação com a visão e o atuador
-        self.visao = Vision(ip=vision_ip, port=vision_port, is_right_side=is_right_side)
-        self.actuator = Actuator(team_port=actuator_port)
+        self.visao = Vision(ip=network['vision']['ip'], port=network['vision']['port'], is_right_side=is_right_side)
+        self.actuator = Actuator(ip=network['command']['ip'], team_port=network['command']['port'])
 
         # Inicializa o campo de jogo
         self.field = Field()
@@ -146,16 +148,14 @@ class RobotController:
             self.robot2.map_obstacle.clear_map()
             
 
-            if (t2 - t1) < 1 / 60:
-                time.sleep(1 / 60 - (t2 - t1))
+            if (t2 - t1) < 1 / CONTROL_FPS:
+                time.sleep(1 / CONTROL_FPS - (t2 - t1))
                 print("Tempo de execução: ", (t2 - t1) * 1000)
             else:
                 print("[TIMEOUT] - Execução de controle excedida: ", (t2 - t1) * 1000)
 
 
 if __name__ == "__main__":
-    controller = RobotController(
-        vision_ip="224.5.23.2", vision_port=10020, actuator_port=10301, is_right_side=False
-    )
+    controller = RobotController(is_right_side=False)
     controller.start_vision_thread()
     controller.control_loop()
