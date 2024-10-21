@@ -32,7 +32,7 @@ def goleiro(robot0, field):
             # poupar bateria e motor (não sei se é tão relevante assim)
             skills.stay_on_center(
                 robot0, field
-            )  # manda pro centrofrom behavior.skills import follow_ball_y, pursue_ball
+            )  # manda pro centrogit from behavior.skills import follow_ball_y, pursue_ball
 
 
 def zagueiro(robot0, field):
