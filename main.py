@@ -24,7 +24,7 @@ class RepeatTimer(threading.Timer):
 
 
 class RobotController:
-    def __init__(self, is_right_side):
+    def __init__(self):
         # Lendo os valores de IP e Porta
         with open('constants/network.json', 'r') as file:
             network = json.load(file)
@@ -168,6 +168,6 @@ class RobotController:
 
 
 if __name__ == "__main__":
-    controller = RobotController(is_right_side=False)
+    controller = RobotController()
     controller.start_vision_thread()
     controller.control_loop()
