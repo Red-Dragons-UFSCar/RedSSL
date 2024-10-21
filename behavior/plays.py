@@ -76,4 +76,4 @@ def estrategia_desvantagem_1(robot_goalie, robot_zagueiro, robot_atacante, field
     Quando a bola estiver no ataque, o robô que era goleiro se torna zagueiro e o outro atacante.
     """
     
-    goleiro(robot_goalie, field)
+    atacante_campo_todo(robot_goalie, field)
