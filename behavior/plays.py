@@ -61,7 +61,7 @@ def estrategia_penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, 
         goleiro(robot_goleiro, field)
 
 
-def estrategia_desvantagem(robot_goalie, robot_zagueiro, robot_atacante, field):
+def estrategia_desvantagem_2(robot_goalie, robot_zagueiro, robot_atacante, field):
     """
     Quando a bola estiver na defesa, um robô se torna goleiro, o outro zagueiro.
     Quando a bola estiver no ataque, o robô que era goleiro se torna zagueiro e o outro atacante.
@@ -69,3 +69,11 @@ def estrategia_desvantagem(robot_goalie, robot_zagueiro, robot_atacante, field):
     
     goleiro(robot_goalie, field)
     atacante_campo_todo(robot_zagueiro, field)
+
+def estrategia_desvantagem_1(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Quando a bola estiver na defesa, um robô se torna goleiro, o outro zagueiro.
+    Quando a bola estiver no ataque, o robô que era goleiro se torna zagueiro e o outro atacante.
+    """
+    
+    goleiro(robot_goalie, field)

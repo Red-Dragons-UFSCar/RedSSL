@@ -4,7 +4,7 @@ from entities.Target import Target
 from path.visibilityGraph import VisibilityGraph
 import numpy as np
 import time
-from behavior.plays import estrategia_basica, estrategia_penalti_defensivo, estrategia_penalti_ofensivo, estrategia_desvantagem
+from behavior.plays import estrategia_basica, estrategia_penalti_defensivo, estrategia_penalti_ofensivo, estrategia_desvantagem_2, estrategia_desvantagem_1
 from behavior.plays import posicionar_robos
 
 
@@ -22,7 +22,7 @@ class Coach:
         self.tempo_de_cobranca = 10
         
         # Número de robôs da equipe em campo
-        self.quantidade_robos = 2
+        self.quantidade_robos = 1
 
     def verificar_bola_em_campo(self):
         """
@@ -108,9 +108,14 @@ class Coach:
                         else: 
                             self.penalty_start_time = None # "zerando" tempo de incio do penalti após a cobrança
                 
-                elif self.quantidade_robos < 3:
-                    print("Estratégia com desvantagem em ação")
-                    estrategia_desvantagem(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
+                elif self.quantidade_robos == 2:
+                    print("Estratégia com 1 robôs a menos em ação")
+                    estrategia_desvantagem_2(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
+
+                elif self.quantidade_robos == 1:
+                    print("Estratégia com 2 robôs a menos em ação")
+                    estrategia_desvantagem_1(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
+
                 
                 else:
                     print("Estrategia basica em ação")
