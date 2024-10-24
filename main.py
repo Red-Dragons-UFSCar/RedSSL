@@ -9,12 +9,11 @@ from behavior.plays import (
     estrategia_penalti_defensivo,
     estrategia_penalti_ofensivo,
 )
-from communication.referee_events import handle_referee_command
+from communication.referee import RefereeCommunication
 from behavior.tactics import *
 import time
 import threading
-import socket
-from communication.proto.ssl_gc_referee_message_pb2 import Referee
+
 
 CONTROL_FPS = 60  # FPS original para o controle de posição
 CAM_FPS = 7 * CONTROL_FPS  # FPS para processar os dados da visão
@@ -40,11 +39,12 @@ class RobotController:
 
         # Inicializa o campo de jogo
         self.field = Field()
+        self.referee = RefereeCommunication(field=self.field)
 
         # Inicializa o coach
         self.coach = Coach(self.field)
 
-        # Cria e adiciona um robô ao campo
+        # Cria e adiciona robôs ao campo
         self.robot0 = Robot(robot_id=0, actuator=self.actuator)
         self.field.add_blue_robot(self.robot0)
 
@@ -139,17 +139,19 @@ class RobotController:
             t1 = time.time()
 
             # Recebe a mensagem do árbitro
-            self.get_referee_message()
-            handle_referee_command(self.referee_state)
+            self.referee.get_referee_message()
+            # Trata o comando do árbitro
 
-            Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
+            self.referee.handle_referee_command()
+
+            # Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
             self.send_velocities()
 
             t2 = time.time()
 
-            self.robot0.map_obstacle.clear_map()
-            self.robot1.map_obstacle.clear_map()
-            self.robot2.map_obstacle.clear_map()
+            # self.robot0.map_obstacle.clear_map()
+            # self.robot1.map_obstacle.clear_map()
+            # self.robot2.map_obstacle.clear_map()
 
             if (t2 - t1) < 1 / 60:
                 time.sleep(1 / 60 - (t2 - t1))
