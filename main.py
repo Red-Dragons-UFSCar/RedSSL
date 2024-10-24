@@ -4,10 +4,16 @@ from entities.Robot import Robot
 from entities.Field import Field
 from entities.Coach import Coach
 from behavior.skills import go_to_point
-from behavior.plays import estrategia_basica, estrategia_penalti_defensivo, estrategia_penalti_ofensivo
+from behavior.plays import (
+    estrategia_basica,
+    estrategia_penalti_defensivo,
+    estrategia_penalti_ofensivo,
+)
+from communication.referee import RefereeCommunication
 from behavior.tactics import *
 import time
 import threading
+
 
 CONTROL_FPS = 60  # FPS original para o controle de posição
 CAM_FPS = 7 * CONTROL_FPS  # FPS para processar os dados da visão
@@ -33,11 +39,12 @@ class RobotController:
 
         # Inicializa o campo de jogo
         self.field = Field()
+        self.referee = RefereeCommunication(field=self.field)
 
         # Inicializa o coach
         self.coach = Coach(self.field)
 
-        # Cria e adiciona um robô ao campo
+        # Cria e adiciona robôs ao campo
         self.robot0 = Robot(robot_id=0, actuator=self.actuator)
         self.field.add_blue_robot(self.robot0)
 
@@ -53,12 +60,6 @@ class RobotController:
         self.field.add_yellow_robot(self.enemy_robot0)
         self.field.add_yellow_robot(self.enemy_robot1)
         self.field.add_yellow_robot(self.enemy_robot2)
-
-        # Contador para controle do loop
-        self.cont = 0
-
-        #flag para habilitar penalti: 
-        self.penalty_start_time = None
 
     def update_coordinates(self, frame):
         # Atualiza as posições dos robôs azuis no campo com base nas informações da visão
@@ -88,7 +89,7 @@ class RobotController:
 
     def send_velocities(self):
         # Envio de velocidades no sistema global
-        '''
+        """
         # Envia as velocidades armazenadas para o atuador
         self.actuator.send_globalVelocity_message(
             self.robot0, self.robot0.vx, self.robot0.vy, self.robot0.w
@@ -99,7 +100,7 @@ class RobotController:
         self.actuator.send_globalVelocity_message(
             self.robot2, self.robot2.vx, self.robot2.vy, self.robot2.w
         )
-        '''
+        """
         # Envio de velocidades do sistema global diretamente para as rodas
         self.actuator.send_wheel_from_global(
             self.robot0, self.robot0.vx, self.robot0.vy, self.robot0.w
@@ -110,7 +111,6 @@ class RobotController:
         self.actuator.send_wheel_from_global(
             self.robot2, self.robot2.vx, self.robot2.vy, self.robot2.w
         )
-        #'''
 
     def get_vision_frame(self):
         """
@@ -137,14 +137,21 @@ class RobotController:
         self.field.ofensive_foul = False
         while True:
             t1 = time.time()
-            Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
+
+            # Recebe a mensagem do árbitro
+            self.referee.get_referee_message()
+            # Trata o comando do árbitro
+
+            self.referee.handle_referee_command()
+
+            # Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
             self.send_velocities()
+
             t2 = time.time()
 
-            self.robot0.map_obstacle.clear_map()
-            self.robot1.map_obstacle.clear_map()
-            self.robot2.map_obstacle.clear_map()
-            
+            # self.robot0.map_obstacle.clear_map()
+            # self.robot1.map_obstacle.clear_map()
+            # self.robot2.map_obstacle.clear_map()
 
             if (t2 - t1) < 1 / 60:
                 time.sleep(1 / 60 - (t2 - t1))
@@ -155,7 +162,10 @@ class RobotController:
 
 if __name__ == "__main__":
     controller = RobotController(
-        vision_ip="224.5.23.2", vision_port=10020, actuator_port=10301, is_right_side=False
+        vision_ip="224.5.23.2",
+        vision_port=10020,
+        actuator_port=10301,
+        is_right_side=False,
     )
     controller.start_vision_thread()
     controller.control_loop()
