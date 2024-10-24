@@ -18,8 +18,6 @@ from communication.proto.ssl_gc_referee_message_pb2 import Referee
 
 CONTROL_FPS = 60  # FPS original para o controle de posição
 CAM_FPS = 7 * CONTROL_FPS  # FPS para processar os dados da visão
-REFEREE_IP = "224.5.23.1"  # IP para receber as mensagens do árbitro
-REFEREE_PORT = 10003  # Porta usada pelo árbitro
 
 
 class RepeatTimer(threading.Timer):
@@ -62,20 +60,6 @@ class RobotController:
         self.field.add_yellow_robot(self.enemy_robot0)
         self.field.add_yellow_robot(self.enemy_robot1)
         self.field.add_yellow_robot(self.enemy_robot2)
-
-        # Inicializa o socket para receber mensagens do árbitro
-        self.referee_socket = socket.socket(
-            socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP
-        )
-        self.referee_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.referee_socket.bind((REFEREE_IP, REFEREE_PORT))
-        mreq = socket.inet_aton(REFEREE_IP) + socket.inet_aton("0.0.0.0")
-        self.referee_socket.setsockopt(
-            socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq
-        )
-
-        # Variável para armazenar o estado do árbitro
-        self.referee_state = None
 
     def update_coordinates(self, frame):
         # Atualiza as posições dos robôs azuis no campo com base nas informações da visão
@@ -145,16 +129,6 @@ class RobotController:
         """
         self.vision_thread = RepeatTimer((1 / CAM_FPS), self.get_vision_frame)
         self.vision_thread.start()
-
-    def get_referee_message(self):
-        """
-        Descrição:
-            Função para receber e decodificar mensagens do árbitro
-        """
-        data, _ = self.referee_socket.recvfrom(1024)
-        referee_message = Referee()
-        referee_message.ParseFromString(data)
-        self.referee_state = referee_message  # Armazena o estado do árbitro
 
     def control_loop(self):
         self.field.game_stopped = False
