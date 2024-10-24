@@ -105,6 +105,19 @@ class RobotController:
 
     def send_velocities(self):
         # Envio de velocidades no sistema global
+        """
+        # Envia as velocidades armazenadas para o atuador
+        self.actuator.send_globalVelocity_message(
+            self.robot0, self.robot0.vx, self.robot0.vy, self.robot0.w
+        )
+        self.actuator.send_globalVelocity_message(
+            self.robot1, self.robot1.vx, self.robot1.vy, self.robot1.w
+        )
+        self.actuator.send_globalVelocity_message(
+            self.robot2, self.robot2.vx, self.robot2.vy, self.robot2.w
+        )
+        """
+        # Envio de velocidades do sistema global diretamente para as rodas
         self.actuator.send_wheel_from_global(
             self.robot0, self.robot0.vx, self.robot0.vy, self.robot0.w
         )
@@ -144,6 +157,10 @@ class RobotController:
         self.referee_state = referee_message  # Armazena o estado do árbitro
 
     def control_loop(self):
+        self.field.game_stopped = False
+        self.field.game_on = True
+        self.field.defending_foul = False
+        self.field.ofensive_foul = False
         while True:
             t1 = time.time()
 
@@ -160,10 +177,11 @@ class RobotController:
             self.robot1.map_obstacle.clear_map()
             self.robot2.map_obstacle.clear_map()
 
-            if (t2 - t1) < 1 / CONTROL_FPS:
-                time.sleep(1 / CONTROL_FPS - (t2 - t1))
-            # else:
-            # print("[TIMEOUT] - Execução de controle excedida: ", (t2 - t1) * 1000)
+            if (t2 - t1) < 1 / 60:
+                time.sleep(1 / 60 - (t2 - t1))
+                print("Tempo de execução: ", (t2 - t1) * 1000)
+            else:
+                print("[TIMEOUT] - Execução de controle excedida: ", (t2 - t1) * 1000)
 
 
 if __name__ == "__main__":
