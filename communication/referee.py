@@ -25,16 +25,22 @@ class RefereeCommunication:
         referee_socket.bind((self.REFEREE_IP, self.REFEREE_PORT))
         mreq = socket.inet_aton(self.REFEREE_IP) + socket.inet_aton("0.0.0.0")
         referee_socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+        referee_socket.setblocking(False)
         return referee_socket
 
     def get_referee_message(self):
         """
-        Recebe e decodifica as mensagens enviadas pelo árbitro.
+        Recebe e decodifica as mensagens enviadas pelo árbitro, não bloqueante.
         """
-        data, _ = self.referee_socket.recvfrom(1024)
-        referee_message = Referee()
-        referee_message.ParseFromString(data)
-        self.referee_state = referee_message  # Armazena o estado do árbitro
+        try:
+            data, _ = self.referee_socket.recvfrom(1024)
+            referee_message = Referee()
+            referee_message.ParseFromString(data)
+            self.referee_state = referee_message  # Armazena o estado do árbitro
+            return self.referee_state
+        except BlockingIOError:
+            # Retorna None se não houver dados para evitar a exceção de bloqueio
+            return None
 
     def handle_referee_command(self):
         if self.referee_state:

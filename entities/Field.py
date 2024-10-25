@@ -82,17 +82,15 @@ class Field:
         """
         Processa e imprime os eventos relevantes do jogo.
         """
-        if command == Referee.Command.HALT:
-            print("HALT")
-
-        elif command == Referee.Command.STOP:
-            print("STOP")
-
-        elif command == Referee.Command.NORMAL_START:
-            print("NORMAL START")
-
-        elif command == Referee.Command.FORCE_START:
-            print("FORCE START")
+        if (
+            command == Referee.Command.NORMAL_START
+            or command == Referee.Command.FORCE_START
+        ):
+            self.game_on = True
+            self.game_stopped = False
+        elif command == Referee.Command.STOP or command == Referee.Command.HALT:
+            self.game_on = False
+            self.game_stopped = True
 
         elif command == Referee.Command.PREPARE_KICKOFF_YELLOW:
             print("KICKOFF YELLOW")

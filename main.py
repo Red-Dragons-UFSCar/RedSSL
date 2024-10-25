@@ -131,10 +131,6 @@ class RobotController:
         self.vision_thread.start()
 
     def control_loop(self):
-        self.field.game_stopped = False
-        self.field.game_on = True
-        self.field.defending_foul = False
-        self.field.ofensive_foul = False
         while True:
             t1 = time.time()
 
@@ -144,14 +140,14 @@ class RobotController:
 
             self.referee.handle_referee_command()
 
-            # Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
+            Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
             self.send_velocities()
 
             t2 = time.time()
 
-            # self.robot0.map_obstacle.clear_map()
-            # self.robot1.map_obstacle.clear_map()
-            # self.robot2.map_obstacle.clear_map()
+            self.robot0.map_obstacle.clear_map()
+            self.robot1.map_obstacle.clear_map()
+            self.robot2.map_obstacle.clear_map()
 
             if (t2 - t1) < 1 / 60:
                 time.sleep(1 / 60 - (t2 - t1))
