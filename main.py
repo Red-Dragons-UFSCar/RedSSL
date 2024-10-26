@@ -19,6 +19,7 @@ import json
 CONTROL_FPS = 60  # FPS original para o controle de posição
 CAM_FPS = 7 * CONTROL_FPS  # FPS para processar os dados da visão
 
+REFEREE_ON = False  # Habilita a comunicação com o Referee
 
 class RepeatTimer(threading.Timer):
     """
@@ -56,7 +57,7 @@ class RobotController:
 
         # Inicializa o campo de jogo
         self.field = Field()
-        self.referee = RefereeCommunication(field=self.field)
+        self.referee = RefereeCommunication(field=self.field, ip=network['referee']['ip'], port=network['vision']['port'])
 
         # Inicializa o coach
         self.coach = Coach(self.field)
@@ -151,11 +152,14 @@ class RobotController:
         while True:
             t1 = time.time()
 
-            # Recebe a mensagem do árbitro
-            self.referee.get_referee_message()
-            # Trata o comando do árbitro
-
-            self.referee.handle_referee_command()
+            if REFEREE_ON:
+                # Recebe a mensagem do árbitro
+                self.referee.get_referee_message()
+                # Trata o comando do árbitro
+                self.referee.handle_referee_command()
+            else:
+                self.field.game_on = True
+                self.field.game_stopped = False
 
             Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
             self.send_velocities()
