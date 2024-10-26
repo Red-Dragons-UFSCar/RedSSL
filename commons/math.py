@@ -98,3 +98,39 @@ def convert_coordinates(robots_blue, robots_yellow, balls, length, width, is_rig
         if balls:
             balls[0].x = (balls[0].x + correction_position_x) / 10
             balls[0].y = (balls[0].y + correction_position_y) / 10
+
+def dot_product(v1, v2):
+    """
+    Descrição:
+            Calcula o produto escalar entre dois vetores
+    Entradas:
+            v1:     Vetor numpy (1x2) com coordenadas (x,y) do vetor v1 
+            v2:     Vetor numpy (1x2) com coordenadas (x,y) do vetor v2
+    Saídas:
+            v1*v2:  Vetor numpy (1x2) com o produto escalar v1*v2
+    """
+    return v1[0]*v2[0] + v1[1]*v2[1]
+
+def ortogonal_projection(p_origin, p_line, p_to_project):
+    """
+    Descrição:
+            Calcula a projeção do vetor u = (p_to_project - p_origin) na reta formada
+            pelo vetor v = (p_line - p_origin). A sua projeção final é dada pela
+            Equação proj = (u*v)/(v*v) . v, sendo * o produto escalar
+    Entradas:
+            p_origin:           Vetor numpy (1x2) com coordenadas (x,y) do ponto de origem 
+            p_line:             Vetor numpy (1x2) com coordenadas (x,y) do ponto formador da reta
+            p_to_project:       Vetor numpy (1x2) com coordenadas (x,y) do ponto a ser projetado
+    Saídas:
+            p_proj:             Vetor numpy (1x2) com coordenadas (x,y) do ponto projetado
+            t:                  Fator de projeção 
+    """
+    v = p_line - p_origin
+    u  = p_to_project - p_origin
+
+    t = dot_product(u, v)/dot_product(v, v) 
+    p = t * v
+
+    p_proj = p_origin + p
+
+    return p_proj, t
