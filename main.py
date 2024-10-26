@@ -13,6 +13,7 @@ from communication.referee import RefereeCommunication
 from behavior.tactics import *
 import time
 import threading
+import json
 
 
 CONTROL_FPS = 60  # FPS original para o controle de posição
@@ -32,10 +33,26 @@ class RepeatTimer(threading.Timer):
 
 
 class RobotController:
-    def __init__(self, vision_ip, vision_port, actuator_port, is_right_side):
+    def __init__(self):
+        # Lendo os valores de IP e Porta
+        with open('constants/network.json', 'r') as file:
+            network = json.load(file)
+        # Lendo os valores de IP e Porta
+        with open('constants/mode_playing.json', 'r') as file:
+            mode_playing = json.load(file)
+        
+        if mode_playing['simulated_mode']:
+            # Lendo as configurações de jogo para simulação
+            with open('constants/game.json', 'r') as file:
+                game = json.load(file)
+        else:
+            # Lendo as configurações de jogo para vida real
+            with open('constants/game_real.json', 'r') as file:
+                game = json.load(file)
+        
         # Inicializa a comunicação com a visão e o atuador
-        self.visao = Vision(ip=vision_ip, port=vision_port, is_right_side=is_right_side)
-        self.actuator = Actuator(team_port=actuator_port)
+        self.visao = Vision(ip=network['vision']['ip'], port=network['vision']['port'], is_right_side=game['team']['right_side'])
+        self.actuator = Actuator(ip=network['command']['ip'], team_port=network['command']['port'])
 
         # Inicializa o campo de jogo
         self.field = Field()
@@ -149,19 +166,14 @@ class RobotController:
             self.robot1.map_obstacle.clear_map()
             self.robot2.map_obstacle.clear_map()
 
-            if (t2 - t1) < 1 / 60:
-                time.sleep(1 / 60 - (t2 - t1))
+            if (t2 - t1) < 1 / CONTROL_FPS:
+                time.sleep(1 / CONTROL_FPS - (t2 - t1))
                 print("Tempo de execução: ", (t2 - t1) * 1000)
             else:
                 print("[TIMEOUT] - Execução de controle excedida: ", (t2 - t1) * 1000)
 
 
 if __name__ == "__main__":
-    controller = RobotController(
-        vision_ip="224.5.23.2",
-        vision_port=10020,
-        actuator_port=10301,
-        is_right_side=False,
-    )
+    controller = RobotController()
     controller.start_vision_thread()
     controller.control_loop()
