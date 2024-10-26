@@ -28,7 +28,7 @@ class Coach:
         self.penalty_start_time = None
         self.penalty_mode = None
         self.tempo_de_cobranca = 10
-        self.quantidade_robos = 1  # Número de robôs da equipe em campo
+        self.quantidade_robos = 3  # Número de robôs da equipe em campo
 
 
     def verificar_bola_em_campo(self):
