@@ -66,3 +66,16 @@ def atacante(robot0, field):
         follow_ball_y(robot0, field, 300)
     else:
         shoot(robot0, field)
+
+
+def atacante_campo_todo(robot0, field):
+    ball_position = field.ball.get_coordinates()
+
+    for robot_field in field.yellow_robots:
+        obst = Obstacle()
+        obst.set_obst(robot_field.get_coordinates().X, 
+                      robot_field.get_coordinates().Y, 
+                      robot_field.get_coordinates().rotation)
+        robot0.map_obstacle.add_obstacle(obst)
+    
+    shoot(robot0, field)

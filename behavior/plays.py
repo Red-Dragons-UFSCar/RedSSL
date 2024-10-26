@@ -1,4 +1,4 @@
-from behavior.tactics import goleiro, zagueiro, atacante
+from behavior.tactics import goleiro, zagueiro, atacante, atacante_campo_todo
 from behavior.skills import go_to_point
 import behavior.skills as skills
 
@@ -31,8 +31,8 @@ def estrategia_penalti_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, f
 
     if enable == 0 : #posição inicial, antes da cobrança 
         """
-        Posciona zagueiro e goleiro em posições fixas no campo de defesa e
-        o atacante para cobrar o penalti, em seguida chamadno a função de atacante para cobrança.
+        Posiciona zagueiro e goleiro em posições fixas no campo de defesa e
+        o atacante para cobrar o pênalti, em seguida chamando a função de atacante para cobrança.
         """
         go_to_point(robot_goleiro, 30, 150, field, 0)
 
@@ -47,8 +47,8 @@ def estrategia_penalti_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, f
 
 def estrategia_penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, field, enable):
     """
-    Posciona zagueiro e goleiro em posições fixas no campo de defesa e
-    o atacante para cobrar o penalti, em seguida chamadno a função de atacante para cobrança.
+    Posiciona zagueiro e goleiro em posições fixas no campo de defesa e
+    o atacante para cobrar o pênalti, em seguida chamando a função de atacante para cobrança.
     """
     if enable == 0:
         #posicionamento inicial:
@@ -61,6 +61,23 @@ def estrategia_penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, 
         #chamando a função de goleiro para defender o penalti
         goleiro(robot_goleiro, field)
 
+def estrategia_desvantagem_2(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Quando a bola estiver na defesa, um robô se torna goleiro, o outro zagueiro.
+    Quando a bola estiver no ataque, o robô que era goleiro se torna zagueiro e o outro atacante.
+    """
+    
+    goleiro(robot_goalie, field)
+    atacante_campo_todo(robot_zagueiro, field)
+    
+
+def estrategia_desvantagem_1(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Quando a bola estiver na defesa, um robô se torna goleiro, o outro zagueiro.
+    Quando a bola estiver no ataque, o robô que era goleiro se torna zagueiro e o outro atacante.
+    """
+    
+    atacante_campo_todo(robot_goalie, field)
 
 def basic_stop_behaviour_defensive(robot_goleiro, robot_zagueiro, robot_atacante, field):
     """
@@ -121,7 +138,3 @@ def basic_stop_behaviour_ofensive(robot_goleiro, robot_zagueiro, robot_atacante,
         robot_zagueiro.target.set_target(robot_zagueiro, (x_target_zagueiro, y_target_zagueiro), field, 0)
         # Vai até o ponto alvo desviando da bola
         skills.idle_behavior_avoid_ball_stop_game(robot_zagueiro, field)
-
-    
-
-
