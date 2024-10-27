@@ -20,17 +20,17 @@ def goleiro(robot0, field):
     # Verifica se a bola está pŕoxima à área
     if (ball_position.X <= Goalie_Chase_line) and (90 < ball_position.Y < 210):
         # A bola está perto da area
-        basic_tackle(robot0, field)  # vai atras
+        skills.basic_tackle(robot0, field)  # vai atras
 
     else:
         if ball_position.X <= Goaie_Y_Enable:
             # A bola não está na área, mas está perto
-            follow_ball_y_elipse(robot0, field)  # foca em y
+            skills.follow_ball_y_elipse(robot0, field)  # foca em y
 
         else:
             # a bola não está perto o suficiente para o goleiro precisar se preocupar, então manda ele pro centor do gol
             # poupar bateria e motor (não sei se é tão relevante assim)
-            stay_on_center(
+            skills.stay_on_center(
                 robot0, field
             )  # manda pro centrofrom behavior.skills import follow_ball_y, pursue_ball
 
@@ -65,4 +65,4 @@ def atacante(robot0, field):
     elif ball_position.X < 225:
         skills.follow_ball_y(robot0, field, 300)
     else:
-        shoot(robot0, field)
+        skills.shoot(robot0, field)

@@ -6,9 +6,9 @@ def estrategia_basica(robot_goalie, robot_zagueiro, robot_atacante, field):
     Função que combina as estratégias do goleiro e do zagueiro.
     Chama as funções goalie e zagueiro para controlar os dois robôs.
     """
-    goleiro(robot_goalie, field)
-    zagueiro(robot_zagueiro, field)
-    atacante(robot_atacante, field)
+    tactics.goleiro(robot_goalie, field)
+    tactics.zagueiro(robot_zagueiro, field)
+    tactics.atacante(robot_atacante, field)
 
 
 def posicionar_robos(robot_goalie, robot_zagueiro, robot_atacante, field):
@@ -40,7 +40,7 @@ def estrategia_penalti_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, f
 
     else :
         #chamando a função de atacante para cobrança do penalti.
-        atacante(robot_atacante, field)
+        tactics.atacante(robot_atacante, field)
 
 
 def estrategia_penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, field, enable):
