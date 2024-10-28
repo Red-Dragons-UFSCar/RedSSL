@@ -80,6 +80,9 @@ class RobotController:
         self.field.add_yellow_robot(self.enemy_robot2)
 
     def update_coordinates(self, frame):
+        if frame["frame_number"] == 0:
+            return
+
         # Atualiza as posições dos robôs azuis no campo com base nas informações da visão
         for detection in frame["robots_blue"]:
             self.field.update_robot_position(
@@ -101,7 +104,7 @@ class RobotController:
             )
 
         # Atualiza a posição da bola com base nas informações da visão
-        if "ball" in frame:
+        if frame["ball"]:
             ball_detection = frame["ball"]
             self.field.update_ball_position(ball_detection["x"], ball_detection["y"])
 
