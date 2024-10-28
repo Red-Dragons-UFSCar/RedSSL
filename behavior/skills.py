@@ -170,7 +170,7 @@ def clear_ball(robot0, field, ball_position, robot_position, angle_to_ball):
     field.zagueiro_current_state = current_state
 
     # Move o robô para o ponto alvo
-    go_to_point(robot0, target_x, target_y, field, target_theta)
+    go_to_point(robot0, target_x, target_y, field, target_theta, threshold = 3)
 
 
 def attack_ball(robot0, field, ball_position, robot_position, target_theta):
