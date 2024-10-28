@@ -28,7 +28,7 @@ class Field:
         self.game_on = False
         self.game_stopped = True
         self.defending_foul = True
-        self.ofensive_foul = False
+        self.offensive_foul = False
 
     def add_blue_robot(self, robot):
         self.blue_robots.append(robot)

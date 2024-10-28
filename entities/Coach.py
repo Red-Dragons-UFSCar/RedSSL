@@ -1,20 +1,9 @@
-from behavior.skills import *
+from behavior import plays
 from entities.Robot import Robot
 from entities.Target import Target
 from path.visibilityGraph import VisibilityGraph
 import numpy as np
 import time
-from behavior.plays import (
-    estrategia_basica,
-    estrategia_penalti_defensivo,
-    estrategia_penalti_ofensivo,
-    basic_stop_behaviour_defensive,
-    basic_stop_behaviour_ofensive,
-    estrategia_desvantagem_1,
-    estrategia_desvantagem_2
-)
-from behavior.plays import posicionar_robos
-
 
 class Coach:
     def __init__(self, field):
@@ -59,11 +48,11 @@ class Coach:
         if referee_penalty == 0:
             return False
         else:
-            if referee_penalty == 2: # pênalti ofensivo
-                self.penalty_mode = 2 #modo de penalty ofensivo
+            if referee_penalty == 2: # Pênalti ofensivo
+                self.penalty_mode = 2 # Modo de penalty ofensivo
             else: 
-                if referee_penalty == 1: # pênalti defensivo
-                    self.penalty_mode = 1 #modo de penalty defensivo
+                if referee_penalty == 1: # Pênalti defensivo
+                    self.penalty_mode = 1 # Modo de penalty defensivo
             return True
         
     def expulsao(self, referee_red_card = 0):
@@ -98,11 +87,11 @@ class Coach:
         if not self.verificar_bola_em_campo():
             # Se o jogo estiver parado, move os robôs para pontos específicos
             # print("Bola Fora. Posicionando robôs.")
-            posicionar_robos(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
+            plays.posicionar_robos(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
         else:
             # Se o jogo estiver em andamento, usa a estratégia básica
             if self.game_on:
-                if self.situacao_de_penalti(0):   # Passando os valores manualmente para testes. 0 não há pênalti, 1, pênalti defensivo, 2 ofensivo.
+                if self.situacao_de_penalti(0): # Passando os valores manualmente para testes. 0 não há pênalti, 1, pênalti defensivo, 2 ofensivo.
                     if self.penalty_start_time is None:
                         self.penalty_start_time = time.time() # Assume tempo atual
             
@@ -114,8 +103,8 @@ class Coach:
                         referee_whistle = 1
 
                     if self.penalty_mode == 1:
-                        # print ("estratégia de penalti defensivo em ação")
-                        estrategia_penalti_defensivo(
+                        # print ("estratégia de pênalti defensivo em ação")
+                        plays.estrategia_penalti_defensivo(
                             robot_goleiro,
                             robot_zagueiro,
                             robot_atacante,
@@ -124,33 +113,33 @@ class Coach:
                         )
                     else:
                         if self.penalty_mode == 2: 
-                            print ("estratégia de penalti ofensivo em ação")
-                            estrategia_penalti_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, self.field, referee_whistle)
+                            print ("estratégia de pênalti ofensivo em ação")
+                            plays.estrategia_penalti_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, self.field, referee_whistle)
                         else: 
-                            self.penalty_start_time = None # "zerando" tempo de incio do penalti após a cobrança
+                            self.penalty_start_time = None # "Zerando" tempo de incio do pênalti após a cobrança
                 
                 elif self.quantidade_robos == 2:
                     print("Estratégia com 1 robôs a menos em ação")
-                    estrategia_desvantagem_2(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
+                    plays.estrategia_desvantagem_2(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
 
                 elif self.quantidade_robos == 1:
                     print("Estratégia com 2 robôs a menos em ação")
-                    estrategia_desvantagem_1(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
+                    plays.estrategia_desvantagem_1(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
 
                 else:
                     print("Estrategia basica em ação")
-                    estrategia_basica(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
+                    plays.estrategia_basica(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
                     
             elif self.field.game_stopped and self.field.defending_foul:
                 # Estratégia de jogo parado em stop defensivo
                 # Faz a estratégia normal e desvia da bola
-                basic_stop_behaviour_defensive(
+                plays.basic_stop_behavior_defensive(
                     robot_goleiro, robot_zagueiro, robot_atacante, self.field
                 )
 
-            elif self.field.game_stopped and self.field.ofensive_foul:
+            elif self.field.game_stopped and self.field.offensive_foul:
                 # Estratégia de jogo parado em stop ofensivo
                 # Calcula o angulo desejado da estrategia normal, mas para perto da bola
-                basic_stop_behaviour_ofensive(
+                plays.basic_stop_behavior_offensive(
                     robot_goleiro, robot_zagueiro, robot_atacante, self.field
                 )
