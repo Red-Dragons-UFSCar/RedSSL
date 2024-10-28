@@ -175,7 +175,7 @@ class RobotController:
 
             if (t2 - t1) < 1 / CONTROL_FPS:
                 time.sleep(1 / CONTROL_FPS - (t2 - t1))
-                print("Tempo de execução: ", (t2 - t1) * 1000)
+                #print("Tempo de execução: ", (t2 - t1) * 1000)
             else:
                 print("[TIMEOUT] - Execução de controle excedida: ", (t2 - t1) * 1000)
 
