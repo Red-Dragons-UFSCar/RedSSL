@@ -53,7 +53,7 @@ def zagueiro(robot0, field):
 def atacante(robot0, field):
     ball_position = field.ball.get_coordinates()
 
-    for robot_field in field.yellow_robots:
+    for robot_field in field.enemy_robots:
         obst = Obstacle()
         obst.set_obst(robot_field.get_coordinates().X, 
                       robot_field.get_coordinates().Y, 

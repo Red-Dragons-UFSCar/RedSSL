@@ -76,6 +76,7 @@ class RobotController:
             self.field.add_blue_robot(self.robot0)
             self.field.add_blue_robot(self.robot1)
             self.field.add_blue_robot(self.robot2)
+            self.field.team_robots = [self.robot0, self.robot1, self.robot2]
 
             # Cria e adiciona robôs inimigos
             self.enemy_robot0 = Robot(robot_id=0, actuator=None)
@@ -84,7 +85,7 @@ class RobotController:
             self.field.add_yellow_robot(self.enemy_robot0)
             self.field.add_yellow_robot(self.enemy_robot1)
             self.field.add_yellow_robot(self.enemy_robot2)
-        
+            self.field.enemy_robots = [self.enemy_robot0, self.enemy_robot1, self.enemy_robot2]
         elif self.team_color == "yellow":
             self.robot0 = Robot(robot_id=0, actuator=self.actuator)
             self.robot1 = Robot(robot_id=1, actuator=self.actuator)
@@ -92,7 +93,7 @@ class RobotController:
             self.field.add_yellow_robot(self.robot0)
             self.field.add_yellow_robot(self.robot1)
             self.field.add_yellow_robot(self.robot2)
-
+            self.field.team_robots = [self.robot0, self.robot1, self.robot2]
             # Cria e adiciona robôs inimigos
             self.enemy_robot0 = Robot(robot_id=0, actuator=None)
             self.enemy_robot1 = Robot(robot_id=1, actuator=None)
@@ -100,6 +101,7 @@ class RobotController:
             self.field.add_blue_robot(self.enemy_robot0)
             self.field.add_blue_robot(self.enemy_robot1)
             self.field.add_blue_robot(self.enemy_robot2)
+            self.field.enemy_robots = [self.enemy_robot0, self.enemy_robot1, self.enemy_robot2]
 
     def update_coordinates(self, frame):
         # Atualiza as posições dos robôs do time com base nas informações da visão

@@ -7,6 +7,8 @@ class Field:
     def __init__(self):
         self.blue_robots = []
         self.yellow_robots = []
+        self.team_robots = []
+        self.enemy_robots = []
         self.obstacles = []
         self.ball = Ball()
         self.width = 900  # Exemplo de largura do campo em cm
