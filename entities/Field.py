@@ -1,6 +1,7 @@
 from entities.Ball import Ball
 from entities.Robot import Robot
 from communication.proto.ssl_gc_referee_message_pb2 import Referee
+from entities import Field, Coach
 
 
 class Field:
@@ -90,15 +91,34 @@ class Field:
         ):
             self.game_on = True
             self.game_stopped = False
+            Coach.kickoff_attacking = False
+            Coach.kickoff_defensive = False
         elif command == Referee.Command.STOP or command == Referee.Command.HALT:
             self.game_on = False
             self.game_stopped = True
 
         elif command == Referee.Command.PREPARE_KICKOFF_YELLOW:
             print("KICKOFF YELLOW")
+            if Field.team_color == "yellow":
+                #flag do coach de kickoff ofensivo
+                Coach.kickoff_attacking = True
+                Coach.kickoff_defensive = False
+
+            else:
+                #flag do coach de kickoff defensivo
+                Coach.kickoff_attacking = False
+                Coach.kickoff_defensive = True
 
         elif command == Referee.Command.PREPARE_KICKOFF_BLUE:
             print("KICKOFF BLUE")
+            if Field.team_color == "blue":
+                #flag do coach de kickoff ofensivo
+                Coach.kickoff_attacking = True
+                Coach.kickoff_defensive = False
+            else:
+                #flag do coach de kickoff defensivo
+                Coach.kickoff_attacking = False
+                Coach.kickoff_defending = True
 
         elif command == Referee.Command.PREPARE_PENALTY_YELLOW:
             print("PENALTY YELLOW")

@@ -19,6 +19,10 @@ class Coach:
         self.tempo_de_cobranca = 10
         self.quantidade_robos = 3  # Número de robôs da equipe em campo
 
+        #flags de kickoff
+        self.kickoff_attacking = False
+        self.kickoff_defensive = False
+
 
     def verificar_bola_em_campo(self):
         """
@@ -143,3 +147,11 @@ class Coach:
                 plays.basic_stop_behavior_offensive(
                     robot_goleiro, robot_zagueiro, robot_atacante, self.field
                 )
+            
+            elif self.kickoff_attacking:
+                # Estratégia de kickoff ofensivo
+                plays.offensive_kickoff(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
+
+            elif self.kickoff_defensive:
+                # Estratégia de kickoff defensivo
+                plays.defensive_kickoff(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
