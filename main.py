@@ -104,7 +104,10 @@ class RobotController:
             self.field.enemy_robots = [self.enemy_robot0, self.enemy_robot1, self.enemy_robot2]
 
     def update_coordinates(self, frame):
-        # Atualiza as posições dos robôs do time com base nas informações da visão
+        if frame["frame_number"] == 0:
+            return
+
+        # Atualiza as posições dos robôs azuis no campo com base nas informações da visão
         for detection in frame[f"robots_{self.team_color}"]:
             self.field.update_robot_position(
                 detection["robot_id"],
@@ -126,7 +129,7 @@ class RobotController:
             )
 
         # Atualiza a posição da bola com base nas informações da visão
-        if "ball" in frame:
+        if frame["ball"]:
             ball_detection = frame["ball"]
             self.field.update_ball_position(ball_detection["x"], ball_detection["y"])
 
@@ -197,7 +200,7 @@ class RobotController:
 
             if (t2 - t1) < 1 / CONTROL_FPS:
                 time.sleep(1 / CONTROL_FPS - (t2 - t1))
-                print("Tempo de execução: ", (t2 - t1) * 1000)
+                #print("Tempo de execução: ", (t2 - t1) * 1000)
             else:
                 print("[TIMEOUT] - Execução de controle excedida: ", (t2 - t1) * 1000)
 

@@ -77,14 +77,20 @@ class KalmanFilter:
                            [0, dt]])
 
         # Matriz da covariancia do ruido do processo
-        self.Q = np.array([[(1.0 / 4) * (power(dt, 4)), 0, (1.0 / 2) * (power(dt, 3)), 0],
-                           [0, (1.0 / 4) * (power(dt, 4)), 0, (1.0 / 2) * (power(dt, 3))],
-                           [(1.0 / 2) * (power(dt, 3)), 0, power(dt, 2), 0],
-                           [0, (1.0 / 2) * (power(dt, 3)), 0, power(dt, 2)]])
+        # self.Q = np.array([[(1.0 / 4) * (power(dt, 4)), 0, (1.0 / 2) * (power(dt, 3)), 0],
+        #                    [0, (1.0 / 4) * (power(dt, 4)), 0, (1.0 / 2) * (power(dt, 3))],
+        #                    [(1.0 / 2) * (power(dt, 3)), 0, power(dt, 2), 0],
+        #                    [0, (1.0 / 2) * (power(dt, 3)), 0, power(dt, 2)]])
+        self.Q = np.array([[(1.0 / 2) * (np.power(dt, 3)), 0                            , (1.0 / 1) * (np.power(dt, 2)), 0                            ],
+                           [0                            , (1.0 / 2) * (np.power(dt, 3)), 0                            , (1.0 / 1) * (np.power(dt, 2))],
+                           [(1.0 / 1) * (np.power(dt, 2)), 0                            , np.power(dt, 1)              , 0                            ],
+                           [0                            , (1.0 / 1) * (np.power(dt, 2)), 0                            , np.power(dt, 1)              ]])
 
         # Matriz da covariancia do ruida da medicao
-        self.R = np.array([[0.1, 0],
-                           [0, 0.1]])
+        # self.R = np.array([[0.1, 0],
+        #                    [0, 0.1]])
+        self.R = np.array([[0.01, 0   ],
+                           [0   , 0.01]])
 
         # Matriz Jacobiana do modelo
         self.H = np.array([[1, 0, 0, 0],
@@ -98,7 +104,11 @@ class KalmanFilter:
 
         # Ganho de Kalman
         # self.P = self.Q.copy()
-        self.P = np.eye(4) * 500.
+        # self.P = np.eye(4) * 500.
+        self.P = np.array([[10, 0 , 0  , 0  ],
+                           [0 , 10, 0  , 0  ],
+                           [0 , 0 , 100, 0  ],
+                           [0 , 0 , 0  , 100]])
 
         # Vetor de Estados
         self.x = np.array([[self.posX],
