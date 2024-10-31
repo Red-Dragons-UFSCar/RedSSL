@@ -9,6 +9,9 @@ class Field:
         self.yellow_robots = []
         self.team_robots = []
         self.enemy_robots = []
+        self.enemy_vision_id = []
+        self.count_enemy_id =[]
+        self.threshold_enemy_id = 100
         self.obstacles = []
         self.ball = Ball()
         self.width = 900  # Exemplo de largura do campo em cm
@@ -69,6 +72,45 @@ class Field:
 
     def update_ball_position(self, x, y):
         self.ball.set_coordinates(x, y)
+
+    def verify_enemy_id(self, robots):
+        for robot in robots:
+            if robot['robot_id'] in self.enemy_vision_id:
+                index = self.enemy_vision_id.index(robot['robot_id'])
+                self.count_enemy_id[index] = 0
+            else:
+                self.enemy_vision_id.append(robot['robot_id'])
+                self.count_enemy_id.append(0)
+
+        #print("Enemies: ", self.enemy_vision_id)
+        
+        list_new_enemies = []
+        list_new_count = []
+        for i in range(len(self.count_enemy_id)):
+            #print("ID robo:", self.enemy_vision_id[i])
+            #print("Contagem: ", self.count_enemy_id[i])
+            if self.count_enemy_id[i] < self.threshold_enemy_id:
+                list_new_enemies.append(self.enemy_vision_id[i])
+                list_new_count.append(self.count_enemy_id[i])
+
+        self.enemy_vision_id = list_new_enemies
+        self.count_enemy_id = list_new_count
+
+        for i in range(len(self.count_enemy_id)):
+            self.count_enemy_id[i] += 1
+
+        #print("ID robôs inimigos: ", self.enemy_vision_id)
+        #print("Robos: ", self.enemy_vision_id)
+        if len(self.enemy_vision_id) < 3:
+            resets = 3 - len(self.enemy_vision_id)
+            for i in range(len(self.enemy_vision_id)):
+                self.enemy_robots[i].vision_id = self.enemy_vision_id[i]
+            for i in range(resets):
+                self.enemy_robots[2-i].set_coordinates(0,0,0)
+                self.enemy_robots[2-i].vision_id = None
+        else:
+            for i in range(3):
+                self.enemy_robots[i].vision_id = self.enemy_vision_id[i]
 
     def update_game_state(self, referee_state):
         """
