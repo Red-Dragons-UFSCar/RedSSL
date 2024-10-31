@@ -194,6 +194,7 @@ class VisibilityGraph:
                 next_point = path[1] if len(path) > 1 else path[0]
                 next_target = np.array([next_point.x, next_point.y])
         else:
+                print("Alvo atual")
                 # Se não há caminho, mantém o alvo atual
                 next_target = current_target
 

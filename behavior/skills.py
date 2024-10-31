@@ -99,7 +99,7 @@ def clear_ball(robot0, field, ball_position, robot_position, angle_to_ball):
     )
 
     current_state = field.zagueiro_current_state
-    print(f"Estado atual: {current_state}")
+    # print(f"Estado atual: {current_state}")
 
     # Define um deslocamento para se posicionar atrás da bola
     approach_offset = -40
@@ -113,7 +113,7 @@ def clear_ball(robot0, field, ball_position, robot_position, angle_to_ball):
 
         if robot0.target_reached(8):
             current_state = STATE_B
-            print("Transitando para o estado B")
+            # print("Transitando para o estado B")
         elif (
             90 <= np.degrees(angle_to_ball) <= 180
             or -180 <= np.degrees(angle_to_ball) <= -90
@@ -194,7 +194,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
     # Ajusta o alvo com base na posição da bola
     if 110 < ball_position.Y < 190:
         target_y_final = ball_position.Y
-        print("Bola no alvo")
+        # print("Bola no alvo")
     else:
         target_y_final = target_y_final + (-30 if ball_position.Y < 150 else 30)
 
