@@ -63,7 +63,7 @@ class Field:
             robots = self.yellow_robots
 
         for robot in robots:
-            if robot.robot_id == robot_id:
+            if robot.vision_id == robot_id:
                 robot.set_coordinates(x, y, theta)
                 break
 
