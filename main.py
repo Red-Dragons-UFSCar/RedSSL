@@ -1,3 +1,4 @@
+import sys
 from communication.vision import Vision
 from communication.actuator import Actuator
 from entities.Robot import Robot
@@ -27,7 +28,6 @@ class RepeatTimer(threading.Timer):
         Classe herdada de Timer para execução paralela da thread de visão
         TODO: Verificar a utilização da biblioteca asyncio para isso.
     """
-
     def run(self):
         while not self.finished.wait(self.interval):
             self.function(*self.args, **self.kwargs)
@@ -38,7 +38,7 @@ class RobotController:
         # Lendo os valores de IP e Porta
         with open('constants/network.json', 'r') as file:
             network = json.load(file)
-        # Lendo os valores de IP e Porta
+        
         with open('constants/mode_playing.json', 'r') as file:
             mode_playing = json.load(file)
         
@@ -51,8 +51,14 @@ class RobotController:
             with open('constants/game_real.json', 'r') as file:
                 game = json.load(file)
         
+        self.team_color = game['team']['color'] # Lê a cor do time
+
         # Inicializa a comunicação com a visão e o atuador
-        self.visao = Vision(ip=network['vision']['ip'], port=network['vision']['port'], is_right_side=game['team']['right_side'])
+        self.visao = Vision(
+            ip=network['vision']['ip'], 
+            port=network['vision']['port'], 
+            is_right_side=(game['team']['right_side']) # Define como True se o time é amarelo
+        )        
         self.actuator = Actuator(ip=network['command']['ip'], team_port=network['command']['port'])
 
         # Inicializa o campo de jogo
@@ -62,45 +68,64 @@ class RobotController:
         # Inicializa o coach
         self.coach = Coach(self.field)
 
-        # Cria e adiciona robôs ao campo
-        self.robot0 = Robot(robot_id=0, actuator=self.actuator)
-        self.field.add_blue_robot(self.robot0)
+        # Cria e adiciona robôs ao campo com base na cor escolhida
+        if self.team_color == "blue":
+            self.robot0 = Robot(robot_id=0, actuator=self.actuator)
+            self.robot1 = Robot(robot_id=1, actuator=self.actuator)
+            self.robot2 = Robot(robot_id=2, actuator=self.actuator)
+            self.field.add_blue_robot(self.robot0)
+            self.field.add_blue_robot(self.robot1)
+            self.field.add_blue_robot(self.robot2)
+            self.field.team_robots = [self.robot0, self.robot1, self.robot2]
 
-        self.robot1 = Robot(robot_id=1, actuator=self.actuator)
-        self.robot2 = Robot(robot_id=2, actuator=self.actuator)
-        self.field.add_blue_robot(self.robot1)
-        self.field.add_blue_robot(self.robot2)
-
-        # Cria e adiciona robôs inimigos ao campo
-        self.enemy_robot0 = Robot(robot_id=0, actuator=None)
-        self.enemy_robot1 = Robot(robot_id=1, actuator=None)
-        self.enemy_robot2 = Robot(robot_id=2, actuator=None)
-        self.field.add_yellow_robot(self.enemy_robot0)
-        self.field.add_yellow_robot(self.enemy_robot1)
-        self.field.add_yellow_robot(self.enemy_robot2)
+            # Cria e adiciona robôs inimigos
+            self.enemy_robot0 = Robot(robot_id=0, actuator=None)
+            self.enemy_robot1 = Robot(robot_id=1, actuator=None)
+            self.enemy_robot2 = Robot(robot_id=2, actuator=None)
+            self.field.add_yellow_robot(self.enemy_robot0)
+            self.field.add_yellow_robot(self.enemy_robot1)
+            self.field.add_yellow_robot(self.enemy_robot2)
+            self.field.enemy_robots = [self.enemy_robot0, self.enemy_robot1, self.enemy_robot2]
+        elif self.team_color == "yellow":
+            self.robot0 = Robot(robot_id=0, actuator=self.actuator)
+            self.robot1 = Robot(robot_id=1, actuator=self.actuator)
+            self.robot2 = Robot(robot_id=2, actuator=self.actuator)
+            self.field.add_yellow_robot(self.robot0)
+            self.field.add_yellow_robot(self.robot1)
+            self.field.add_yellow_robot(self.robot2)
+            self.field.team_robots = [self.robot0, self.robot1, self.robot2]
+            # Cria e adiciona robôs inimigos
+            self.enemy_robot0 = Robot(robot_id=0, actuator=None)
+            self.enemy_robot1 = Robot(robot_id=1, actuator=None)
+            self.enemy_robot2 = Robot(robot_id=2, actuator=None)
+            self.field.add_blue_robot(self.enemy_robot0)
+            self.field.add_blue_robot(self.enemy_robot1)
+            self.field.add_blue_robot(self.enemy_robot2)
+            self.field.enemy_robots = [self.enemy_robot0, self.enemy_robot1, self.enemy_robot2]
 
     def update_coordinates(self, frame):
         if frame["frame_number"] == 0:
             return
 
         # Atualiza as posições dos robôs azuis no campo com base nas informações da visão
-        for detection in frame["robots_blue"]:
+        for detection in frame[f"robots_{self.team_color}"]:
             self.field.update_robot_position(
                 detection["robot_id"],
                 detection["x"],
                 detection["y"],
                 detection["orientation"],
-                "blue",
+                self.team_color,
             )
 
-        # Atualiza as posições dos robôs amarelos (inimigos) no campo com base nas informações da visão
-        for detection in frame["robots_yellow"]:
+        # Atualiza as posições dos robôs inimigos no campo com base nas informações da visão
+        enemy_color = "yellow" if self.team_color == "blue" else "blue"
+        for detection in frame[f"robots_{enemy_color}"]:
             self.field.update_robot_position(
                 detection["robot_id"],
                 detection["x"],
                 detection["y"],
                 detection["orientation"],
-                "yellow",
+                enemy_color,
             )
 
         # Atualiza a posição da bola com base nas informações da visão
@@ -136,8 +161,8 @@ class RobotController:
     def get_vision_frame(self):
         """
         Descrição:
-            Função para adquirir os dados de visão e atualizar eles
-            nos respectivos robôs
+        Função para adquirir os dados de visão e atualizar eles
+        nos respectivos robôs
         """
         self.visao.update()
         frame = self.visao.get_last_frame()
