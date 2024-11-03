@@ -94,19 +94,19 @@ class Field:
             self.game_on = True
             self.game_stopped = False
             self.game_halted = False
-            print("JOGO INICIADO")
+            # print("JOGO INICIADO")
         elif command == Referee.Command.STOP:
             self.game_on = False
             self.game_stopped = True
             self.game_halted = False
             self.defending_foul = True
             self.offensive_foul = False
-            print("JOGO PARADO")
+            # print("JOGO PARADO")
         elif command == Referee.Command.HALT:
             self.game_on = False
             self.game_stopped = False
             self.game_halted = True
-            print("JOGO INTERROMPIDO")
+            # print("JOGO INTERROMPIDO")
 
         elif command == Referee.Command.PREPARE_KICKOFF_YELLOW:
             print("KICKOFF YELLOW")
@@ -121,7 +121,7 @@ class Field:
             print("PENALTY BLUE")
 
         elif command == Referee.Command.DIRECT_FREE_YELLOW:
-            print("FREEKICK YELLOW.")
+            # print("FREEKICK YELLOW.")
             self.game_on = False
             self.game_stopped = True
             self.game_halted = False
@@ -133,7 +133,7 @@ class Field:
                 self.defending_foul = True
 
         elif command == Referee.Command.DIRECT_FREE_BLUE:
-            print("FREEKICK BLUE")
+            # print("FREEKICK BLUE")
             self.game_on = False
             self.game_stopped = True
             self.game_halted = False
