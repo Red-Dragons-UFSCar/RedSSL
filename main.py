@@ -20,7 +20,7 @@ import json
 CONTROL_FPS = 60  # FPS original para o controle de posição
 CAM_FPS = 7 * CONTROL_FPS  # FPS para processar os dados da visão
 
-REFEREE_ON = False  # Habilita a comunicação com o Referee
+REFEREE_ON = True  # Habilita a comunicação com o Referee
 
 
 class RepeatTimer(threading.Timer):
@@ -68,11 +68,11 @@ class RobotController:
         )
 
         # Inicializa o campo de jogo
-        self.field = Field()
+        self.field = Field(self.team_color)
         self.referee = RefereeCommunication(
             field=self.field,
             ip=network["referee"]["ip"],
-            port=network["vision"]["port"],
+            port=network["referee"]["port"],
         )
 
         # Inicializa o coach

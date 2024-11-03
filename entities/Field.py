@@ -34,7 +34,7 @@ class Field:
         self.game_stopped = True
         self.game_halted = False
         self.defending_foul = False
-        self.ofensive_foul = True
+        self.offensive_foul = False
 
     def add_blue_robot(self, robot):
         self.blue_robots.append(robot)
@@ -80,7 +80,6 @@ class Field:
         """
         command = referee_state.command
         self.game_state = command  # Adiciona o comando atual ao estado do jogo
-
         # Processa e imprime os eventos relevantes
         self.process_event(command, referee_state)
 
@@ -101,7 +100,7 @@ class Field:
             self.game_stopped = True
             self.game_halted = False
             self.defending_foul = True
-            self.ofensive_foul = False
+            self.offensive_foul = False
             print("JOGO PARADO")
         elif command == Referee.Command.HALT:
             self.game_on = False
@@ -127,10 +126,10 @@ class Field:
             self.game_stopped = True
             self.game_halted = False
             if self.team == "yellow":
-                self.ofensive_foul = True
+                self.offensive_foul = True
                 self.defending_foul = False
             else:
-                self.ofensive_foul = False
+                self.offensive_foul = False
                 self.defending_foul = True
 
         elif command == Referee.Command.DIRECT_FREE_BLUE:
@@ -139,10 +138,10 @@ class Field:
             self.game_stopped = True
             self.game_halted = False
             if self.team == "blue":
-                self.ofensive_foul = True
+                self.offensive_foul = True
                 self.defending_foul = False
             else:
-                self.ofensive_foul = False
+                self.offensive_foul = False
                 self.defending_foul = True
 
         elif command == Referee.Command.TIMEOUT_YELLOW:
