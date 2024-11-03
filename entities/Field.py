@@ -4,7 +4,7 @@ from communication.proto.ssl_gc_referee_message_pb2 import Referee
 
 
 class Field:
-    def __init__(self):
+    def __init__(self, team="blue"):
         self.blue_robots = []
         self.yellow_robots = []
         self.obstacles = []
@@ -23,6 +23,9 @@ class Field:
 
         # Máquina de estados do atacante
         self.atacante_current_state = "A"
+
+        # Define o time do robô
+        self.team = team
 
         # Flags para estados de jogo
         self.game_on = False
@@ -95,6 +98,8 @@ class Field:
             self.game_on = False
             self.game_stopped = True
             self.game_halted = False
+            self.defending_foul = True
+            self.ofensive_foul = False
             print("JOGO PARADO")
         elif command == Referee.Command.HALT:
             self.game_on = False
@@ -119,16 +124,24 @@ class Field:
             self.game_on = False
             self.game_stopped = True
             self.game_halted = False
-            self.defending_foul = True
-            self.ofensive_foul = False
+            if self.team == "yellow":
+                self.ofensive_foul = True
+                self.defending_foul = False
+            else:
+                self.ofensive_foul = False
+                self.defending_foul = True
 
         elif command == Referee.Command.DIRECT_FREE_BLUE:
             print("FREEKICK BLUE")
             self.game_on = False
             self.game_stopped = True
             self.game_halted = False
-            self.defending_foul = False
-            self.ofensive_foul = True
+            if self.team == "blue":
+                self.ofensive_foul = True
+                self.defending_foul = False
+            else:
+                self.ofensive_foul = False
+                self.defending_foul = True
 
         elif command == Referee.Command.TIMEOUT_YELLOW:
             print("TIMEOUT YELLOW")
