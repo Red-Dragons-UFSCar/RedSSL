@@ -23,6 +23,7 @@ class Coach:
         self.field = field
         self.game_on = True
         self.game_stopped = False
+        self.game_halted = False
         self.penalty_start_time = None
         self.penalty_mode = None
         self.tempo_de_cobranca = 10
@@ -66,6 +67,14 @@ class Coach:
         """
         Escolhe e executa a estratégia baseada na situação do jogo.
         """
+
+        if self.field.game_halted:
+            # Estratégia para quando o jogo está pausado permanentemente (halted)
+            robot_goleiro.v_max = 0
+            robot_zagueiro.v_max = 0
+            robot_atacante.v_max = 0
+            return  # Sai da função para garantir que os robôs permaneçam parados
+
         if self.field.game_stopped:
             robot_goleiro.v_max = 0.75
             robot_zagueiro.v_max = 0.75
