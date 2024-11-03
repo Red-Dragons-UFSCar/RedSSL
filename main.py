@@ -1,3 +1,4 @@
+import sys
 from communication.vision import Vision
 from communication.actuator import Actuator
 from entities.Robot import Robot
@@ -13,10 +14,13 @@ from communication.referee import RefereeCommunication
 from behavior.tactics import *
 import time
 import threading
+import json
 
 
 CONTROL_FPS = 60  # FPS original para o controle de posição
 CAM_FPS = 7 * CONTROL_FPS  # FPS para processar os dados da visão
+
+REFEREE_ON = False  # Habilita a comunicação com o Referee
 
 
 class RepeatTimer(threading.Timer):
@@ -32,58 +36,118 @@ class RepeatTimer(threading.Timer):
 
 
 class RobotController:
-    def __init__(self, vision_ip, vision_port, actuator_port, is_right_side):
+    def __init__(self):
+        # Lendo os valores de IP e Porta
+        with open("constants/network.json", "r") as file:
+            network = json.load(file)
+
+        with open("constants/mode_playing.json", "r") as file:
+            mode_playing = json.load(file)
+
+        if mode_playing["simulated_mode"]:
+            # Lendo as configurações de jogo para simulação
+            with open("constants/game.json", "r") as file:
+                game = json.load(file)
+        else:
+            # Lendo as configurações de jogo para vida real
+            with open("constants/game_real.json", "r") as file:
+                game = json.load(file)
+
+        self.team_color = game["team"]["color"]  # Lê a cor do time
+
         # Inicializa a comunicação com a visão e o atuador
-        self.visao = Vision(ip=vision_ip, port=vision_port, is_right_side=is_right_side)
-        self.actuator = Actuator(team_port=actuator_port)
+        self.visao = Vision(
+            ip=network["vision"]["ip"],
+            port=network["vision"]["port"],
+            is_right_side=(
+                game["team"]["right_side"]
+            ),  # Define como True se o time é amarelo
+        )
+        self.actuator = Actuator(
+            ip=network["command"]["ip"], team_port=network["command"]["port"]
+        )
 
         # Inicializa o campo de jogo
         self.field = Field()
-        self.referee = RefereeCommunication(field=self.field)
+        self.referee = RefereeCommunication(
+            field=self.field,
+            ip=network["referee"]["ip"],
+            port=network["vision"]["port"],
+        )
 
         # Inicializa o coach
         self.coach = Coach(self.field)
 
-        # Cria e adiciona robôs ao campo
-        self.robot0 = Robot(robot_id=0, actuator=self.actuator)
-        self.field.add_blue_robot(self.robot0)
+        # Cria e adiciona robôs ao campo com base na cor escolhida
+        if self.team_color == "blue":
+            self.robot0 = Robot(robot_id=0, actuator=self.actuator)
+            self.robot1 = Robot(robot_id=1, actuator=self.actuator)
+            self.robot2 = Robot(robot_id=2, actuator=self.actuator)
+            self.field.add_blue_robot(self.robot0)
+            self.field.add_blue_robot(self.robot1)
+            self.field.add_blue_robot(self.robot2)
+            self.field.team_robots = [self.robot0, self.robot1, self.robot2]
 
-        self.robot1 = Robot(robot_id=1, actuator=self.actuator)
-        self.robot2 = Robot(robot_id=2, actuator=self.actuator)
-        self.field.add_blue_robot(self.robot1)
-        self.field.add_blue_robot(self.robot2)
-
-        # Cria e adiciona robôs inimigos ao campo
-        self.enemy_robot0 = Robot(robot_id=0, actuator=None)
-        self.enemy_robot1 = Robot(robot_id=1, actuator=None)
-        self.enemy_robot2 = Robot(robot_id=2, actuator=None)
-        self.field.add_yellow_robot(self.enemy_robot0)
-        self.field.add_yellow_robot(self.enemy_robot1)
-        self.field.add_yellow_robot(self.enemy_robot2)
+            # Cria e adiciona robôs inimigos
+            self.enemy_robot0 = Robot(robot_id=0, actuator=None)
+            self.enemy_robot1 = Robot(robot_id=1, actuator=None)
+            self.enemy_robot2 = Robot(robot_id=2, actuator=None)
+            self.field.add_yellow_robot(self.enemy_robot0)
+            self.field.add_yellow_robot(self.enemy_robot1)
+            self.field.add_yellow_robot(self.enemy_robot2)
+            self.field.enemy_robots = [
+                self.enemy_robot0,
+                self.enemy_robot1,
+                self.enemy_robot2,
+            ]
+        elif self.team_color == "yellow":
+            self.robot0 = Robot(robot_id=0, actuator=self.actuator)
+            self.robot1 = Robot(robot_id=1, actuator=self.actuator)
+            self.robot2 = Robot(robot_id=2, actuator=self.actuator)
+            self.field.add_yellow_robot(self.robot0)
+            self.field.add_yellow_robot(self.robot1)
+            self.field.add_yellow_robot(self.robot2)
+            self.field.team_robots = [self.robot0, self.robot1, self.robot2]
+            # Cria e adiciona robôs inimigos
+            self.enemy_robot0 = Robot(robot_id=0, actuator=None)
+            self.enemy_robot1 = Robot(robot_id=1, actuator=None)
+            self.enemy_robot2 = Robot(robot_id=2, actuator=None)
+            self.field.add_blue_robot(self.enemy_robot0)
+            self.field.add_blue_robot(self.enemy_robot1)
+            self.field.add_blue_robot(self.enemy_robot2)
+            self.field.enemy_robots = [
+                self.enemy_robot0,
+                self.enemy_robot1,
+                self.enemy_robot2,
+            ]
 
     def update_coordinates(self, frame):
+        if frame["frame_number"] == 0:
+            return
+
         # Atualiza as posições dos robôs azuis no campo com base nas informações da visão
-        for detection in frame["robots_blue"]:
+        for detection in frame[f"robots_{self.team_color}"]:
             self.field.update_robot_position(
                 detection["robot_id"],
                 detection["x"],
                 detection["y"],
                 detection["orientation"],
-                "blue",
+                self.team_color,
             )
 
-        # Atualiza as posições dos robôs amarelos (inimigos) no campo com base nas informações da visão
-        for detection in frame["robots_yellow"]:
+        # Atualiza as posições dos robôs inimigos no campo com base nas informações da visão
+        enemy_color = "yellow" if self.team_color == "blue" else "blue"
+        for detection in frame[f"robots_{enemy_color}"]:
             self.field.update_robot_position(
                 detection["robot_id"],
                 detection["x"],
                 detection["y"],
                 detection["orientation"],
-                "yellow",
+                enemy_color,
             )
 
         # Atualiza a posição da bola com base nas informações da visão
-        if "ball" in frame:
+        if frame["ball"]:
             ball_detection = frame["ball"]
             self.field.update_ball_position(ball_detection["x"], ball_detection["y"])
 
@@ -115,8 +179,8 @@ class RobotController:
     def get_vision_frame(self):
         """
         Descrição:
-            Função para adquirir os dados de visão e atualizar eles
-            nos respectivos robôs
+        Função para adquirir os dados de visão e atualizar eles
+        nos respectivos robôs
         """
         self.visao.update()
         frame = self.visao.get_last_frame()
@@ -134,11 +198,14 @@ class RobotController:
         while True:
             t1 = time.time()
 
-            # Recebe a mensagem do árbitro
-            self.referee.get_referee_message()
-            # Trata o comando do árbitro
-
-            self.referee.handle_referee_command()
+            if REFEREE_ON:
+                # Recebe a mensagem do árbitro
+                self.referee.get_referee_message()
+                # Trata o comando do árbitro
+                self.referee.handle_referee_command()
+            else:
+                self.field.game_on = True
+                self.field.game_stopped = False
 
             Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
             self.send_velocities()
@@ -149,19 +216,14 @@ class RobotController:
             self.robot1.map_obstacle.clear_map()
             self.robot2.map_obstacle.clear_map()
 
-            if (t2 - t1) < 1 / 60:
-                time.sleep(1 / 60 - (t2 - t1))
+            if (t2 - t1) < 1 / CONTROL_FPS:
+                time.sleep(1 / CONTROL_FPS - (t2 - t1))
                 # print("Tempo de execução: ", (t2 - t1) * 1000)
             else:
                 print("[TIMEOUT] - Execução de controle excedida: ", (t2 - t1) * 1000)
 
 
 if __name__ == "__main__":
-    controller = RobotController(
-        vision_ip="224.5.23.2",
-        vision_port=10020,
-        actuator_port=10301,
-        is_right_side=False,
-    )
+    controller = RobotController()
     controller.start_vision_thread()
     controller.control_loop()

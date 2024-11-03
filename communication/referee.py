@@ -3,16 +3,15 @@ from communication.proto.ssl_gc_referee_message_pb2 import Referee
 
 
 class RefereeCommunication:
-    REFEREE_IP = "224.5.23.1"
-    REFEREE_PORT = 10003
-
-    def __init__(self, field):
+    def __init__(self, field, ip = "224.5.23.1", port = 10003):
         """
         Inicializa o socket para receber mensagens do árbitro e define o estado inicial.
         """
-        self.referee_socket = self._init_referee_socket()
         self.referee_state = None
         self.field = field
+        self.ip = ip
+        self.port = port
+        self.referee_socket = self._init_referee_socket()
 
     def _init_referee_socket(self):
         """
@@ -22,8 +21,8 @@ class RefereeCommunication:
             socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP
         )
         referee_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        referee_socket.bind((self.REFEREE_IP, self.REFEREE_PORT))
-        mreq = socket.inet_aton(self.REFEREE_IP) + socket.inet_aton("0.0.0.0")
+        referee_socket.bind((self.ip, self.port))
+        mreq = socket.inet_aton(self.ip) + socket.inet_aton("0.0.0.0")
         referee_socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         referee_socket.setblocking(False)
         return referee_socket

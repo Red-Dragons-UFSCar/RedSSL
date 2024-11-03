@@ -45,6 +45,15 @@ class Vision:
         # Criação do socket de conexão
         self._create_socket()
 
+        # Frame numbers dos últimos frames recebidos
+        self.before_last_frame_frame_number = 0 # Penúltimo
+        self.last_frame_frame_number = 0        # Último
+
+        # Dados do frame que já foram recebidos
+        self.validated_data = {"ball": [],
+                               "robots_yellow": [],
+                               "robots_blue": []}
+
     def _create_socket(self):
         """
         Descrição:
@@ -170,6 +179,99 @@ class Vision:
             "robots_yellow": robots_yellow,
             "robots_blue": robots_blue,
         }
+    
+    def _convert_parameters2(self, msgRaw):
+        """
+        Descrição:
+            Método responsável pela conversão da mensagem serializada protobuf em um
+            dicionário Python para utilização.
+        Entradas:
+            msgRaw: Mensagem serializada WrapperPacket recebida pelo socket.
+        """
+        msg = SSL_WrapperPacket()
+        msg.ParseFromString(msgRaw)
+
+        robots_blue = msg.detection.robots_blue
+        robots_yellow = msg.detection.robots_yellow
+        balls = msg.detection.balls
+        msg_geometry = msg.geometry
+
+        # Conversão de coordenadas, se necessário
+        if self.convert_coordinates:
+            convert_coordinates(list(robots_blue), list(robots_yellow), list(balls), self.length, self.width, self.is_right_side)
+        
+        # Atualização dos últimos frame numbers
+        self.before_last_frame_frame_number = self.last_frame_frame_number
+        self.last_frame_frame_number = msg.detection.frame_number
+
+        # Verifica se houve mudança do frame number entre os frames recebidos
+        # Reseta os dados validados para processar novos dados
+        if not self.before_last_frame_frame_number == self.last_frame_frame_number:
+            self.validated_data = {"ball": [],
+                                   "robots_yellow": [],
+                                   "robots_blue": []}
+        
+        validated_data = self.validated_data
+
+        # Atualiza o frame com os novos dados recebidos
+        if balls and not validated_data["ball"]:
+            ball = (
+                {
+                    "confidence": balls[0].confidence,
+                    "area": balls[0].area,
+                    "x": balls[0].x,
+                    "y": balls[0].y,
+                    "z": balls[0].z,
+                    "pixel_x": balls[0].pixel_x,
+                    "pixel_y": balls[0].pixel_y,
+                }
+            )
+            validated_data["ball"] = True
+        else:
+            ball = ()
+        
+        robots_blue_validated = []
+        for robot in robots_blue:
+            if not robot.robot_id in validated_data["robots_blue"]:
+                robots_blue_validated.append(
+                    {
+                        "confidence": robot.confidence,
+                        "robot_id": robot.robot_id,
+                        "x": robot.x,
+                        "y": robot.y,
+                        "orientation": robot.orientation,
+                        "pixel_x": robot.pixel_x,
+                        "pixel_y": robot.pixel_y,
+                        "height": robot.height,
+                    }
+                )
+                validated_data["robots_blue"].append(robot.robot_id)
+        
+        robots_yellow_validated = []
+        for robot in robots_yellow:
+            if not robot.robot_id in validated_data["robots_yellow"]:
+                robots_yellow_validated.append(
+                    {
+                        "confidence": robot.confidence,
+                        "robot_id": robot.robot_id,
+                        "x": robot.x,
+                        "y": robot.y,
+                        "orientation": robot.orientation,
+                        "pixel_x": robot.pixel_x,
+                        "pixel_y": robot.pixel_y,
+                        "height": robot.height,
+                    }
+                )
+                validated_data["robots_yellow"].append(robot.robot_id)
+
+        self.last_frame = {
+            "frame_number": msg.detection.frame_number,
+            "t_capture": msg.detection.t_capture,
+            "t_sent": msg.detection.t_sent,
+            "ball": ball,
+            "robots_yellow": robots_yellow_validated,
+            "robots_blue": robots_blue_validated,
+        }
 
     def update(self):
         """
@@ -179,8 +281,9 @@ class Vision:
             novas informações são desejadas.
         """
         try:
+            self.reset_last_frame()
             msgRaw, _ = self.socket.recvfrom(self.buffer_size)
-            self._convert_parameters(msgRaw=msgRaw)
+            self._convert_parameters2(msgRaw=msgRaw)
 
             if self.logger:
                 print("[VISION] Dados recebidos e convertidos com sucesso.")
@@ -200,7 +303,21 @@ class Vision:
             last_frame: Último frame de detecção (dicionário).
         """
         return self.last_frame
+    
+    def reset_last_frame(self):
+        """
+        Descrição:
+            Reseta o último frame recebido pelo socket.
+        """
 
+        self.last_frame = {
+            "frame_number": 0,
+            "t_capture": 0,
+            "t_sent": 0,
+            "ball": [],
+            "robots_yellow": [],
+            "robots_blue": [],
+        }
 
 if __name__ == "__main__":
     import time
