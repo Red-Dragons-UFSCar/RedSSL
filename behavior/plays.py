@@ -165,10 +165,10 @@ def defensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
     skills.go_to_point(robot_goalie, 30, 150, field, 0)
 
     # print("Posicionando robô zagueiro no ponto específico.")
-    skills.stop_kickoff_positioning(robot_zagueiro, field, attacking = True, attacker = False)
+    skills.stop_kickoff_positioning(robot_zagueiro, field, attacking = False, attacker = False)
 
     # print("Posicionando robô atacante no ponto específico.")
-    skills.stop_kickoff_positioning(robot_atacante, field, attacking = True, attacker = True)
+    skills.stop_kickoff_positioning(robot_atacante, field, attacking = False, attacker = True)
 
 
 def offensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
@@ -179,7 +179,7 @@ def offensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
     skills.go_to_point(robot_goalie, 30, 150, field, 0)
 
     # print("Posicionando robô zagueiro no ponto específico.")
-    skills.stop_kickoff_positioning(robot_zagueiro, field, attacking = False, attacker = False)
+    skills.stop_kickoff_positioning(robot_zagueiro, field, attacking = True, attacker = False)
 
     # print("Posicionando robô atacante no ponto específico.")
-    skills.stop_kickoff_positioning(robot_atacante, field, attacking = False, attacker = True)
+    skills.stop_kickoff_positioning(robot_atacante, field, attacking = True, attacker = True)
