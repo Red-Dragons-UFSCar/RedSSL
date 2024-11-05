@@ -516,3 +516,37 @@ def idle_behavior_avoid_ball_stop_game(robot, field):
     )
 
     go_to_point(robot, x_target, y_target, field, theta_robot)
+
+def stop_kickoff_positioning(robot, field, attacking = False, attacker = False):
+    
+    ball = field.ball
+
+    if attacking:
+        ball_obst_radius = 15
+        if attacker:
+            target_x = 205
+            target_y = 150
+
+        else:
+            target_x = 150
+            target_y = 150
+    
+    else:
+        ball_obst_radius = 70
+        if attacker:
+            target_x = 155
+            target_y = 150
+
+        else:
+            target_x = 120
+            target_y = 150
+
+    # Configura a bola como obstáculo
+    obst = Obstacle()
+    obst.set_obst(
+        ball.get_coordinates().X, ball.get_coordinates().Y, 0, radius=ball_obst_radius
+    )
+    robot.map_obstacle.add_obstacle(obst)
+
+    go_to_point(robot, target_x, target_y, field, np.pi)
+
