@@ -19,7 +19,6 @@ class Field:
         self.blue_team_yellow_cards_counter = 0
         self.yellow_team_red_cards_counter = 0
         self.blue_team_red_cards_counter = 0
-        self.team = team
 
         # Máquina de estados do zagueiro
         self.zagueiro_current_state = "A"
@@ -95,47 +94,53 @@ class Field:
             command == Referee.Command.NORMAL_START
             or command == Referee.Command.FORCE_START
         ):
+            print("Game iniciado")
             self.game_on = True
             self.game_stopped = False
             self.game_halted = False
-            # print("JOGO INICIADO")
-            Coach.kickoff_attacking = False
-            Coach.kickoff_defensive = False
+            self.kickoff_offensive = False
+            self.kickoff_defensive = False
         elif command == Referee.Command.STOP:
             self.game_on = False
             self.game_stopped = True
             self.game_halted = False
             self.defending_foul = True
             self.offensive_foul = False
-            # print("JOGO PARADO")
+            print("JOGO PARADO")
         elif command == Referee.Command.HALT:
             self.game_on = False
             self.game_stopped = False
             self.game_halted = True
-            # print("JOGO INTERROMPIDO")
+            print("JOGO INTERROMPIDO")
 
         elif command == Referee.Command.PREPARE_KICKOFF_YELLOW:
             print("KICKOFF YELLOW")
             if self.team == "yellow":
                 # flag do coach de kickoff ofensivo
-                Coach.kickoff_attacking = True
-                Coach.kickoff_defensive = False
+                self.kickoff_offensive = True
+                self.kickoff_defensive = False
+                self.game_on = False
+                self.game_stopped = False
+                self.game_halted = False
 
             else:
                 # flag do coach de kickoff defensivo
-                Coach.kickoff_attacking = False
-                Coach.kickoff_defensive = True
+                self.kickoff_offensive = False
+                self.kickoff_defensive = True
+                self.game_on = False
+                self.game_stopped = False
+                self.game_halted = False
 
         elif command == Referee.Command.PREPARE_KICKOFF_BLUE:
             print("KICKOFF BLUE")
             if self.team == "blue":
                 # flag do coach de kickoff ofensivo
-                Coach.kickoff_attacking = True
-                Coach.kickoff_defensive = False
+                self.kickoff_offensive = True
+                self.kickoff_defensive = False
             else:
                 # flag do coach de kickoff defensivo
-                Coach.kickoff_attacking = False
-                Coach.kickoff_defending = True
+                self.kickoff_offensive = False
+                self.kickoff_defending = True
 
         elif command == Referee.Command.PREPARE_PENALTY_YELLOW:
             print("PENALTY YELLOW")
@@ -144,7 +149,7 @@ class Field:
             print("PENALTY BLUE")
 
         elif command == Referee.Command.DIRECT_FREE_YELLOW:
-            # print("FREEKICK YELLOW.")
+            print("FREEKICK YELLOW.")
             self.game_on = False
             self.game_stopped = True
             self.game_halted = False
@@ -156,7 +161,7 @@ class Field:
                 self.defending_foul = True
 
         elif command == Referee.Command.DIRECT_FREE_BLUE:
-            # print("FREEKICK BLUE")
+            print("FREEKICK BLUE")
             self.game_on = False
             self.game_stopped = True
             self.game_halted = False
@@ -181,9 +186,23 @@ class Field:
 
         elif command == Referee.Command.BALL_PLACEMENT_YELLOW:
             print("BALL PLACEMENT YELLOW")
+            self.game_on = False
+            self.game_stopped = True
+            self.game_halted = False
+            self.offensive_foul = False
+            self.defending_foul = False
+            self.kickoff_offensive = False
+            self.kickoff_defensive = False
 
         elif command == Referee.Command.BALL_PLACEMENT_BLUE:
             print("BALL PLACEMENT BLUE")
+            self.game_on = False
+            self.game_stopped = True
+            self.game_halted = False
+            self.offensive_foul = False
+            self.defending_foul = False
+            self.kickoff_offensive = False
+            self.kickoff_defensive = False
 
         else:
             print(f"Comando desconhecido: {command}")

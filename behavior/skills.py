@@ -170,7 +170,7 @@ def clear_ball(robot0, field, ball_position, robot_position, angle_to_ball):
     field.zagueiro_current_state = current_state
 
     # Move o robô para o ponto alvo
-    go_to_point(robot0, target_x, target_y, field, target_theta, threshold = 3)
+    go_to_point(robot0, target_x, target_y, field, target_theta, threshold=3)
 
 
 def attack_ball(robot0, field, ball_position, robot_position, target_theta):
@@ -220,12 +220,12 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         target_y = ball_position.Y + approach_offset * np.sin(angle_ball_to_target)
         target_theta = angle_ball_to_target
         robot0.v_max = 1.25
-        #print("Estado A")
-        #print(f"target_x: {target_x}, target_y: {target_y}, target_theta: {target_theta}")
+        # print("Estado A")
+        # print(f"target_x: {target_x}, target_y: {target_y}, target_theta: {target_theta}")
 
         if robot0.target_reached(threshold):
             current_state = STATE_B
-            #print("Transitando para o estado B")
+            # print("Transitando para o estado B")
         elif (
             90 <= np.degrees(angle_robot_to_ball) <= 180
             or -180 <= np.degrees(angle_robot_to_ball) <= -90
@@ -238,7 +238,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         target_y = ball_position.Y - 20 * np.sin(angle_ball_to_target)
         target_theta = angle_ball_to_target
         robot0.v_max = 1.5
-        #print("Estado B")
+        # print("Estado B")
 
         if robot0.target_reached(threshold):
             current_state = STATE_C
@@ -254,7 +254,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         target_y = target_y_final
         target_theta = angle_ball_to_target
         robot0.v_max = 1.5
-        #print("Estado C")
+        # print("Estado C")
 
         if not abs(angle_diff) <= 30:
             current_state = STATE_B
@@ -270,7 +270,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         target_y = ball_position.Y
         target_theta = angle_ball_to_target
         robot0.v_max = 1.5
-        #print("Estado D")
+        # print("Estado D")
 
         # Ajusta a posição Y do alvo para evitar a bola
         if 90 <= np.degrees(angle_robot_to_ball) <= 180:
@@ -458,7 +458,7 @@ def projection_stop_target(robot, field, kicker=False):
 
         angle_robot = angle_ball_to_goal
     else:
-        radius = 60
+        radius = 70
         ball_obstacle = 20
 
         goal_y = 150
@@ -516,4 +516,3 @@ def idle_behavior_avoid_ball_stop_game(robot, field):
     )
 
     go_to_point(robot, x_target, y_target, field, theta_robot)
-    

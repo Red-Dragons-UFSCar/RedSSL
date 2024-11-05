@@ -1,9 +1,10 @@
 import socket
 from communication.proto.ssl_gc_referee_message_pb2 import Referee
+from google.protobuf.message import DecodeError
 
 
 class RefereeCommunication:
-    def __init__(self, field, ip = "224.5.23.1", port = 10003):
+    def __init__(self, field, ip="224.5.23.1", port=10003):
         """
         Inicializa o socket para receber mensagens do árbitro e define o estado inicial.
         """
@@ -32,13 +33,16 @@ class RefereeCommunication:
         Recebe e decodifica as mensagens enviadas pelo árbitro, não bloqueante.
         """
         try:
-            data, _ = self.referee_socket.recvfrom(1024)
+            data, _ = self.referee_socket.recvfrom(4096)
             referee_message = Referee()
             referee_message.ParseFromString(data)
             self.referee_state = referee_message  # Armazena o estado do árbitro
             return self.referee_state
         except BlockingIOError:
             # Retorna None se não houver dados para evitar a exceção de bloqueio
+            return None
+        except DecodeError:
+            print("Erro ao decodificar a mensagem do árbitro.")
             return None
 
     def handle_referee_command(self):
