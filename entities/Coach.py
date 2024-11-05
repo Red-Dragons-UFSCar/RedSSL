@@ -169,3 +169,15 @@ class Coach:
                 plays.basic_stop_behavior_offensive(
                     robot_goleiro, robot_zagueiro, robot_atacante, self.field
                 )
+
+            elif self.field.kickoff_offensive:
+                # Estratégia de kickoff ofensivo
+                plays.offensive_kickoff(
+                    robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                )
+
+            elif self.field.kickoff_defensive:
+                # Estratégia de kickoff defensivo
+                plays.defensive_kickoff(
+                    robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                )

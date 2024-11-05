@@ -136,3 +136,29 @@ def basic_stop_behavior_offensive(robot_goleiro, robot_zagueiro, robot_atacante,
         robot_zagueiro.target.set_target(robot_zagueiro, (x_target_zagueiro, y_target_zagueiro), field, 0)
         # Vai até o ponto alvo desviando da bola
         skills.idle_behavior_avoid_ball_stop_game(robot_zagueiro, field)
+
+def defensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Estratégia de kickoff defensivo
+    """
+    #print("Posicionando robô goleiro no ponto específico.")
+    skills.go_to_point(robot_goalie, 30, 150, field, 0)
+
+    #print("Posicionando robô zagueiro no ponto específico.")
+    skills.go_to_point(robot_zagueiro, 100, 150, field, 0)
+
+    #print("Posicionando robô atacante no ponto específico.")
+    skills.go_to_point(robot_atacante, 150, 150, field, 0)
+
+def offensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Estratégia de kickoff ofensivo
+    """
+    #print("Posicionando robô goleiro no ponto específico.")
+    skills.go_to_point(robot_goalie, 30, 150, field, 0)
+
+    #print("Posicionando robô zagueiro no ponto específico.")
+    skills.go_to_point(robot_zagueiro, 150, 150, field, 0)
+
+    #print("Posicionando robô atacante no ponto específico.")
+    skills.go_to_point(robot_atacante, 200, 150, field, 0)

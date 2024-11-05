@@ -192,7 +192,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
     target_y_final = 150
 
     # Ajusta o alvo com base na posição da bola
-    if 110 < ball_position.Y < 190:
+    if 110 < ball_position.Y < 120 and 180 < ball_position.X < 190:
         target_y_final = ball_position.Y
         # print("Bola no alvo")
     else:

@@ -1,6 +1,7 @@
 from entities.Ball import Ball
 from entities.Robot import Robot
 from communication.proto.ssl_gc_referee_message_pb2 import Referee
+from entities import Field, Coach
 
 
 class Field:
@@ -18,6 +19,7 @@ class Field:
         self.blue_team_yellow_cards_counter = 0
         self.yellow_team_red_cards_counter = 0
         self.blue_team_red_cards_counter = 0
+        self.team = team
 
         # Máquina de estados do zagueiro
         self.zagueiro_current_state = "A"
@@ -35,6 +37,8 @@ class Field:
         self.game_halted = False
         self.defending_foul = False
         self.offensive_foul = False
+        self.kickoff_offensive = False
+        self.kickoff_defensive = False
 
     def add_blue_robot(self, robot):
         self.blue_robots.append(robot)
@@ -95,6 +99,8 @@ class Field:
             self.game_stopped = False
             self.game_halted = False
             # print("JOGO INICIADO")
+            Coach.kickoff_attacking = False
+            Coach.kickoff_defensive = False
         elif command == Referee.Command.STOP:
             self.game_on = False
             self.game_stopped = True
@@ -110,9 +116,26 @@ class Field:
 
         elif command == Referee.Command.PREPARE_KICKOFF_YELLOW:
             print("KICKOFF YELLOW")
+            if self.team == "yellow":
+                # flag do coach de kickoff ofensivo
+                Coach.kickoff_attacking = True
+                Coach.kickoff_defensive = False
+
+            else:
+                # flag do coach de kickoff defensivo
+                Coach.kickoff_attacking = False
+                Coach.kickoff_defensive = True
 
         elif command == Referee.Command.PREPARE_KICKOFF_BLUE:
             print("KICKOFF BLUE")
+            if self.team == "blue":
+                # flag do coach de kickoff ofensivo
+                Coach.kickoff_attacking = True
+                Coach.kickoff_defensive = False
+            else:
+                # flag do coach de kickoff defensivo
+                Coach.kickoff_attacking = False
+                Coach.kickoff_defending = True
 
         elif command == Referee.Command.PREPARE_PENALTY_YELLOW:
             print("PENALTY YELLOW")
