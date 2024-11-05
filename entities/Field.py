@@ -5,7 +5,7 @@ from entities import Field, Coach
 
 
 class Field:
-    def __init__(self):
+    def __init__(self, team="blue"):
         self.blue_robots = []
         self.yellow_robots = []
         self.team_robots = []
@@ -19,6 +19,7 @@ class Field:
         self.blue_team_yellow_cards_counter = 0
         self.yellow_team_red_cards_counter = 0
         self.blue_team_red_cards_counter = 0
+        self.team = team
 
         # Máquina de estados do zagueiro
         self.zagueiro_current_state = "A"
@@ -32,6 +33,8 @@ class Field:
         self.game_stopped = True
         self.defending_foul = True
         self.offensive_foul = False
+        self.kickoff_offensive = False
+        self.kickoff_defensive = False
 
     def add_blue_robot(self, robot):
         self.blue_robots.append(robot)
@@ -99,24 +102,24 @@ class Field:
 
         elif command == Referee.Command.PREPARE_KICKOFF_YELLOW:
             print("KICKOFF YELLOW")
-            if Field.team_color == "yellow":
-                #flag do coach de kickoff ofensivo
+            if self.team == "yellow":
+                # flag do coach de kickoff ofensivo
                 Coach.kickoff_attacking = True
                 Coach.kickoff_defensive = False
 
             else:
-                #flag do coach de kickoff defensivo
+                # flag do coach de kickoff defensivo
                 Coach.kickoff_attacking = False
                 Coach.kickoff_defensive = True
 
         elif command == Referee.Command.PREPARE_KICKOFF_BLUE:
             print("KICKOFF BLUE")
-            if Field.team_color == "blue":
-                #flag do coach de kickoff ofensivo
+            if self.team == "blue":
+                # flag do coach de kickoff ofensivo
                 Coach.kickoff_attacking = True
                 Coach.kickoff_defensive = False
             else:
-                #flag do coach de kickoff defensivo
+                # flag do coach de kickoff defensivo
                 Coach.kickoff_attacking = False
                 Coach.kickoff_defending = True
 
