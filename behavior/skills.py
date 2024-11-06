@@ -532,7 +532,7 @@ def stop_kickoff_positioning(robot, field, attacking = False, attacker = False):
             target_y = 150
     
     else:
-        ball_obst_radius = 70
+        ball_obst_radius = 15
         if attacker:
             target_x = 155
             target_y = 150
