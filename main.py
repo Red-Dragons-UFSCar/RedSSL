@@ -108,6 +108,7 @@ class RobotController:
             return
 
         # Atualiza as posições dos robôs azuis no campo com base nas informações da visão
+        self.field.verify_team_id(frame[f"robots_{self.team_color}"])
         for detection in frame[f"robots_{self.team_color}"]:
             self.field.update_robot_position(
                 detection["robot_id"],
@@ -215,21 +216,21 @@ class RobotController:
             print("y: ", self.robot2.get_coordinates().X)
             print("r: ", self.robot2.get_coordinates().rotation)
 
-            # print("---------------------------------------")
-            # print("    LOGGING DOS ROBÔS INIMIGO     ")
-            # print("---------------------------------------")
-            # print("Robo goleiro, id=", self.enemy_robot0.vision_id)
-            # print("x: ", self.enemy_robot0.get_coordinates().X)
-            # print("y: ", self.enemy_robot0.get_coordinates().X)
-            # print("r: ", self.enemy_robot0.get_coordinates().rotation)
-            # print("Robo zagueiro, id=", self.enemy_robot1.vision_id)
-            # print("x: ", self.enemy_robot1.get_coordinates().X)
-            # print("y: ", self.enemy_robot1.get_coordinates().X)
-            # print("r: ", self.enemy_robot1.get_coordinates().rotation)
-            # print("Robo goleiro, id=", self.enemy_robot2.vision_id)
-            # print("x: ", self.enemy_robot2.get_coordinates().X)
-            # print("y: ", self.enemy_robot2.get_coordinates().X)
-            # print("r: ", self.enemy_robot2.get_coordinates().rotation)
+            print("---------------------------------------")
+            print("    LOGGING DOS ROBÔS INIMIGO     ")
+            print("---------------------------------------")
+            print("Robo goleiro, id=", self.enemy_robot0.vision_id)
+            print("x: ", self.enemy_robot0.get_coordinates().X)
+            print("y: ", self.enemy_robot0.get_coordinates().X)
+            print("r: ", self.enemy_robot0.get_coordinates().rotation)
+            print("Robo zagueiro, id=", self.enemy_robot1.vision_id)
+            print("x: ", self.enemy_robot1.get_coordinates().X)
+            print("y: ", self.enemy_robot1.get_coordinates().X)
+            print("r: ", self.enemy_robot1.get_coordinates().rotation)
+            print("Robo goleiro, id=", self.enemy_robot2.vision_id)
+            print("x: ", self.enemy_robot2.get_coordinates().X)
+            print("y: ", self.enemy_robot2.get_coordinates().X)
+            print("r: ", self.enemy_robot2.get_coordinates().rotation)
 
             if (t2 - t1) < 1 / CONTROL_FPS:
                 time.sleep(1 / CONTROL_FPS - (t2 - t1))
