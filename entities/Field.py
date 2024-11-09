@@ -274,6 +274,7 @@ class Field:
             self.defending_foul = False
             self.kickoff_offensive = False
             self.kickoff_defensive = False
+            self.game_on_but_is_penalty = False
 
         elif command == Referee.Command.BALL_PLACEMENT_BLUE:
             print("BALL PLACEMENT BLUE")
@@ -284,6 +285,7 @@ class Field:
             self.defending_foul = False
             self.kickoff_offensive = False
             self.kickoff_defensive = False
+            self.game_on_but_is_penalty = False
 
         else:
             print(f"Comando desconhecido: {command}")

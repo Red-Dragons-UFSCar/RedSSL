@@ -443,7 +443,7 @@ def projection_stop_target(robot, field, kicker=False):
     ball_coordinates = ball.get_coordinates()
 
     if kicker:
-        radius = 15
+        radius = 20
         ball_obstacle = 10
 
         goal_y = 150
