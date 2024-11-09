@@ -517,8 +517,9 @@ def idle_behavior_avoid_ball_stop_game(robot, field):
 
     go_to_point(robot, x_target, y_target, field, theta_robot)
 
-def stop_kickoff_positioning(robot, field, attacking = False, attacker = False):
-    
+
+def stop_kickoff_positioning(robot, field, attacking=False, attacker=False):
+
     ball = field.ball
 
     if attacking:
@@ -530,7 +531,7 @@ def stop_kickoff_positioning(robot, field, attacking = False, attacker = False):
         else:
             target_x = 150
             target_y = 150
-    
+
     else:
         ball_obst_radius = 15
         if attacker:
@@ -550,3 +551,64 @@ def stop_kickoff_positioning(robot, field, attacking = False, attacker = False):
 
     go_to_point(robot, target_x, target_y, field, np.pi)
 
+
+def penalty_idle_offensive(robot_goleiro, robot_zagueiro, robot_atacante, field):
+    """
+    Move os robôs para posições específicas para a posição de penalty idle.
+
+    Parameters:
+    skills: módulo contendo a função go_to_point para mover os robôs.
+    robot_goleiro: objeto representando o robô goleiro.
+    robot_zagueiro: objeto representando o robô zagueiro.
+    robot_atacante: objeto representando o robô atacante.
+    field: objeto representando o campo.
+    """
+    go_to_point(robot_goleiro, 0, 150, field, 0)
+    go_to_point(robot_zagueiro, 150, 150, field, 0)
+    go_to_point(robot_atacante, 250, 150, field, 0)
+
+
+def penalty_idle_offensive_game_on(robot_goleiro, robot_zagueiro, field):
+    """
+    Move os robôs para posições específicas para a posição de penalty idle.
+
+    Parameters:
+    skills: módulo contendo a função go_to_point para mover os robôs.
+    robot_goleiro: objeto representando o robô goleiro.
+    robot_zagueiro: objeto representando o robô zagueiro.
+    robot_atacante: objeto representando o robô atacante.
+    field: objeto representando o campo.
+    """
+    go_to_point(robot_goleiro, 0, 150, field, 0)
+    go_to_point(robot_zagueiro, 150, 150, field, 0)
+
+
+def penalty_idle_defensive(robot_goleiro, robot_zagueiro, robot_atacante, field):
+    """
+    Move os robôs para posições específicas para a posição de penalty idle.
+
+    Parameters:
+    skills: módulo contendo a função go_to_point para mover os robôs.
+    robot_goleiro: objeto representando o robô goleiro.
+    robot_zagueiro: objeto representando o robô zagueiro.
+    robot_atacante: objeto representando o robô atacante.
+    field: objeto representando o campo.
+    """
+    go_to_point(robot_goleiro, 0, 150, field, 0)
+    go_to_point(robot_zagueiro, 230, 150, field, 0)
+    go_to_point(robot_atacante, 250, 150, field, 0)
+
+
+def penalty_idle_game_on(robot_zagueiro, robot_atacante, field):
+    """
+    Move os robôs para posições específicas para a posição de penalty idle.
+
+    Parameters:
+    skills: módulo contendo a função go_to_point para mover os robôs.
+    robot_goleiro: objeto representando o robô goleiro.
+    robot_zagueiro: objeto representando o robô zagueiro.
+    robot_atacante: objeto representando o robô atacante.
+    field: objeto representando o campo.
+    """
+    go_to_point(robot_zagueiro, 230, 150, field, 0)
+    go_to_point(robot_atacante, 250, 150, field, 0)

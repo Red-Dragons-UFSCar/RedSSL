@@ -42,20 +42,6 @@ class Coach:
             # self.game_on = True
             return True  # Bola dentro de campo
 
-    def situacao_de_penalti(self, referee_penalty):
-        """
-        Verificar se é uma situação de pênalti
-        """
-        if referee_penalty == 0:
-            return False
-        else:
-            if referee_penalty == 2:  # Pênalti ofensivo
-                self.penalty_mode = 2  # Modo de penalty ofensivo
-            else:
-                if referee_penalty == 1:  # Pênalti defensivo
-                    self.penalty_mode = 1  # Modo de penalty defensivo
-            return True
-
     def expulsao(self, referee_red_card=0):
         """
         Altera a quantidade de robôs em campo se um for expulso.
@@ -102,43 +88,9 @@ class Coach:
             )
         else:
             # Se o jogo estiver em andamento, usa a estratégia básica
-            if self.field.game_on:
-                if self.situacao_de_penalti(
-                    0
-                ):  # Passando os valores manualmente para testes. 0 não há pênalti, 1, pênalti defensivo, 2 ofensivo.
-                    if self.penalty_start_time is None:
-                        self.penalty_start_time = time.time()  # Assume tempo atual
+            if self.field.game_on and self.field.game_on_but_is_penalty == False:
 
-                    # improviso apito do juiz
-                    tempo_decorrido = time.time() - self.penalty_start_time
-                    if tempo_decorrido <= self.tempo_de_cobranca:
-                        referee_whistle = 0
-                    else:
-                        referee_whistle = 1
-
-                    if self.penalty_mode == 1:
-                        # print ("estratégia de pênalti defensivo em ação")
-                        plays.estrategia_penalti_defensivo(
-                            robot_goleiro,
-                            robot_zagueiro,
-                            robot_atacante,
-                            self.field,
-                            referee_whistle,
-                        )
-                    else:
-                        if self.penalty_mode == 2:
-                            # print ("estratégia de pênalti ofensivo em ação")
-                            plays.estrategia_penalti_ofensivo(
-                                robot_goleiro,
-                                robot_zagueiro,
-                                robot_atacante,
-                                self.field,
-                                referee_whistle,
-                            )
-                        else:
-                            self.penalty_start_time = None  # "Zerando" tempo de incio do pênalti após a cobrança
-
-                elif self.quantidade_robos == 2:
+                if self.quantidade_robos == 2:
                     # print("Estratégia com 1 robôs a menos em ação")
                     plays.estrategia_desvantagem_2(
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
@@ -155,6 +107,26 @@ class Coach:
                     plays.estrategia_basica(
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
                     )
+
+            elif self.field.game_on and self.field.game_on_but_is_penalty == True:
+                if self.penalty_start_time is None:
+                    self.penalty_start_time = time.time()
+
+                if self.field.penalty_defensive:
+                    print("estratégia de pênalti defensivo em ação")
+                    plays.estrategia_penalti_defensivo(
+                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                    )
+                else:
+                    if self.field.penalty_offensive:
+                        print("estratégia de pênalti ofensivo em ação")
+                        plays.estrategia_penalti_ofensivo(
+                            robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                        )
+                    else:
+                        self.penalty_start_time = (
+                            None  # "Zerando" tempo de incio do pênalti após a cobrança
+                        )
 
             elif self.field.game_stopped and self.field.defending_foul:
                 # Estratégia de jogo parado em stop defensivo
@@ -181,3 +153,23 @@ class Coach:
                 plays.defensive_kickoff(
                     robot_goleiro, robot_zagueiro, robot_atacante, self.field
                 )
+
+            elif self.field.penalty_offensive or self.field.penalty_defensive:
+                if self.penalty_start_time is None:
+                    self.penalty_start_time = time.time()
+
+                if self.field.penalty_defensive:
+                    print("estratégia de pênalti defensivo em ação")
+                    plays.estrategia_penalti_defensivo(
+                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                    )
+                else:
+                    if self.field.penalty_offensive:
+                        print("estratégia de pênalti ofensivo em ação")
+                        plays.estrategia_penalti_ofensivo(
+                            robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                        )
+                    else:
+                        self.penalty_start_time = (
+                            None  # "Zerando" tempo de incio do pênalti após a cobrança
+                        )

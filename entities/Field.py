@@ -38,6 +38,9 @@ class Field:
         self.offensive_foul = False
         self.kickoff_offensive = False
         self.kickoff_defensive = False
+        self.penalty_offensive = False
+        self.penalty_defensive = False
+        self.game_on_but_is_penalty = False
 
     def add_blue_robot(self, robot):
         self.blue_robots.append(robot)
@@ -94,23 +97,38 @@ class Field:
             command == Referee.Command.NORMAL_START
             or command == Referee.Command.FORCE_START
         ):
-            print("Game iniciado")
-            self.game_on = True
-            self.game_stopped = False
-            self.game_halted = False
-            self.kickoff_offensive = False
-            self.kickoff_defensive = False
+            if self.game_on and (self.penalty_offensive or self.penalty_defensive):
+                self.game_on_but_is_penalty = True
+                print("Jogando situacao de penalty")
+
+            else:
+                print("Game iniciado")
+                self.game_on = True
+                self.game_stopped = False
+                self.game_halted = False
+                self.kickoff_offensive = False
+                self.kickoff_defensive = False
+                self.game_on_but_is_penalty = False
+
         elif command == Referee.Command.STOP:
             self.game_on = False
             self.game_stopped = True
             self.game_halted = False
             self.defending_foul = True
             self.offensive_foul = False
+            self.penalty_offensive = False
+            self.penalty_defensive = False
+            self.game_on_but_is_penalty = False
+
             print("JOGO PARADO")
         elif command == Referee.Command.HALT:
             self.game_on = False
             self.game_stopped = False
             self.game_halted = True
+            self.penalty_offensive = False
+            self.penalty_defensive = False
+            self.game_on_but_is_penalty = False
+
             print("JOGO INTERROMPIDO")
 
         elif command == Referee.Command.PREPARE_KICKOFF_YELLOW:
@@ -122,6 +140,9 @@ class Field:
                 self.game_on = False
                 self.game_stopped = False
                 self.game_halted = False
+                self.penalty_offensive = False
+                self.penalty_defensive = False
+                self.game_on_but_is_penalty = False
 
             else:
                 # flag do coach de kickoff defensivo
@@ -130,6 +151,9 @@ class Field:
                 self.game_on = False
                 self.game_stopped = False
                 self.game_halted = False
+                self.penalty_offensive = False
+                self.penalty_defensive = False
+                self.game_on_but_is_penalty = False
 
         elif command == Referee.Command.PREPARE_KICKOFF_BLUE:
             print("KICKOFF BLUE")
@@ -137,16 +161,61 @@ class Field:
                 # flag do coach de kickoff ofensivo
                 self.kickoff_offensive = True
                 self.kickoff_defensive = False
+                self.penalty_offensive = False
+                self.penalty_defensive = False
+                self.game_on_but_is_penalty = False
+
             else:
                 # flag do coach de kickoff defensivo
                 self.kickoff_offensive = False
                 self.kickoff_defending = True
+                self.penalty_offensive = False
+                self.penalty_defensive = False
+                self.game_on_but_is_penalty = False
 
         elif command == Referee.Command.PREPARE_PENALTY_YELLOW:
             print("PENALTY YELLOW")
+            if self.team == "yellow":
+                # flag do coach de kickoff ofensivo
+                self.kickoff_offensive = False
+                self.kickoff_defensive = False
+                self.game_on = False
+                self.game_stopped = False
+                self.game_halted = False
+                self.penalty_offensive = True
+                self.penalty_defensive = False
+
+            else:
+                # flag do coach de kickoff defensivo
+                self.kickoff_offensive = False
+                self.kickoff_defensive = False
+                self.game_on = False
+                self.game_stopped = False
+                self.game_halted = False
+                self.penalty_offensive = False
+                self.penalty_defensive = True
 
         elif command == Referee.Command.PREPARE_PENALTY_BLUE:
             print("PENALTY BLUE")
+            if self.team == "blue":
+                # flag do coach de kickoff ofensivo
+                self.kickoff_offensive = False
+                self.kickoff_defensive = False
+                self.game_on = False
+                self.game_stopped = False
+                self.game_halted = False
+                self.penalty_offensive = True
+                self.penalty_defensive = False
+
+            else:
+                # flag do coach de kickoff defensivo
+                self.kickoff_offensive = False
+                self.kickoff_defensive = False
+                self.game_on = False
+                self.game_stopped = False
+                self.game_halted = False
+                self.penalty_offensive = False
+                self.penalty_defensive = True
 
         elif command == Referee.Command.DIRECT_FREE_YELLOW:
             print("FREEKICK YELLOW.")
@@ -173,9 +242,21 @@ class Field:
                 self.defending_foul = True
 
         elif command == Referee.Command.TIMEOUT_YELLOW:
+            self.game_on = False
+            self.game_stopped = False
+            self.game_halted = True
+            self.penalty_offensive = False
+            self.penalty_defensive = False
+            self.game_on_but_is_penalty = False
             print("TIMEOUT YELLOW")
 
         elif command == Referee.Command.TIMEOUT_BLUE:
+            self.game_on = False
+            self.game_stopped = False
+            self.game_halted = True
+            self.penalty_offensive = False
+            self.penalty_defensive = False
+            self.game_on_but_is_penalty = False
             print("TIMEOUT BLUE")
 
         elif command == Referee.Command.GOAL_YELLOW:

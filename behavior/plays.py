@@ -26,43 +26,40 @@ def posicionar_robos(robot_goalie, robot_zagueiro, robot_atacante, field):
     skills.go_to_point(robot_atacante, 300, 150, field, 0)
 
 
-def estrategia_penalti_ofensivo(
-    robot_goleiro, robot_zagueiro, robot_atacante, field, enable
-):
+def estrategia_penalti_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, field):
 
-    if enable == 0:  # Posição inicial, antes da cobrança
+    if field.penalty_offensive == True and field.game_on_but_is_penalty == False:
         """
         Posiciona zagueiro e goleiro em posições fixas no campo de defesa e
         o atacante para cobrar o pênalti, em seguida chamando a função de atacante para cobrança.
         """
-        skills.go_to_point(robot_goleiro, 30, 150, field, 0)
 
-        skills.go_to_point(robot_zagueiro, 150, 150, field, 0)
-
-        skills.go_to_point(robot_atacante, 220, 150, field, 0)
+        skills.penalty_idle_offensive(
+            robot_goleiro, robot_zagueiro, robot_atacante, field
+        )
 
     else:
         # chamando a função de atacante para cobrança do penalti.
         tactics.atacante(robot_atacante, field)
+        skills.penalty_idle_offensive_game_on(robot_goleiro, robot_zagueiro, field)
 
 
-def estrategia_penalti_defensivo(
-    robot_goleiro, robot_zagueiro, robot_atacante, field, enable
-):
+def estrategia_penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, field):
     """
     Posiciona zagueiro e goleiro em posições fixas no campo de defesa e
     o atacante para cobrar o pênalti, em seguida chamando a função de atacante para cobrança.
     """
-    if enable == 0:
-        # posicionamento inicial:
-        skills.go_to_point(robot_goleiro, 30, 150, field, 0)
+    if field.penalty_defensive == True and field.game_on_but_is_penalty == False:
+        # Se o jogo estiver no modo penalty parado, preparacao do penalty
 
-        skills.go_to_point(robot_zagueiro, 230, 150, field, 0)
+        skills.penalty_idle_defensive(
+            robot_goleiro, robot_zagueiro, robot_atacante, field
+        )
 
-        skills.go_to_point(robot_atacante, 250, 150, field, 0)
     else:
-        # chamando a função de goleiro para defender o penalti
+        # Quando o jogo ativar, todos se posicionam para o jogo normal
         tactics.goleiro(robot_goleiro, field)
+        skills.penalty_idle_game_on(robot_zagueiro, robot_atacante, field)
 
 
 def estrategia_desvantagem_2(robot_goalie, robot_zagueiro, robot_atacante, field):
@@ -165,10 +162,14 @@ def defensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
     skills.go_to_point(robot_goalie, 30, 150, field, 0)
 
     # print("Posicionando robô zagueiro no ponto específico.")
-    skills.stop_kickoff_positioning(robot_zagueiro, field, attacking = False, attacker = False)
+    skills.stop_kickoff_positioning(
+        robot_zagueiro, field, attacking=False, attacker=False
+    )
 
     # print("Posicionando robô atacante no ponto específico.")
-    skills.stop_kickoff_positioning(robot_atacante, field, attacking = False, attacker = True)
+    skills.stop_kickoff_positioning(
+        robot_atacante, field, attacking=False, attacker=True
+    )
 
 
 def offensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
@@ -179,7 +180,11 @@ def offensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
     skills.go_to_point(robot_goalie, 30, 150, field, 0)
 
     # print("Posicionando robô zagueiro no ponto específico.")
-    skills.stop_kickoff_positioning(robot_zagueiro, field, attacking = True, attacker = False)
+    skills.stop_kickoff_positioning(
+        robot_zagueiro, field, attacking=True, attacker=False
+    )
 
     # print("Posicionando robô atacante no ponto específico.")
-    skills.stop_kickoff_positioning(robot_atacante, field, attacking = True, attacker = True)
+    skills.stop_kickoff_positioning(
+        robot_atacante, field, attacking=True, attacker=True
+    )
