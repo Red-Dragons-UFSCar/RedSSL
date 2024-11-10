@@ -21,6 +21,9 @@ class Coach:
         self.tempo_de_cobranca = 10
         self.quantidade_robos = 3  # Número de robôs da equipe em campo
 
+        #Contador de cartões amarelos ativos
+        self.true_yellow_cards_counter = 0
+
     def verificar_bola_em_campo(self):
         """
         Verifica a posição da bola e determina se ela está fora de campo.
@@ -91,19 +94,31 @@ class Coach:
             if self.field.game_on and self.field.game_on_but_is_penalty == False:
 
                 if self.field.red_cards_counter == 1:
-                    # print("Estratégia com 1 robôs a menos em ação")
+                    #Estratégia com 1 robôs a menos em ação
                     plays.estrategia_desvantagem_2(
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
                     )
 
                 elif self.field.red_cards_counter == 2:
-                    # print("Estratégia com 2 robôs a menos em ação")
+                    #Estratégia com 2 robôs a menos em ação")
                     plays.estrategia_desvantagem_1(
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
                     )
+                
+                if self.true_yellow_cards_counter == 0 and self.field.yellow_cards_counter > 0 and self.red_cards_counter == 1:
+                    # Temos 1 cartão amarelo ativo
+                    # Estratégia com 2 robôs a menos em ação
+                        self.true_yellow_cards_counter += 1
+                        elapsed_time = time.time() - self.yellow_card_timestamp
+                        if elapsed_time >= 15:  # 2 minutos = 120 segundos
+                            self.yellow_card_flag -= 1  # Desativa a flag após 2 minutos
+                        else:
+                            plays.estrategia_desvantagem_1(
+                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                        )
 
                 else:
-                    # print("Estrategia basica em ação")
+                    #Estrategia basica em ação
                     plays.estrategia_basica(
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
                     )
