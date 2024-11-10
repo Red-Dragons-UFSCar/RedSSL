@@ -38,15 +38,13 @@ class Field:
         self.penalty_offensive = False
         self.penalty_defensive = False
         self.game_on_but_is_penalty = False
-        
-        #Flags para cartão e timestamp
+
+        # Flags para cartão e timestamp
         self.yellow_card_flag = False
         self.yellow_card_timestamp = None
         self.red_card_flag = False
         self.yellow_cards_counter = 0
         self.red_cards_counter = 0
-
- 
 
     def add_blue_robot(self, robot):
         self.blue_robots.append(robot)
@@ -306,25 +304,33 @@ class Field:
         yellow_team_info = referee_state.yellow
         blue_team_info = referee_state.blue
 
-        if yellow_team_info.yellow_cards > self.yellow_team_yellow_cards_counter and self.team == "yellow":
+        if (
+            yellow_team_info.yellow_cards > self.yellow_cards_counter
+            and self.team == "yellow"
+        ):
             print("CARTAO PRO TIME AMARELO")
             self.yellow_card_flag = True
             self.yellow_card_timestamp = time.time()  # Registra o tempo do cartão
-            self.yellow_cards_counter = yellow_team_info.yellow_cards            
+            self.yellow_cards_counter = yellow_team_info.yellow_cards
 
-        if blue_team_info.yellow_cards > self.blue_team_yellow_cards_counter and self.team == "blue":
+        if (
+            blue_team_info.yellow_cards > self.yellow_cards_counter
+            and self.team == "blue"
+        ):
             print("CARTAO PRO TIME AZUL")
             self.yellow_card_flag = True
             self.yellow_card_timestamp = time.time()  # Registra o tempo do cartão
             self.yellow_cards_counter = blue_team_info.yellow_cards
 
-        if yellow_team_info.red_cards > self.yellow_team_red_cards_counter and self.team == "yellow":
+        if (
+            yellow_team_info.red_cards > self.red_cards_counter
+            and self.team == "yellow"
+        ):
             print("CARTAO VERMELHO PRO TIME AMARELO")
             self.red_card_flag = True
             self.red_cards_counter = yellow_team_info.red_cards
 
-
-        if blue_team_info.red_cards > self.blue_team_red_cards_counter and self.team == "blue":
+        if blue_team_info.red_cards > self.red_cards_counter and self.team == "blue":
             print("CARTAO VERMELHO PRO TIME AZUL")
             self.red_card_flag = True
             self.red_cards_counter = blue_team_info.red_cards
