@@ -2,6 +2,7 @@ from entities.Ball import Ball
 from entities.Robot import Robot
 from communication.proto.ssl_gc_referee_message_pb2 import Referee
 from entities import Field, Coach
+import time
 
 
 class Field:
@@ -15,10 +16,6 @@ class Field:
         self.width = 900  # Exemplo de largura do campo em cm
         self.height = 600  # Exemplo de altura do campo em cm
         self.game_state = None  # Dicionário para armazenar o estado do jogo
-        self.yellow_team_yellow_cards_counter = 0
-        self.blue_team_yellow_cards_counter = 0
-        self.yellow_team_red_cards_counter = 0
-        self.blue_team_red_cards_counter = 0
 
         # Máquina de estados do zagueiro
         self.zagueiro_current_state = "A"
@@ -41,6 +38,15 @@ class Field:
         self.penalty_offensive = False
         self.penalty_defensive = False
         self.game_on_but_is_penalty = False
+        
+        #Flags para cartão e timestamp
+        self.yellow_card_flag = False
+        self.yellow_card_timestamp = None
+        self.red_card_flag = False
+        self.yellow_cards_counter = 0
+        self.red_cards_counter = 0
+
+ 
 
     def add_blue_robot(self, robot):
         self.blue_robots.append(robot)
@@ -300,20 +306,25 @@ class Field:
         yellow_team_info = referee_state.yellow
         blue_team_info = referee_state.blue
 
-        if yellow_team_info.yellow_cards > self.yellow_team_yellow_cards_counter:
+        if yellow_team_info.yellow_cards > self.yellow_team_yellow_cards_counter and self.team == "yellow":
             print("CARTAO PRO TIME AMARELO")
+            self.yellow_card_flag = True
+            self.yellow_card_timestamp = time.time()  # Registra o tempo do cartão
+            self.yellow_cards_counter = yellow_team_info.yellow_cards            
 
-        if blue_team_info.yellow_cards > self.blue_team_yellow_cards_counter:
+        if blue_team_info.yellow_cards > self.blue_team_yellow_cards_counter and self.team == "blue":
             print("CARTAO PRO TIME AZUL")
+            self.yellow_card_flag = True
+            self.yellow_card_timestamp = time.time()  # Registra o tempo do cartão
+            self.yellow_cards_counter = blue_team_info.yellow_cards
 
-        self.yellow_team_yellow_cards_counter = yellow_team_info.yellow_cards
-        self.blue_team_yellow_cards_counter = blue_team_info.yellow_cards
-
-        if yellow_team_info.red_cards > self.yellow_team_red_cards_counter:
+        if yellow_team_info.red_cards > self.yellow_team_red_cards_counter and self.team == "yellow":
             print("CARTAO VERMELHO PRO TIME AMARELO")
+            self.red_card_flag = True
+            self.red_cards_counter = yellow_team_info.red_cards
 
-        if blue_team_info.red_cards > self.blue_team_red_cards_counter:
+
+        if blue_team_info.red_cards > self.blue_team_red_cards_counter and self.team == "blue":
             print("CARTAO VERMELHO PRO TIME AZUL")
-
-        self.yellow_team_red_cards_counter = yellow_team_info.red_cards
-        self.blue_team_red_cards_counter = blue_team_info.red_cards
+            self.red_card_flag = True
+            self.red_cards_counter = blue_team_info.red_cards

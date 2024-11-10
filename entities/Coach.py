@@ -41,14 +41,14 @@ class Coach:
             # self.game_stopped = False
             # self.game_on = True
             return True  # Bola dentro de campo
-
-    def expulsao(self, referee_red_card=0):
+    
+    def expulsao(self):
         """
         Altera a quantidade de robôs em campo se um for expulso.
 
         :param referee_red_card: Flag indicando se um robô foi expulso (True ou False)
         """
-        if referee_red_card == 1:  # Se a flag de cartão vermelho for ativada
+        if self.field.red_card_flag == True:  # Se a flag de cartão vermelho for ativada
             if (
                 self.quantidade_robos > 1
             ):  # Verifica se ainda há mais de um robô em campo
@@ -57,7 +57,7 @@ class Coach:
             else:
                 print("Não é possível expulsar mais robôs, só resta um em campo.")
         else:
-            print("Nenhum robô foi expulso.")
+            pass
 
     def escolher_estrategia(self, robot_goleiro, robot_zagueiro, robot_atacante):
         """
@@ -90,13 +90,13 @@ class Coach:
             # Se o jogo estiver em andamento, usa a estratégia básica
             if self.field.game_on and self.field.game_on_but_is_penalty == False:
 
-                if self.quantidade_robos == 2:
+                if self.field.red_cards_counter == 1:
                     # print("Estratégia com 1 robôs a menos em ação")
                     plays.estrategia_desvantagem_2(
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
                     )
 
-                elif self.quantidade_robos == 1:
+                elif self.field.red_cards_counter == 2:
                     # print("Estratégia com 2 robôs a menos em ação")
                     plays.estrategia_desvantagem_1(
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
