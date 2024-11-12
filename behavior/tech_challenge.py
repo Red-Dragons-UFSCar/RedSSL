@@ -78,28 +78,87 @@ class TechChallenge():
             robot2.w = 0
         elif self.state_kick_off:
             print("KICK OFF")
-            self.kickoff_behavior(robot0, robot1, robot2, field)
+            self.set_robot_targets('kickoff')
+            self.moving_behavior(robot0, robot1, robot2, field)
         elif self.state_penalty_kick:
             print("PENALTI KICK")
+            self.set_robot_targets('penalti')
+            self.moving_behavior(robot0, robot1, robot2, field)
         elif self.state_free_kick_ofense:
             print("FREE KICK OFENSIVO")
+            self.set_robot_targets('free_offense')
+            self.moving_behavior(robot0, robot1, robot2, field)
         elif self.state_free_kick_defense:
             print("FREE KICK DEFENSIVO")
+            self.set_robot_targets('free_defense')
+            self.moving_behavior(robot0, robot1, robot2, field)
         else:
             print("ué?")
 
-    def kickoff_behavior(self, robot0, robot1, robot2, field):
-        robot0_xTarget = 225+210
-        robot0_yTarget = 150+0
-        robot0_aTarget = np.pi
+    def set_robot_targets(self, foul):
+        if foul=='kickoff':
+            self.robot0_xTarget = 225+210
+            self.robot0_yTarget = 150+0
+            self.robot0_aTarget = np.pi
 
-        robot1_xTarget = 225+25
-        robot1_yTarget = 150+70
-        robot1_aTarget = np.pi
+            self.robot1_xTarget = 225+25
+            self.robot1_yTarget = 150+70
+            self.robot1_aTarget = np.pi
 
-        robot2_xTarget = 225+25
-        robot2_yTarget = 150+0
-        robot2_aTarget = np.pi
+            self.robot2_xTarget = 225+25
+            self.robot2_yTarget = 150+0
+            self.robot2_aTarget = np.pi
+        elif foul=='penalti':
+            self.robot0_xTarget = 225+31
+            self.robot0_yTarget = 150-70
+            self.robot0_aTarget = np.pi
+
+            self.robot1_xTarget = 225+31
+            self.robot1_yTarget = 150+70
+            self.robot1_aTarget = np.pi
+
+            self.robot2_xTarget = 225-25
+            self.robot2_yTarget = 150+0
+            self.robot2_aTarget = np.pi
+        elif foul=='free_defense':
+            self.robot0_xTarget = 225+210
+            self.robot0_yTarget = 150+30
+            self.robot0_aTarget = np.pi/2
+
+            self.robot1_xTarget = 225+185
+            self.robot1_yTarget = 150+90
+            self.robot1_aTarget = np.pi/2
+
+            self.robot2_xTarget = 225+165
+            self.robot2_yTarget = 150+90
+            self.robot2_aTarget = np.pi/2
+        elif foul=='free_offense':
+            self.robot0_xTarget = 225+15
+            self.robot0_yTarget = 150+70
+            self.robot0_aTarget = np.pi
+
+            self.robot1_xTarget = 225-59
+            self.robot1_yTarget = 150-60
+            self.robot1_aTarget = np.pi/2
+
+            self.robot2_xTarget = 225-185
+            self.robot2_yTarget = 150+142
+            self.robot2_aTarget = -np.pi/2
+        else:
+            # Caso default
+            self.robot0_xTarget = 225
+            self.robot0_yTarget = 150
+            self.robot0_aTarget = np.pi
+
+            self.robot1_xTarget = 275
+            self.robot1_yTarget = 150
+            self.robot1_aTarget = np.pi
+
+            self.robot2_xTarget = 325
+            self.robot2_yTarget = 150
+            self.robot2_aTarget = np.pi
+
+    def moving_behavior(self, robot0, robot1, robot2, field):
 
         for robot_field in field.enemy_robots:
             obst = Obstacle()
@@ -109,6 +168,15 @@ class TechChallenge():
             robot0.map_obstacle.add_obstacle(obst)
             robot1.map_obstacle.add_obstacle(obst)
             robot2.map_obstacle.add_obstacle(obst)
+        
+        ball = field.ball
+        obst = Obstacle()  # Configura a bola como obstáculo
+        obst.set_obst(
+            ball.get_coordinates().X, ball.get_coordinates().Y, 0, radius=20
+        )
+        robot0.map_obstacle.add_obstacle(obst)
+        robot1.map_obstacle.add_obstacle(obst)
+        robot2.map_obstacle.add_obstacle(obst)
         
         # for robot_field in [robot0, robot1]:
         #     obst = Obstacle()
@@ -131,9 +199,9 @@ class TechChallenge():
         #                 robot_field.get_coordinates().rotation)
         #     robot0.map_obstacle.add_obstacle(obst)
 
-        skills.go_to_point(robot0, robot0_xTarget, robot0_yTarget, field, robot0_aTarget)
-        skills.go_to_point(robot1, robot1_xTarget, robot1_yTarget, field, robot1_aTarget)
-        skills.go_to_point(robot2, robot2_xTarget, robot2_yTarget, field, robot2_aTarget)
+        skills.go_to_point(robot0, self.robot0_xTarget, self.robot0_yTarget, field, self.robot0_aTarget)
+        skills.go_to_point(robot1, self.robot1_xTarget, self.robot1_yTarget, field, self.robot1_aTarget)
+        skills.go_to_point(robot2, self.robot2_xTarget, self.robot2_yTarget, field, self.robot2_aTarget)
 
         if robot0.target_reached():
             #skills.go_to_point(robot0, robot0_xTarget, robot0_yTarget, field, robot0_aTarget)
