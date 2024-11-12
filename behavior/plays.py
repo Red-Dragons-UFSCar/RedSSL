@@ -71,7 +71,7 @@ def estrategia_desvantagem_2(robot_goalie, robot_zagueiro, robot_atacante, field
 
     tactics.goleiro(robot_goalie, field)
     tactics.atacante_campo_todo(robot_zagueiro, field)
-    skills.go_to_point(robot_atacante, 150, 380, field, np.pi / 2, 2)
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
 
 
 def estrategia_desvantagem_1(robot_goalie, robot_zagueiro, robot_atacante, field):
@@ -81,8 +81,8 @@ def estrategia_desvantagem_1(robot_goalie, robot_zagueiro, robot_atacante, field
     """
 
     tactics.atacante_campo_todo(robot_goalie, field)
-    skills.go_to_point(robot_zagueiro, 120, 380, field, np.pi / 2, 2)
-    skills.go_to_point(robot_atacante, 150, 380, field, np.pi / 2, 2)
+    skills.go_to_point(robot_zagueiro, 120, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
 
 
 def estrategia_desvantagem_0(robot_goalie, robot_zagueiro, robot_atacante, field):
@@ -91,9 +91,9 @@ def estrategia_desvantagem_0(robot_goalie, robot_zagueiro, robot_atacante, field
     Quando a bola estiver no ataque, o robô que era goleiro se torna zagueiro e o outro atacante.
     """
 
-    skills.go_to_point(robot_goalie, 120, 380, field, np.pi / 2, 2)
-    skills.go_to_point(robot_zagueiro, 150, 380, field, np.pi / 2, 2)
-    skills.go_to_point(robot_atacante, 180, 380, field, np.pi / 2, 2)
+    skills.go_to_point(robot_goalie, 120, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_zagueiro, 150, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_atacante, 180, 360, field, np.pi / 2, 2)
 
 
 def basic_stop_behavior_defensive(robot_goleiro, robot_zagueiro, robot_atacante, field):
@@ -129,6 +129,54 @@ def basic_stop_behavior_defensive(robot_goleiro, robot_zagueiro, robot_atacante,
         )
         # Vai até o ponto alvo desviando da bola
         skills.idle_behavior_avoid_ball_stop_game(robot_zagueiro, field)
+
+
+def basic_stop_behavior_defensive_desvantagem2(
+    robot_goleiro, robot_zagueiro, robot_atacante, field
+):
+    """
+    Descrição: Comportamento básico de stop em casos de faltas defensivas, que
+               precisa estar longe da bola. Um jogador cerca a ação da bola e
+               outro espera no meio campo, a depender da posição da bola
+    """
+    ball = field.ball.get_coordinates()
+
+    tactics.goleiro(robot_goleiro, field)
+
+    skills.projection_stop_target(robot_zagueiro, field)  # Zagueiro vai pra bola
+
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
+
+
+def basic_stop_behavior_defensive_desvantagem1(
+    robot_goleiro, robot_zagueiro, robot_atacante, field
+):
+    """
+    Descrição: Comportamento básico de stop em casos de faltas defensivas, que
+               precisa estar longe da bola. Um jogador cerca a ação da bola e
+               outro espera no meio campo, a depender da posição da bola
+    """
+    ball = field.ball.get_coordinates()
+
+    skills.projection_stop_target(robot_goleiro, field)  # Goleiro vai pra bola
+
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_zagueiro, 180, 360, field, np.pi / 2, 2)
+
+
+def basic_stop_behavior_defensive_desvantagem0(
+    robot_goleiro, robot_zagueiro, robot_atacante, field
+):
+    """
+    Descrição: Comportamento básico de stop em casos de faltas defensivas, que
+               precisa estar longe da bola. Um jogador cerca a ação da bola e
+               outro espera no meio campo, a depender da posição da bola
+    """
+    ball = field.ball.get_coordinates()
+
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_zagueiro, 180, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_goleiro, 120, 360, field, np.pi / 2, 2)
 
 
 def basic_stop_behavior_offensive(robot_goleiro, robot_zagueiro, robot_atacante, field):
@@ -167,6 +215,58 @@ def basic_stop_behavior_offensive(robot_goleiro, robot_zagueiro, robot_atacante,
         )
         # Vai até o ponto alvo desviando da bola
         skills.idle_behavior_avoid_ball_stop_game(robot_zagueiro, field)
+
+
+def basic_stop_behavior_offensive_desvantagem_2(
+    robot_goleiro, robot_zagueiro, robot_atacante, field
+):
+    """
+    Descrição: Comportamento básico de stop em casos de faltas ofensivas, que
+               precisa estar longe da bola. . Um jogador vai para a cobrança e
+               outro espera no meio campo, a depender da posição da bola
+    """
+    ball = field.ball.get_coordinates()
+
+    tactics.goleiro(robot_goleiro, field)
+
+    skills.projection_stop_target(
+        robot_zagueiro, field, kicker=True
+    )  # Zagueiro vai pra bola cobrar
+
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
+
+
+def basic_stop_behavior_offensive_desvantagem_1(
+    robot_goleiro, robot_zagueiro, robot_atacante, field
+):
+    """
+    Descrição: Comportamento básico de stop em casos de faltas ofensivas, que
+               precisa estar longe da bola. . Um jogador vai para a cobrança e
+               outro espera no meio campo, a depender da posição da bola
+    """
+    ball = field.ball.get_coordinates()
+
+    skills.projection_stop_target(
+        robot_goleiro, field, kicker=True
+    )  # Zagueiro vai pra bola cobrar
+
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_zagueiro, 180, 360, field, np.pi / 2, 2)
+
+
+def basic_stop_behavior_offensive_desvantagem_0(
+    robot_goleiro, robot_zagueiro, robot_atacante, field
+):
+    """
+    Descrição: Comportamento básico de stop em casos de faltas ofensivas, que
+               precisa estar longe da bola. . Um jogador vai para a cobrança e
+               outro espera no meio campo, a depender da posição da bola
+    """
+    ball = field.ball.get_coordinates()
+
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_zagueiro, 180, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_goleiro, 120, 360, field, np.pi / 2, 2)
 
 
 def defensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
