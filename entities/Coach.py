@@ -21,9 +21,6 @@ class Coach:
         self.tempo_de_cobranca = 10
         self.quantidade_robos = 3  # Número de robôs da equipe em campo
 
-        # Contador de cartões amarelos ativos
-        self.true_yellow_cards_counter = 0
-
     def verificar_bola_em_campo(self):
         """
         Verifica a posição da bola e determina se ela está fora de campo.
@@ -93,7 +90,13 @@ class Coach:
             # Se o jogo estiver em andamento, usa a estratégia básica
             if self.field.game_on and self.field.game_on_but_is_penalty == False:
 
-                if (
+                if self.field.red_cards_counter == 3:
+                    # Estratégia com 3 robôs a menos em ação")
+                    plays.estrategia_desvantagem_0(
+                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                    )
+
+                elif (
                     self.field.red_cards_counter == 2
                     and self.field.yellow_card_flag == False
                 ):
@@ -103,6 +106,20 @@ class Coach:
                     )
 
                 elif (
+                    self.field.red_cards_counter == 2
+                    and self.field.yellow_card_flag == True
+                ):
+                    elapsed_time = time.time() - self.field.yellow_card_timestamp
+                    if elapsed_time >= 15:
+                        self.field.yellow_card_flag = False
+                        self.field.true_yellow_cards_counter -= 1
+
+                    else:
+                        plays.estrategia_desvantagem_0(
+                            robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                        )
+
+                elif (
                     self.field.red_cards_counter == 1
                     and self.field.yellow_card_flag == True
                 ):
@@ -110,6 +127,7 @@ class Coach:
                     elapsed_time = time.time() - self.field.yellow_card_timestamp
                     if elapsed_time >= 15:
                         self.field.yellow_card_flag = False
+                        self.field.true_yellow_cards_counter -= 1
 
                     else:
                         plays.estrategia_desvantagem_1(
@@ -126,11 +144,30 @@ class Coach:
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
                     )
 
-                elif self.field.yellow_card_flag == True:
+                elif (
+                    self.field.yellow_card_flag == True
+                    and self.field.true_yellow_cards_counter == 2
+                ):
+                    # Estratégia com 1 cartão amarelo ativo
+                    elapsed_time = time.time() - self.field.yellow_card_timestamp
+
+                    if elapsed_time >= 15:  # 2 minutos = 120 segundos
+                        self.field.yellow_card_flag = False  # Desativa a flag após 2
+                        self.field.true_yellow_cards_counter -= 1
+                    else:
+                        plays.estrategia_desvantagem_1(
+                            robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                        )
+
+                elif (
+                    self.field.yellow_card_flag == True
+                    and self.field.true_yellow_cards_counter == 1
+                ):
                     # Estratégia com 1 cartão amarelo ativo
                     elapsed_time = time.time() - self.field.yellow_card_timestamp
                     if elapsed_time >= 15:  # 2 minutos = 120 segundos
                         self.field.yellow_card_flag = False  # Desativa a flag após 2
+                        self.field.true_yellow_cards_counter -= 1
 
                     else:
                         plays.estrategia_desvantagem_2(

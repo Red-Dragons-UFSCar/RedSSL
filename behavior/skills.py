@@ -564,8 +564,8 @@ def penalty_idle_offensive(robot_goleiro, robot_zagueiro, robot_atacante, field)
     field: objeto representando o campo.
     """
     go_to_point(robot_goleiro, 0, 150, field, 0)
-    go_to_point(robot_zagueiro, 150, 150, field, 0)
-    go_to_point(robot_atacante, 250, 150, field, 0)
+    go_to_point(robot_zagueiro, 150, 220, field, 0)
+    go_to_point(robot_atacante, 250, 20, field, 0)
 
 
 def penalty_idle_offensive_game_on(robot_goleiro, robot_zagueiro, field):
@@ -595,8 +595,8 @@ def penalty_idle_defensive(robot_goleiro, robot_zagueiro, robot_atacante, field)
     field: objeto representando o campo.
     """
     go_to_point(robot_goleiro, 0, 150, field, 0)
-    go_to_point(robot_zagueiro, 230, 150, field, 0)
-    go_to_point(robot_atacante, 250, 150, field, 0)
+    go_to_point(robot_zagueiro, 230, 220, field, 0)
+    go_to_point(robot_atacante, 250, 20, field, 0)
 
 
 def penalty_idle_game_on(robot_zagueiro, robot_atacante, field):
@@ -610,5 +610,5 @@ def penalty_idle_game_on(robot_zagueiro, robot_atacante, field):
     robot_atacante: objeto representando o robô atacante.
     field: objeto representando o campo.
     """
-    go_to_point(robot_zagueiro, 230, 150, field, 0)
-    go_to_point(robot_atacante, 250, 150, field, 0)
+    go_to_point(robot_zagueiro, 230, 220, field, 0)
+    go_to_point(robot_atacante, 250, 20, field, 0)

@@ -42,6 +42,7 @@ class Field:
         # Flags para cartão e timestamp
         self.yellow_card_flag = False
         self.yellow_card_timestamp = None
+        self.true_yellow_cards_counter = 0
         self.red_card_flag = False
         self.yellow_cards_counter = 0
         self.red_cards_counter = 0
@@ -312,6 +313,7 @@ class Field:
             self.yellow_card_flag = True
             self.yellow_card_timestamp = time.time()  # Registra o tempo do cartão
             self.yellow_cards_counter = yellow_team_info.yellow_cards
+            self.true_yellow_cards_counter += 1
 
         if (
             blue_team_info.yellow_cards > self.yellow_cards_counter
@@ -321,6 +323,7 @@ class Field:
             self.yellow_card_flag = True
             self.yellow_card_timestamp = time.time()  # Registra o tempo do cartão
             self.yellow_cards_counter = blue_team_info.yellow_cards
+            self.true_yellow_cards_counter += 1
 
         if (
             yellow_team_info.red_cards > self.red_cards_counter

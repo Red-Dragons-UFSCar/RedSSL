@@ -71,7 +71,7 @@ def estrategia_desvantagem_2(robot_goalie, robot_zagueiro, robot_atacante, field
 
     tactics.goleiro(robot_goalie, field)
     tactics.atacante_campo_todo(robot_zagueiro, field)
-    skills.go_to_point(robot_atacante, 150, 390, field, np.pi / 2, 2)
+    skills.go_to_point(robot_atacante, 150, 380, field, np.pi / 2, 2)
 
 
 def estrategia_desvantagem_1(robot_goalie, robot_zagueiro, robot_atacante, field):
@@ -81,8 +81,19 @@ def estrategia_desvantagem_1(robot_goalie, robot_zagueiro, robot_atacante, field
     """
 
     tactics.atacante_campo_todo(robot_goalie, field)
-    skills.go_to_point(robot_zagueiro, 120, 390, field, np.pi / 2, 2)
-    skills.go_to_point(robot_atacante, 150, 390, field, np.pi / 2, 2)
+    skills.go_to_point(robot_zagueiro, 120, 380, field, np.pi / 2, 2)
+    skills.go_to_point(robot_atacante, 150, 380, field, np.pi / 2, 2)
+
+
+def estrategia_desvantagem_0(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Quando a bola estiver na defesa, um robô se torna goleiro, o outro zagueiro.
+    Quando a bola estiver no ataque, o robô que era goleiro se torna zagueiro e o outro atacante.
+    """
+
+    skills.go_to_point(robot_goalie, 120, 380, field, np.pi / 2, 2)
+    skills.go_to_point(robot_zagueiro, 150, 380, field, np.pi / 2, 2)
+    skills.go_to_point(robot_atacante, 180, 380, field, np.pi / 2, 2)
 
 
 def basic_stop_behavior_defensive(robot_goleiro, robot_zagueiro, robot_atacante, field):
