@@ -561,9 +561,9 @@ def attack_ball_fisico(robot0, field):
     # Calcula a diferença angular entre o robô e a bola em relação ao alvo
     angle_diff = np.degrees(angle_ball_to_target - angle_robot_to_ball)
 
-    approach_offset = -35
+    approach_offset = -20
     #threshold = 2
-    threshold = 10
+    threshold = 15
 
     print("Contador: ", field.counter_attacker_stop)
     if current_state == STATE_A:
@@ -603,11 +603,11 @@ def attack_ball_fisico(robot0, field):
         robot0.vx = 0
         robot0.vy = 0
 
-        if not robot0.target_reached(threshold):
+        if not robot0.target_reached(threshold+5):
             current_state = STATE_A
         else:
             field.counter_attacker_stop += 1
-            if field.counter_attacker_stop > 2*field.threshold_attacker_stop:
+            if field.counter_attacker_stop > 4*field.threshold_attacker_stop:
                 current_state = STATE_B
                 field.counter_attacker_stop = 0
         
@@ -620,13 +620,16 @@ def attack_ball_fisico(robot0, field):
         #robot0.v_max = 1.5
         print("Estado B")
 
-        if not abs(angle_diff) <= 30:
+        if not abs(angle_diff) <= 60:
             current_state = STATE_A
+            field.counter_attacker_stop = 0
         elif (
             90 <= np.degrees(angle_robot_to_ball) <= 180
             or -180 <= np.degrees(angle_robot_to_ball) <= -90
         ):
-            current_state = STATE_C
+            field.counter_attacker_stop += 1
+            if field.counter_atacker_stop > 5*field.threshold_attacker_stop:
+                current_state = STATE_C
 
     elif current_state == STATE_C:
         # Estado D: Evitar a bola
@@ -655,20 +658,32 @@ def attack_ball_fisico(robot0, field):
     #     and robot_position.X >= 370
     # ):
     #     #robot0.v_max = 1
-
+    field.send_local = False
     # Usa a função adequada para mover o robô
     if current_state == STATE_B:
+        field.send_local = False
+        robot0.vMax = 0.7
+        field.send_local = True
+        robot0.vx = 1.0
+        robot0.vy = 0
         go_to_point_angled(robot0, target_x, target_y, field, target_theta, threshold)
     elif current_state == STATE_A:
+        field.send_local = False
+        robot0.vMax = 1.0
         go_to_point(robot0, target_x, target_y, field, target_theta, threshold)
         robot0.w = 0
     elif current_state == STATE_C:
+        robot0.vMax = 1.0
         go_to_point(robot0, target_x, target_y, field, target_theta, threshold)
         robot0.w = 0
     else:
+        field.send_local = False
+        robot0.vMax = 1.0
         go_to_point(robot0, target_x, target_y, field, target_theta, threshold)
         robot0.vx = 0
         robot0.vy = 0
+        if abs(robot0.get_coordinates().rotation - target_theta) < 20*np.pi/180:
+            robot0.w = 0
 
 def pursue_ball_fisico(robot0, field):
     """

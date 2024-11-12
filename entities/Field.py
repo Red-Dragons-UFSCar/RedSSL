@@ -43,6 +43,8 @@ class Field:
         self.defending_foul = True
         self.offensive_foul = False
 
+        self.send_local = False
+
     def add_blue_robot(self, robot):
         self.blue_robots.append(robot)
 

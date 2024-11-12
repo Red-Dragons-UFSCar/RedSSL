@@ -27,7 +27,7 @@ class Robot(KinematicBody):
         self.w = 0  # Velocidade angular do robô
 
         # Valores máximos do robô móvel
-        self.v_max = 2  # Velocidade linear máxima em módulo
+        self.v_max = 1.0  # Velocidade linear máxima em módulo
 
         '''
         # Parâmetros PID
@@ -60,21 +60,21 @@ class Robot(KinematicBody):
         '''
 
         ''' FISICO ATUAL
+        '''
         Kp_x = 25
         Kd_x = 0
-        Ki_x = 15
+        Ki_x = 30
         N_x = 30
         Kp_y = 25
         Kd_y = 0
-        Ki_y = 15
+        Ki_y = 30
         N_y = 30
-        Kp_theta = 3
+        Kp_theta = 5
         Kd_theta = 0
         Ki_theta = 0
-        '''
+        
 
         ''' SIMULACAO 2
-        '''
         Kp_x = 13
         Kd_x = 0
         Ki_x = 50
@@ -86,6 +86,7 @@ class Robot(KinematicBody):
         Kp_theta = 7
         Kd_theta = 0
         Ki_theta = 0
+        '''
         
         
 
@@ -93,7 +94,7 @@ class Robot(KinematicBody):
         self.control_PID_x = PID_discrete(Kp_x, Kd_x, Ki_x, saturation=2, N=N_x)
         self.control_PID_y = PID_discrete(Kp_y, Kd_y, Ki_y, saturation=2, N=N_y)
         #self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=5)
-        self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=7)
+        self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=5)
 
         # Parâmetros construtivos do robo
         # Todos esses parâmetros do grSim estão em grSim/config/Parsian.ini

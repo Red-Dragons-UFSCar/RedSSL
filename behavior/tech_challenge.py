@@ -203,21 +203,21 @@ class TechChallenge():
         skills.go_to_point(robot1, self.robot1_xTarget, self.robot1_yTarget, field, self.robot1_aTarget)
         skills.go_to_point(robot2, self.robot2_xTarget, self.robot2_yTarget, field, self.robot2_aTarget)
 
-        if robot0.target_reached():
+        if robot0.target_reached(treshold=30):
             #skills.go_to_point(robot0, robot0_xTarget, robot0_yTarget, field, robot0_aTarget)
             robot0.vx = 0
             robot0.vy = 0
         else:
             robot0.w = 0
 
-        if robot1.target_reached():
+        if robot1.target_reached(treshold=30):
             #skills.go_to_point(robot0, robot0_xTarget, robot0_yTarget, field, robot0_aTarget)
             robot1.vx = 0
             robot1.vy = 0
         else:
             robot1.w = 0
 
-        if robot2.target_reached():
+        if robot2.target_reached(treshold=30):
             #skills.go_to_point(robot0, robot0_xTarget, robot0_yTarget, field, robot0_aTarget)
             robot2.vx = 0
             robot2.vy = 0

@@ -157,9 +157,15 @@ class RobotController:
         self.actuator.send_wheel_from_global(
             self.robot1, self.robot1.vx, self.robot1.vy, self.robot1.w, self.mode_playing['simulated_mode']
         )
-        self.actuator.send_wheel_from_global(
-            self.robot2, self.robot2.vx, self.robot2.vy, self.robot2.w, self.mode_playing['simulated_mode']
-        )
+        if self.field.send_local:
+            print("--------------------------------------------------------------")
+            self.actuator.send_wheel_from_local_fisico(
+                self.robot2, self.robot2.vx, self.robot2.vy, self.robot2.w, self.mode_playing['simulated_mode']
+            )
+        else:
+            self.actuator.send_wheel_from_global(
+                self.robot2, self.robot2.vx, self.robot2.vy, self.robot2.w, self.mode_playing['simulated_mode']
+            )
 
     def get_vision_frame(self):
         """
@@ -192,9 +198,9 @@ class RobotController:
                 self.field.game_on = True
                 self.field.game_stopped = False
 
-            #Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
+            #Coach.escolher_estrategia(self.coach, self.robot2, self.robot1, self.robot0)
             #skills.go_to_point(self.robot0, self.field.ball.get_coordinates().X, self.field.ball.get_coordinates().Y, self.field, 0, threshold=15)
-            estrategia_basica_real(self.robot0,self.robot1,self.robot2,self.field)
+            estrategia_basica_real(self.robot2,self.robot0,self.robot1,self.field)
             #skills.attack_ball_fisico(self.robot0, self.field)
 
             #self.robot0.vx = 1
@@ -208,24 +214,26 @@ class RobotController:
             self.robot1.map_obstacle.clear_map()
             self.robot2.map_obstacle.clear_map()
 
+            self.field.send_local = False
+
             print("---------------------------------------")
             print("    LOGGING DOS ROBÔS TIME     ")
             print("---------------------------------------")
-            print("Robo goleiro, id=", self.robot0.vision_id)
-            print("x: ", self.robot0.get_coordinates().X)
-            print("y: ", self.robot0.get_coordinates().X)
-            print("r: ", self.robot0.get_coordinates().rotation)
-            print("vx: ", self.robot0.vx)
-            print("vy: ", self.robot0.vy)
-            print("w: ", self.robot0.w)
-            # print("Robo zagueiro, id=", self.robot1.vision_id)
-            # print("x: ", self.robot1.get_coordinates().X)
-            # print("y: ", self.robot1.get_coordinates().X)
-            # print("r: ", self.robot1.get_coordinates().rotation)
-            # print("Robo goleiro, id=", self.robot2.vision_id)
-            # print("x: ", self.robot2.get_coordinates().X)
-            # print("y: ", self.robot2.get_coordinates().X)
-            # print("r: ", self.robot2.get_coordinates().rotation)
+            # print("Robo goleiro, id=", self.robot0.vision_id)
+            # print("x: ", self.robot0.get_coordinates().X)
+            # print("y: ", self.robot0.get_coordinates().X)
+            # print("r: ", self.robot0.get_coordinates().rotation)
+            # print("vx: ", self.robot0.vx)
+            # print("vy: ", self.robot0.vy)
+            # print("w: ", self.robot0.w)
+            print("Robo zagueiro, id=", self.robot1.vision_id)
+            print("x: ", self.robot1.get_coordinates().X)
+            print("y: ", self.robot1.get_coordinates().X)
+            print("r: ", self.robot1.get_coordinates().rotation)
+            print("Robo goleiro, id=", self.robot2.vision_id)
+            print("x: ", self.robot2.get_coordinates().X)
+            print("y: ", self.robot2.get_coordinates().X)
+            print("r: ", self.robot2.get_coordinates().rotation)
 
             # print("---------------------------------------")
             # print("    LOGGING DOS ROBÔS INIMIGO     ")
