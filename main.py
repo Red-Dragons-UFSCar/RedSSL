@@ -38,6 +38,7 @@ class RepeatTimer(threading.Timer):
 class RobotController:
     def __init__(self):
         # Lendo os valores de IP e Porta
+
         with open("constants/network.json", "r") as file:
             network = json.load(file)
 
@@ -80,9 +81,9 @@ class RobotController:
 
         # Cria e adiciona robôs ao campo com base na cor escolhida
         if self.team_color == "blue":
-            self.robot0 = Robot(robot_id=0, actuator=self.actuator)
-            self.robot1 = Robot(robot_id=1, actuator=self.actuator)
-            self.robot2 = Robot(robot_id=2, actuator=self.actuator)
+            self.robot0 = Robot(robot_id=0, actuator=self.actuator, vision_id=self.game['team']['id_goalkeeper'])
+            self.robot1 = Robot(robot_id=1, actuator=self.actuator, vision_id=self.game['team']['id_defender'])
+            self.robot2 = Robot(robot_id=2, actuator=self.actuator, vision_id=self.game['team']['id_attacker'])
             self.field.add_blue_robot(self.robot0)
             self.field.add_blue_robot(self.robot1)
             self.field.add_blue_robot(self.robot2)
@@ -101,9 +102,9 @@ class RobotController:
                 self.enemy_robot2,
             ]
         elif self.team_color == "yellow":
-            self.robot0 = Robot(robot_id=0, actuator=self.actuator)
-            self.robot1 = Robot(robot_id=1, actuator=self.actuator)
-            self.robot2 = Robot(robot_id=2, actuator=self.actuator)
+            self.robot0 = Robot(robot_id=0, actuator=self.actuator, vision_id=self.game['team']['id_goalkeeper'])
+            self.robot1 = Robot(robot_id=1, actuator=self.actuator, vision_id=self.game['team']['id_defender'])
+            self.robot2 = Robot(robot_id=2, actuator=self.actuator, vision_id=self.game['team']['id_defender'])
             self.field.add_yellow_robot(self.robot0)
             self.field.add_yellow_robot(self.robot1)
             self.field.add_yellow_robot(self.robot2)
@@ -126,6 +127,7 @@ class RobotController:
             return
 
         # Atualiza as posições dos robôs azuis no campo com base nas informações da visão
+        self.field.verify_team_id(frame[f"robots_{self.team_color}"])
         for detection in frame[f"robots_{self.team_color}"]:
             self.field.update_robot_position(
                 detection["robot_id"],
@@ -137,6 +139,7 @@ class RobotController:
 
         # Atualiza as posições dos robôs inimigos no campo com base nas informações da visão
         enemy_color = "yellow" if self.team_color == "blue" else "blue"
+        self.field.verify_enemy_id(frame[f"robots_{enemy_color}"])
         for detection in frame[f"robots_{enemy_color}"]:
             self.field.update_robot_position(
                 detection["robot_id"],
@@ -167,13 +170,13 @@ class RobotController:
         """
         # Envio de velocidades do sistema global diretamente para as rodas
         self.actuator.send_wheel_from_global(
-            self.robot0, self.robot0.vx, self.robot0.vy, self.robot0.w
+            self.robot0, self.robot0.vx, self.robot0.vy, self.robot0.w, self.mode_playing['simulated_mode']
         )
         self.actuator.send_wheel_from_global(
-            self.robot1, self.robot1.vx, self.robot1.vy, self.robot1.w
+            self.robot1, self.robot1.vx, self.robot1.vy, self.robot1.w, self.mode_playing['simulated_mode']
         )
         self.actuator.send_wheel_from_global(
-            self.robot2, self.robot2.vx, self.robot2.vy, self.robot2.w
+            self.robot2, self.robot2.vx, self.robot2.vy, self.robot2.w, self.mode_playing['simulated_mode']
         )
 
     def get_vision_frame(self):
@@ -215,6 +218,38 @@ class RobotController:
             self.robot0.map_obstacle.clear_map()
             self.robot1.map_obstacle.clear_map()
             self.robot2.map_obstacle.clear_map()
+
+            print("---------------------------------------")
+            print("    LOGGING DOS ROBÔS TIME     ")
+            print("---------------------------------------")
+            print("Robo goleiro, id=", self.robot0.vision_id)
+            print("x: ", self.robot0.get_coordinates().X)
+            print("y: ", self.robot0.get_coordinates().X)
+            print("r: ", self.robot0.get_coordinates().rotation)
+            print("Robo zagueiro, id=", self.robot1.vision_id)
+            print("x: ", self.robot1.get_coordinates().X)
+            print("y: ", self.robot1.get_coordinates().X)
+            print("r: ", self.robot1.get_coordinates().rotation)
+            print("Robo goleiro, id=", self.robot2.vision_id)
+            print("x: ", self.robot2.get_coordinates().X)
+            print("y: ", self.robot2.get_coordinates().X)
+            print("r: ", self.robot2.get_coordinates().rotation)
+
+            print("---------------------------------------")
+            print("    LOGGING DOS ROBÔS INIMIGO     ")
+            print("---------------------------------------")
+            print("Robo goleiro, id=", self.enemy_robot0.vision_id)
+            print("x: ", self.enemy_robot0.get_coordinates().X)
+            print("y: ", self.enemy_robot0.get_coordinates().X)
+            print("r: ", self.enemy_robot0.get_coordinates().rotation)
+            print("Robo zagueiro, id=", self.enemy_robot1.vision_id)
+            print("x: ", self.enemy_robot1.get_coordinates().X)
+            print("y: ", self.enemy_robot1.get_coordinates().X)
+            print("r: ", self.enemy_robot1.get_coordinates().rotation)
+            print("Robo goleiro, id=", self.enemy_robot2.vision_id)
+            print("x: ", self.enemy_robot2.get_coordinates().X)
+            print("y: ", self.enemy_robot2.get_coordinates().X)
+            print("r: ", self.enemy_robot2.get_coordinates().rotation)
 
             if (t2 - t1) < 1 / CONTROL_FPS:
                 time.sleep(1 / CONTROL_FPS - (t2 - t1))

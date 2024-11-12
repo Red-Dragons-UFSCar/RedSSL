@@ -168,7 +168,7 @@ class Actuator():
         self.send_socket(robot_control.SerializeToString())
 
     
-    def send_wheel_from_global(self, robot, velocity_x, velocity_y, angular):
+    def send_wheel_from_global(self, robot, velocity_x, velocity_y, angular, simulated_mode):
         '''
         Descrição:  
                 Método responsável pelo envio da velocidade de cada roda do robô 
@@ -202,7 +202,10 @@ class Actuator():
 
         # Por algum motivo os motores precisam ir de 4 até 1... 
         # O simulador inverteu os motores
-        self.send_wheelVelocity_message(robot.robot_id, dw4, dw3, dw2, dw1)
+        if simulated_mode:
+            self.send_wheelVelocity_message(robot.vision_id, dw4, dw3, dw2, dw1)
+        else:
+            self.send_wheelVelocity_message(robot.robot_id, dw4, dw3, dw2, dw1)
 
 
 if __name__ == '__main__':
