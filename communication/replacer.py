@@ -2,10 +2,12 @@ import socket
 import numpy as np
 
 from commons.math import rotate_vector
+from communication.proto.grSim_Commands_pb2 import grSim_Commands, grSim_Robot_Command
 from communication.proto.grSim_Replacement_pb2 import grSim_BallReplacement, grSim_Replacement, grSim_RobotReplacement
+from communication.proto.grSim_Packet_pb2 import grSim_Packet
 
 class Replacer():
-    def __init__(self, ip:str='8.8.8.8', port:int=10000, team_port:int=10301, logger:bool=False) -> None:
+    def __init__(self, ip:str='localhost', port:int=10000, team_port:int=20011, logger:bool=False) -> None:
         """
         Descrição:
                 Classe para interação com um atuador em um sistema de controle ou automação.
@@ -69,14 +71,9 @@ class Replacer():
         self.yellowteam = yellowteam
         self.turnon = turnon
 
-        replacement = grSim_Replacement()
+        packet = grSim_Packet()
 
-        # ball_replacement = replacement.ball
-
-        # ball_replacement.x = 0
-        # ball_replacement.y = 0
-        # ball_replacement.vx = 0
-        # ball_replacement.vy = 0
+        replacement = packet.replacement
 
         robot_replacement = replacement.robots.add()
 
@@ -87,13 +84,7 @@ class Replacer():
         robot_replacement.yellowteam = self.yellowteam
         robot_replacement.turnon = self.turnon
 
-        # print(ball_replacement)
-        # print(ball_replacement.SerializeToString())
-        # print(robot_replacement.SerializeToString())
-        print(replacement)
-        # print(replacement.SerializeToString())
-
-        self.send_socket(replacement.SerializeToString())
+        self.send_socket(packet.SerializeToString())
 
 
     def send_ballReplacement_message(self, x, y, vx, vy):
@@ -103,7 +94,9 @@ class Replacer():
         self.vx = vx
         self.vy = vy
 
-        replacement = grSim_Replacement()
+        packet = grSim_Packet()
+
+        replacement = packet.replacement
         
         ball_replacement = replacement.ball
 
@@ -112,54 +105,40 @@ class Replacer():
         ball_replacement.vx = vx
         ball_replacement.vy = vy
 
-        self.send_socket(replacement.SerializeToString())
-
-
-    def send_replacement_message(self):
-        pass
+        self.send_socket(packet.SerializeToString())
 
 
 if __name__ == '__main__':
     import time
-    replacer = Replacer(team_port=10300, logger=True)
+    replacer = Replacer()
 
-    # replacer.send_robotReplacement_message(1, 1, 1, 1, 0, 1)
+    ball_x = [-0.5, 0.5, 0.5 , -0.5]
+    ball_y = [0.5 , 0.5, -0.5, -0.5]
+    ball_cont = 0
 
-    for i in range(10):
-        # replacer.send_robotReplacement_message(0, 0, 0, 0, 0, 1)
-        time.sleep(1)
-        print(i)
-        for j in range(3):
-            replacer.send_robotReplacement_message(2, 2, 2, j, 0, 1)
+    robot_x = [[-1.25, 1.25, 1.25, -1.25],
+               [-1   , 1   , 1   , -1   ],
+               [-0.75, 0.75, 0.75, -0.75]]
+    robot_y = [[1.25, 1.25, -1.25, -1.25],
+               [1   , 1   , -1   , -1   ],
+               [0.75, 0.75, -0.75, -0.75]]
+    robot_dir = [[0, 0, 0, 0],
+                 [0, 0, 0, 0],
+                 [0, 0, 0, 0]]
+    robot_count = 0
 
-    from entities.Robot import Robot
-    from actuator import Actuator
-    import json
+    while True:
+        t1 = time.time()
 
-    # with open('constants/network.json', 'r') as file:
-    #     network = json.load(file)
+        replacer.send_ballReplacement_message(ball_x[ball_cont], ball_y[ball_cont], 0, 0)
+        for i in range(3):
+            replacer.send_robotReplacement_message(robot_x[i][robot_count], robot_y[i][robot_count], robot_dir[i][robot_count], i, 0, 1)
 
-    # actuator = Actuator(ip=network['command']['ip'], team_port=network['command']['port'])
-    actuator = Actuator(ip='localhost', team_port=10301)
-    robot0 = Robot(robot_id=0, actuator=actuator)
+        ball_cont = (ball_cont + 1) % 4
+        robot_count = (robot_count + 1) % 4
+        time.sleep(0.5)
 
-    robot0.vx = 20
-    robot0.vy = 20
-    robot0.w = 2
+        t2 = time.time()
 
-    for i in range(10):
-        # replacer.send_robotReplacement_message(0, 0, 0, 0, 0, 1)
-        time.sleep(1)
-        print(i)
-        actuator.send_wheel_from_global(robot0, robot0.vx, robot0.vy, robot0.w)
-
-
-    # while True:
-    #     t1 = time.time()
-    #     replacer.send_robotReplacement_message(0, 0, 0, 0, 0, 0)
-    #     t2 = time.time()
-
-    #     print('a')
-
-    #     if( (t2-t1) < 1/300 ):
-    #         time.sleep(1/300 - (t2-t1))
+        if( (t2-t1) < 1/300 ):
+            time.sleep(1/300 - (t2-t1))
