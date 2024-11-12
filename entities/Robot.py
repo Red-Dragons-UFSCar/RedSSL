@@ -10,9 +10,10 @@ import numpy as np
 class Robot(KinematicBody):
     """Armazena dados sobre os robôs no jogo."""
 
-    def __init__(self, robot_id: int, actuator: Actuator):
+    def __init__(self, robot_id: int, actuator: Actuator, vision_id:int=None):
         super().__init__()
         self.robot_id = robot_id
+        self.vision_id = vision_id
         self.actuator = actuator
         self.map_obstacle = ObstacleMap()
         self.cont_target = 0  # Adicionado cont_target como atributo do robô
