@@ -1,0 +1,1 @@
+PYTHONPATH=. python3 ./commons/generate_filter_constants.py

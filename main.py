@@ -43,9 +43,9 @@ class RobotController:
             network = json.load(file)
 
         with open("constants/mode_playing.json", "r") as file:
-            mode_playing = json.load(file)
+            self.mode_playing = json.load(file)
 
-        if mode_playing["simulated_mode"]:
+        if self.mode_playing["simulated_mode"]:
             # Lendo as configurações de jogo para simulação
             with open("constants/game.json", "r") as file:
                 game = json.load(file)
@@ -53,6 +53,9 @@ class RobotController:
             # Lendo as configurações de jogo para vida real
             with open("constants/game_real.json", "r") as file:
                 game = json.load(file)
+        
+        with open("constants/filter_parameters.json", "r") as file:
+            filter_parameters = json.load(file)
 
         self.team_color = game["team"]["color"]  # Lê a cor do time
 
@@ -81,9 +84,9 @@ class RobotController:
 
         # Cria e adiciona robôs ao campo com base na cor escolhida
         if self.team_color == "blue":
-            self.robot0 = Robot(robot_id=0, actuator=self.actuator, vision_id=self.game['team']['id_goalkeeper'])
-            self.robot1 = Robot(robot_id=1, actuator=self.actuator, vision_id=self.game['team']['id_defender'])
-            self.robot2 = Robot(robot_id=2, actuator=self.actuator, vision_id=self.game['team']['id_attacker'])
+            self.robot0 = Robot(robot_id=0, actuator=self.actuator, vision_id=game['team']['id_goalkeeper'])
+            self.robot1 = Robot(robot_id=1, actuator=self.actuator, vision_id=game['team']['id_defender'])
+            self.robot2 = Robot(robot_id=2, actuator=self.actuator, vision_id=game['team']['id_attacker'])
             self.field.add_blue_robot(self.robot0)
             self.field.add_blue_robot(self.robot1)
             self.field.add_blue_robot(self.robot2)
@@ -121,6 +124,10 @@ class RobotController:
                 self.enemy_robot1,
                 self.enemy_robot2,
             ]
+        
+        for param in filter_parameters:
+            setattr(self.robot0.filter, param, np.asarray(filter_parameters[param]))
+            # print(getattr(self.robot0.filter, param))
 
     def update_coordinates(self, frame):
         if frame["frame_number"] == 0:
