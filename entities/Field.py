@@ -29,7 +29,13 @@ class Field:
         self.zagueiro_current_state = "A"
 
         # Máquina de estados do atacante
-        self.atacante_current_state = "A"
+        self.atacante_current_state = "B"
+
+        # Máquina de estados do atacante real
+        self.atacante_state_real = "A"
+        self.enable_angular_controller_mono = False
+        self.threshold_attacker_stop = 30
+        self.counter_attacker_stop = 0
 
         # Flags para estados de jogo
         self.game_on = False

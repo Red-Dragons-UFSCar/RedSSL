@@ -11,6 +11,7 @@ from behavior.plays import (
     estrategia_penalti_defensivo,
     estrategia_penalti_ofensivo,
 )
+from behavior.tech_challenge import TechChallenge
 from communication.referee import RefereeCommunication
 from behavior.tactics import *
 import time
@@ -21,7 +22,7 @@ import json
 CONTROL_FPS = 60  # FPS original para o controle de posição
 CAM_FPS = 7 * CONTROL_FPS  # FPS para processar os dados da visão
 
-REFEREE_ON = False  # Habilita a comunicação com o Referee
+REFEREE_ON = True  # Habilita a comunicação com o Referee
 
 class RepeatTimer(threading.Timer):
     """
@@ -65,6 +66,8 @@ class RobotController:
         # Inicializa o campo de jogo
         self.field = Field()
         self.referee = RefereeCommunication(field=self.field, ip=self.network['referee']['ip'], port=self.network['referee']['port'])
+
+        self.tech = TechChallenge()
 
         # Inicializa o coach
         self.coach = Coach(self.field)
@@ -154,6 +157,7 @@ class RobotController:
         self.actuator.send_wheel_from_global(
             self.robot0, self.robot0.vx, self.robot0.vy, self.robot0.w, self.mode_playing['simulated_mode']
         )
+        print("vx: ", self.robot1.vx)
         self.actuator.send_wheel_from_global(
             self.robot1, self.robot1.vx, self.robot1.vy, self.robot1.w, self.mode_playing['simulated_mode']
         )
@@ -187,19 +191,21 @@ class RobotController:
                 # Recebe a mensagem do árbitro
                 self.referee.get_referee_message()
                 # Trata o comando do árbitro
-                self.referee.handle_referee_command()
+                # self.referee.handle_referee_command()
             else:
                 self.field.game_on = True
                 self.field.game_stopped = False
 
             #Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
             #skills.go_to_point(self.robot0, self.field.ball.get_coordinates().X, self.field.ball.get_coordinates().Y, self.field, 0, threshold=15)
-            estrategia_basica_real(self.robot0,self.robot1,self.robot2,self.field)
+            #estrategia_basica_real(self.robot2,self.robot0,self.robot1,self.field)
             #skills.attack_ball_fisico(self.robot0, self.field)
 
-            #self.robot0.vx = 1
-            #self.robot0.vy = 0
-            #self.robot0.w = 0
+            if self.referee.referee_state:
+                self.tech.machine_state_update(self.referee.referee_state.command)
+            #self.tech.machine_state_update(self.referee.referee_state.command)
+            self.tech.tech_control(self.robot0, self.robot1, self.robot2, self.field)
+
             self.send_velocities()
 
             t2 = time.time()
@@ -208,16 +214,16 @@ class RobotController:
             self.robot1.map_obstacle.clear_map()
             self.robot2.map_obstacle.clear_map()
 
-            print("---------------------------------------")
-            print("    LOGGING DOS ROBÔS TIME     ")
-            print("---------------------------------------")
-            print("Robo goleiro, id=", self.robot0.vision_id)
-            print("x: ", self.robot0.get_coordinates().X)
-            print("y: ", self.robot0.get_coordinates().X)
-            print("r: ", self.robot0.get_coordinates().rotation)
-            print("vx: ", self.robot0.vx)
-            print("vy: ", self.robot0.vy)
-            print("w: ", self.robot0.w)
+            # print("---------------------------------------")
+            # print("    LOGGING DOS ROBÔS TIME     ")
+            # print("---------------------------------------")
+            # print("Robo goleiro, id=", self.robot0.vision_id)
+            # print("x: ", self.robot0.get_coordinates().X)
+            # print("y: ", self.robot0.get_coordinates().X)
+            # print("r: ", self.robot0.get_coordinates().rotation)
+            # print("vx: ", self.robot0.vx)
+            # print("vy: ", self.robot0.vy)
+            # print("w: ", self.robot0.w)
             # print("Robo zagueiro, id=", self.robot1.vision_id)
             # print("x: ", self.robot1.get_coordinates().X)
             # print("y: ", self.robot1.get_coordinates().X)
