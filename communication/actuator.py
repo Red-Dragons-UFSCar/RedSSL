@@ -93,10 +93,7 @@ class Actuator():
         # Atribua a mensagem MoveWheelVelocity ao campo move_command da mensagem RobotCommand
         robot_command.move_command.wheel_velocity.CopyFrom(move_command)
 
-        print("fr: ", self.wheel_fr)
-        print("fl: ", self.wheel_fl)
-        print("br: ", self.wheel_br)
-        print("bl: ", self.wheel_bl)
+        
         self.send_socket(robot_control.SerializeToString())
         
 
@@ -209,11 +206,6 @@ class Actuator():
         # Por algum motivo os motores precisam ir de 4 até 1... 
         # O simulador inverteu os motores
         if simulated_mode:
-            print("--------------")
-            print("MENSAGEM ENVIADA")
-            print("Robo: ", robot.vision_id)
-            print("Vx: ", robot.vx)
-            print("Vy: ", robot.vy)
             self.send_wheelVelocity_message(robot.vision_id, dw4, dw3, dw2, dw1)
         else:
             self.send_wheelVelocity_message(robot.robot_id, dw1, dw2, dw3, dw4)
