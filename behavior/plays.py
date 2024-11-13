@@ -287,6 +287,38 @@ def defensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
     )
 
 
+def defensive_kickoff_2(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Estratégia de kickoff defensivo com um robô a menos
+    """
+    # print("Posicionando robô goleiro no ponto específico.")
+    skills.go_to_point(robot_goalie, 30, 150, field, 0)
+
+    # print("Posicionando robô zagueiro no ponto específico.")
+    skills.stop_kickoff_positioning(
+        robot_zagueiro, field, attacking=False, attacker=True
+    )
+
+    # print("Posicionando robô atacante no ponto específico.")
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
+
+
+def defensive_kickoff_1(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Estratégia de kickoff defensivo com um robô a menos
+    """
+    # print("Posicionando robô zagueiro no ponto específico.")
+    skills.stop_kickoff_positioning(
+        robot_goalie, field, attacking=False, attacker=False
+    )
+
+    # print("Posicionando robô zagueiro no ponto específico.")
+    skills.go_to_point(robot_zagueiro, 120, 360, field, np.pi / 2, 2)
+
+    # print("Posicionando robô atacante no ponto específico.")
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
+
+
 def offensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
     """
     Estratégia de kickoff ofensivo
@@ -303,3 +335,35 @@ def offensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
     skills.stop_kickoff_positioning(
         robot_atacante, field, attacking=True, attacker=True
     )
+
+
+def offensive_kickoff_2(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Estratégia de kickoff ofensivo com um robô a menos
+    """
+    # print("Posicionando robô goleiro no ponto específico.")
+    skills.go_to_point(robot_goalie, 30, 150, field, 0)
+
+    # print("Posicionando robô zagueiro no ponto específico.")
+    skills.stop_kickoff_positioning(
+        robot_zagueiro, field, attacking=True, attacker=True
+    )
+
+    # print("Posicionando robô atacante no ponto específico.")
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
+
+
+def offensive_kickoff_1(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Estratégia de kickoff ofensivo com dois robôs a menos
+    """
+    # print("Posicionando robô goleiro no ponto específico.")
+    skills.stop_kickoff_positioning(
+        robot_goalie, field, attacking=True, attacker=True
+    )
+
+    # print("Posicionando robô zagueiro no ponto específico.")
+    skills.go_to_point(robot_zagueiro, 120, 360, field, np.pi / 2, 2)
+
+    # print("Posicionando robô atacante no ponto específico.")
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)

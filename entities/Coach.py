@@ -217,16 +217,39 @@ class Coach:
                 )
 
             elif self.field.kickoff_offensive:
+                if self.field.allowed_robots == 3:
                 # Estratégia de kickoff ofensivo
-                plays.offensive_kickoff(
-                    robot_goleiro, robot_zagueiro, robot_atacante, self.field
-                )
+                    plays.offensive_kickoff(
+                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                    )
+                
+                elif self.field.allowed_robots == 2:
+                    plays.offensive_kickoff_2(
+                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                    )
+
+                elif self.field.allowed_robots == 1:
+                    plays.offensive_kickoff_1(
+                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                    )
+
 
             elif self.field.kickoff_defensive:
-                # Estratégia de kickoff defensivo
-                plays.defensive_kickoff(
-                    robot_goleiro, robot_zagueiro, robot_atacante, self.field
-                )
+                if self.field.allowed_robots == 3:
+                # Estratégia de kickoff ofensivo
+                    plays.defensive_kickoff(
+                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                    )
+                
+                elif self.field.allowed_robots == 2:
+                    plays.defensive_kickoff_2(
+                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                    )
+
+                elif self.field.allowed_robots == 1:
+                    plays.defensive_kickoff_1(
+                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                    )
 
             elif self.field.penalty_offensive or self.field.penalty_defensive:
                 if self.penalty_start_time is None:
