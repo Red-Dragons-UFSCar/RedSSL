@@ -255,7 +255,7 @@ class RobotController:
             self.robot1.map_obstacle.clear_map()
             self.robot2.map_obstacle.clear_map()
 
-            """print("---------------------------------------")
+            print("---------------------------------------")
             print("    LOGGING DOS ROBÔS TIME     ")
             print("---------------------------------------")
             print("Robo goleiro, id=", self.robot0.vision_id)
@@ -285,7 +285,7 @@ class RobotController:
             print("Robo goleiro, id=", self.enemy_robot2.vision_id)
             print("x: ", self.enemy_robot2.get_coordinates().X)
             print("y: ", self.enemy_robot2.get_coordinates().X)
-            print("r: ", self.enemy_robot2.get_coordinates().rotation)"""
+            print("r: ", self.enemy_robot2.get_coordinates().rotation)
 
             if (t2 - t1) < 1 / CONTROL_FPS:
                 time.sleep(1 / CONTROL_FPS - (t2 - t1))
