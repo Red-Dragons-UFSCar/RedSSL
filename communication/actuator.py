@@ -93,7 +93,7 @@ class Actuator():
         # Atribua a mensagem MoveWheelVelocity ao campo move_command da mensagem RobotCommand
         robot_command.move_command.wheel_velocity.CopyFrom(move_command)
 
-
+        
         self.send_socket(robot_control.SerializeToString())
         
 
@@ -193,6 +193,9 @@ class Actuator():
         vx_local = vector_vel_local[0]
         vy_local = vector_vel_local[1]
 
+        #vx_local = -1
+        #vy_local = 0
+
         # Transformação do vetor local de velocidades do robô para as rodas
         # Fonte: grSim/src/robot.cpp
         dw1 =  (1.0 / robot.wheel_radius) * (( (robot.robot_radius * angular) - (vx_local * np.sin(robot.phi1)) + (vy_local * np.cos(robot.phi1))) )
@@ -205,7 +208,35 @@ class Actuator():
         if simulated_mode:
             self.send_wheelVelocity_message(robot.vision_id, dw4, dw3, dw2, dw1)
         else:
-            self.send_wheelVelocity_message(robot.robot_id, dw4, dw3, dw2, dw1)
+            self.send_wheelVelocity_message(robot.robot_id, dw1, dw2, dw3, dw4)
+
+    
+    def send_wheel_from_local_fisico(self, robot, velocity_x, velocity_y, angular, simulated_mode):
+        '''
+        Descrição:  
+                Método responsável pelo envio da velocidade de cada roda do robô 
+                em função da velocidade global (vx, vy, w) dele.
+        '''
+        vx_local = velocity_x
+        vy_local = velocity_y
+        angular = 0
+
+        #vx_local = -1
+        #vy_local = 0
+
+        # Transformação do vetor local de velocidades do robô para as rodas
+        # Fonte: grSim/src/robot.cpp
+        dw1 =  (1.0 / robot.wheel_radius) * (( (robot.robot_radius * angular) - (vx_local * np.sin(robot.phi1)) + (vy_local * np.cos(robot.phi1))) )
+        dw2 =  (1.0 / robot.wheel_radius) * (( (robot.robot_radius * angular) - (vx_local * np.sin(robot.phi2)) + (vy_local * np.cos(robot.phi2))) )
+        dw3 =  (1.0 / robot.wheel_radius) * (( (robot.robot_radius * angular) - (vx_local * np.sin(robot.phi3)) + (vy_local * np.cos(robot.phi3))) )
+        dw4 =  (1.0 / robot.wheel_radius) * (( (robot.robot_radius * angular) - (vx_local * np.sin(robot.phi4)) + (vy_local * np.cos(robot.phi4))) )
+
+        # Por algum motivo os motores precisam ir de 4 até 1... 
+        # O simulador inverteu os motores
+        if simulated_mode:
+            self.send_wheelVelocity_message(robot.vision_id, dw4, dw3, dw2, dw1)
+        else:
+            self.send_wheelVelocity_message(robot.robot_id, dw1, dw2, dw3, dw4)
 
 
 if __name__ == '__main__':
