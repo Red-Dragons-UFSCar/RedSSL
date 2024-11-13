@@ -12,6 +12,15 @@ class TechChallenge():
         self.state_free_kick_defense = False
         self.state_stop = True
 
+        self.threshold_attacker_stop = 60
+        self.counter_attacker_stop = 0
+
+        self.threshold_defender_stop = 60
+        self.counter_defender_stop = 0
+
+        self.threshold_goalkeper_stop = 60
+        self.counter_goalkeper_stop = 0
+
     def machine_state_update(self, flag_referee):
 
         if not flag_referee:
@@ -203,24 +212,42 @@ class TechChallenge():
         skills.go_to_point(robot1, self.robot1_xTarget, self.robot1_yTarget, field, self.robot1_aTarget)
         skills.go_to_point(robot2, self.robot2_xTarget, self.robot2_yTarget, field, self.robot2_aTarget)
 
-        if robot0.target_reached(treshold=30):
+        if robot0.target_reached(treshold=15):
             #skills.go_to_point(robot0, robot0_xTarget, robot0_yTarget, field, robot0_aTarget)
             robot0.vx = 0
             robot0.vy = 0
+            if abs(robot0.get_coordinates().rotation - self.robot0_aTarget) < 15*np.pi/180:
+                if self.threshold_goalkeper_stop < self.counter_goalkeper_stop:
+                    robot0.w = 0
+                else:
+                    self.counter_goalkeper_stop += 1
+            else:
+                self.counter_goalkeper_stop = 0
         else:
             robot0.w = 0
+            self.counter_goalkeper_stop = 0
 
-        if robot1.target_reached(treshold=30):
+        if robot1.target_reached(treshold=15):
             #skills.go_to_point(robot0, robot0_xTarget, robot0_yTarget, field, robot0_aTarget)
             robot1.vx = 0
             robot1.vy = 0
+            if abs(robot1.get_coordinates().rotation - self.robot1_aTarget) < 15*np.pi/2:
+                if self.threshold_defender_stop < self.counter_defender_stop:
+                    robot1.w = 0
+                else:
+                    self.counter_defender_stop += 1
+            else:
+                self.counter_defender_stop = 0
         else:
             robot1.w = 0
+            self.counter_defender_stop = 0
 
-        if robot2.target_reached(treshold=30):
+        if robot2.target_reached(treshold=15):
             #skills.go_to_point(robot0, robot0_xTarget, robot0_yTarget, field, robot0_aTarget)
             robot2.vx = 0
             robot2.vy = 0
+            if abs(robot2.get_coordinates().rotation - self.robot2_aTarget) < 15*np.pi/2:
+                robot2.w = 0
         else:
             robot2.w = 0
 

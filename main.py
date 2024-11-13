@@ -128,7 +128,7 @@ class RobotController:
             self.robot2 = Robot(
                 robot_id=2,
                 actuator=self.actuator,
-                vision_id=self.game["team"]["id_defender"],
+                vision_id=self.game["team"]["id_attacker"],
             )
             self.field.add_yellow_robot(self.robot0)
             self.field.add_yellow_robot(self.robot1)
@@ -254,8 +254,9 @@ class RobotController:
                 self.field.game_stopped = False
 
             #Coach.escolher_estrategia(self.coach, self.robot2, self.robot1, self.robot0)
+            Coach.escolher_estrategia_real(self.coach, self.robot2,self.robot1,self.robot0)
             #skills.go_to_point(self.robot0, self.field.ball.get_coordinates().X, self.field.ball.get_coordinates().Y, self.field, 0, threshold=15)
-            estrategia_basica_real(self.robot2,self.robot0,self.robot1,self.field)
+            #estrategia_basica_real(self.robot2,self.robot1,self.robot0,self.field)
             #skills.attack_ball_fisico(self.robot0, self.field)
 
             #self.robot0.vx = 1
@@ -285,10 +286,10 @@ class RobotController:
             print("x: ", self.robot1.get_coordinates().X)
             print("y: ", self.robot1.get_coordinates().X)
             print("r: ", self.robot1.get_coordinates().rotation)
-            print("Robo goleiro, id=", self.robot2.vision_id)
-            print("x: ", self.robot2.get_coordinates().X)
-            print("y: ", self.robot2.get_coordinates().X)
-            print("r: ", self.robot2.get_coordinates().rotation)
+            # print("Robo atacante, id=", self.robot2.vision_id)
+            # print("x: ", self.robot2.get_coordinates().X)
+            # print("y: ", self.robot2.get_coordinates().X)
+            # print("r: ", self.robot2.get_coordinates().rotation)
 
             # print("---------------------------------------")
             # print("    LOGGING DOS ROBÔS INIMIGO     ")

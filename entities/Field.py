@@ -27,13 +27,13 @@ class Field:
         self.zagueiro_current_state = "A"
 
         # Máquina de estados do atacante
-        self.atacante_current_state = "B"
+        self.atacante_current_state = ["A", "A", "A"]
 
         # Máquina de estados do atacante real
         self.atacante_state_real = "A"
         self.enable_angular_controller_mono = False
-        self.threshold_attacker_stop = 30
-        self.counter_attacker_stop = 0
+        self.threshold_attacker_stop = [30, 30, 30]
+        self.counter_attacker_stop = [0, 0, 0]
 
         # Define o time do robô
         self.team = team

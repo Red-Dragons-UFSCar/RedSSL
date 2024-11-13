@@ -78,6 +78,21 @@ def atacante_campo_todo(robot0, field):
         robot0.map_obstacle.add_obstacle(obst)
     
         skills.shoot(robot0, field)
+
+def atacante_campo_todo(robot0, field):
+    ball_position = field.ball.get_coordinates()
+
+    for robot_field in field.enemy_robots:
+        obst = Obstacle()
+        obst.set_obst(robot_field.get_coordinates().X, 
+                      robot_field.get_coordinates().Y, 
+                      robot_field.get_coordinates().rotation)
+        robot0.map_obstacle.add_obstacle(obst)
+    
+    if (ball_position.X > 370) and (70 <= ball_position.Y <= 240):
+        skills.follow_ball_y(robot0, field, 380)
+    else:
+        skills.attack_ball_fisico(robot0, field, robot0.robot_id)
       
 
 def atacante_real(robot0, field):
@@ -90,12 +105,12 @@ def atacante_real(robot0, field):
                       robot_field.get_coordinates().rotation)
         robot0.map_obstacle.add_obstacle(obst)
     
-    if (ball_position.X > 380) and (70 <= ball_position.Y <= 240):
+    if (ball_position.X > 370) and (70 <= ball_position.Y <= 240):
         skills.follow_ball_y(robot0, field, 380)
-    elif ball_position.X < 225:
+    elif ball_position.X < 190:
         skills.follow_ball_y(robot0, field, 300)
     else:
-        skills.attack_ball_fisico(robot0, field)
+        skills.attack_ball_fisico(robot0, field, robot0.robot_id)
 
 def zagueiro_real(robot0, field):
     """
@@ -107,9 +122,14 @@ def zagueiro_real(robot0, field):
     ball_position = field.ball.get_coordinates()
 
     if ball_position.X >= offensive_line_x:
-        skills.follow_ball_y(robot0, field)
+        skills.follow_ball_y(robot0, field, 150)
+        print("eu to tentando seguir 1")
+        print("Target: ", robot0.target.get_coordinates().X)
+    elif (ball_position.X < 70) and (70 <= ball_position.Y <= 240):
+        skills.follow_ball_y(robot0, field, 100)
+        print("eu to tentando seguir")
     else:
-        skills.pursue_ball_fisico(robot0, field)
+        skills.attack_ball_fisico(robot0, field, robot0.robot_id)
 
 def goleiro_real(robot0, field):
 

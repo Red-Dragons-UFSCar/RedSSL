@@ -157,7 +157,6 @@ class RobotController:
         self.actuator.send_wheel_from_global(
             self.robot0, self.robot0.vx, self.robot0.vy, self.robot0.w, self.mode_playing['simulated_mode']
         )
-        print("vx: ", self.robot1.vx)
         self.actuator.send_wheel_from_global(
             self.robot1, self.robot1.vx, self.robot1.vy, self.robot1.w, self.mode_playing['simulated_mode']
         )
