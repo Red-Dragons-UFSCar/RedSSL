@@ -106,7 +106,7 @@ class Coach:
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
                     )
 
-                else:
+                elif self.field.allowed_robots == 3:
                     # Estrategia basica em ação
                     plays.estrategia_basica(
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
@@ -167,7 +167,6 @@ class Coach:
                 and self.field.defending_foul
                 and self.field.allowed_robots == 3
             ):
-
                 plays.basic_stop_behavior_defensive(
                     robot_goleiro, robot_zagueiro, robot_atacante, self.field
                 )
@@ -218,11 +217,11 @@ class Coach:
 
             elif self.field.kickoff_offensive:
                 if self.field.allowed_robots == 3:
-                # Estratégia de kickoff ofensivo
+                    # Estratégia de kickoff ofensivo
                     plays.offensive_kickoff(
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
                     )
-                
+
                 elif self.field.allowed_robots == 2:
                     plays.offensive_kickoff_2(
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
@@ -233,14 +232,13 @@ class Coach:
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
                     )
 
-
             elif self.field.kickoff_defensive:
                 if self.field.allowed_robots == 3:
-                # Estratégia de kickoff ofensivo
+                    # Estratégia de kickoff ofensivo
                     plays.defensive_kickoff(
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
                     )
-                
+
                 elif self.field.allowed_robots == 2:
                     plays.defensive_kickoff_2(
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field

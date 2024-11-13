@@ -168,6 +168,10 @@ class Field:
                 self.kickoff_offensive = False
                 self.kickoff_defensive = False
                 self.game_on_but_is_penalty = False
+                self.penalty_offensive = False
+                self.penalty_defensive = False
+                self.defending_foul = False
+                self.offensive_foul = False
 
         elif command == Referee.Command.STOP:
             self.game_on = False
@@ -178,12 +182,16 @@ class Field:
             self.penalty_offensive = False
             self.penalty_defensive = False
             self.game_on_but_is_penalty = False
+            self.kickoff_offensive = False
+            self.kickoff_defensive = False
 
             print("JOGO PARADO")
         elif command == Referee.Command.HALT:
             self.game_on = False
             self.game_stopped = False
             self.game_halted = True
+            self.defending_foul = False
+            self.offensive_foul = False
             self.penalty_offensive = False
             self.penalty_defensive = False
             self.game_on_but_is_penalty = False
@@ -222,6 +230,9 @@ class Field:
                 self.kickoff_defensive = False
                 self.penalty_offensive = False
                 self.penalty_defensive = False
+                self.game_stopped = False
+                self.game_halted = False
+                self.game_on = False
                 self.game_on_but_is_penalty = False
 
             else:
@@ -230,6 +241,9 @@ class Field:
                 self.kickoff_defending = True
                 self.penalty_offensive = False
                 self.penalty_defensive = False
+                self.game_stopped = False
+                self.game_halted = False
+                self.game_on = False
                 self.game_on_but_is_penalty = False
 
         elif command == Referee.Command.PREPARE_PENALTY_YELLOW:
@@ -330,7 +344,7 @@ class Field:
             self.game_stopped = True
             self.game_halted = False
             self.offensive_foul = False
-            self.defending_foul = False
+            self.defending_foul = True
             self.kickoff_offensive = False
             self.kickoff_defensive = False
             self.game_on_but_is_penalty = False
@@ -341,7 +355,7 @@ class Field:
             self.game_stopped = True
             self.game_halted = False
             self.offensive_foul = False
-            self.defending_foul = False
+            self.defending_foul = True
             self.kickoff_offensive = False
             self.kickoff_defensive = False
             self.game_on_but_is_penalty = False
