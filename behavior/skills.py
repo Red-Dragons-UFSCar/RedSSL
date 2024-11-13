@@ -171,7 +171,7 @@ def clear_ball(robot0, field, ball_position, robot_position, angle_to_ball):
     field.zagueiro_current_state = current_state
 
     # Move o robô para o ponto alvo
-    go_to_point(robot0, target_x, target_y, field, target_theta, threshold = 3)
+    go_to_point(robot0, target_x, target_y, field, target_theta, threshold=3)
 
 
 def attack_ball(robot0, field, ball_position, robot_position, target_theta):
@@ -193,7 +193,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
     target_y_final = 150
 
     # Ajusta o alvo com base na posição da bola
-    if 110 < ball_position.Y < 190:
+    if 110 < ball_position.Y < 120 and 180 < ball_position.X < 190:
         target_y_final = ball_position.Y
         # print("Bola no alvo")
     else:
@@ -222,12 +222,12 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         target_y = ball_position.Y + approach_offset * np.sin(angle_ball_to_target)
         target_theta = angle_ball_to_target
         robot0.v_max = 1.25
-        print("Estado A")
-        #print(f"target_x: {target_x}, target_y: {target_y}, target_theta: {target_theta}")
+        # print("Estado A")
+        # print(f"target_x: {target_x}, target_y: {target_y}, target_theta: {target_theta}")
 
         if robot0.target_reached(threshold):
             current_state = STATE_B
-            #print("Transitando para o estado B")
+            # print("Transitando para o estado B")
         elif (
             90 <= np.degrees(angle_robot_to_ball) <= 180
             or -180 <= np.degrees(angle_robot_to_ball) <= -90
@@ -240,7 +240,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         target_y = ball_position.Y - 20 * np.sin(angle_ball_to_target)
         target_theta = angle_ball_to_target
         robot0.v_max = 1.5
-        print("Estado B")
+        # print("Estado B")
 
         if robot0.target_reached(threshold):
             current_state = STATE_C
@@ -257,7 +257,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         target_theta = angle_ball_to_target
         target_theta = 0
         robot0.v_max = 1.5
-        print("Estado C")
+        # print("Estado C")
 
         if not abs(angle_diff) <= 30:
             current_state = STATE_B
@@ -273,7 +273,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         target_y = ball_position.Y
         target_theta = angle_ball_to_target
         robot0.v_max = 1.5
-        print("Estado D")
+        # print("Estado D")
 
         # Ajusta a posição Y do alvo para evitar a bola
         if 90 <= np.degrees(angle_robot_to_ball) <= 180:
@@ -446,7 +446,7 @@ def projection_stop_target(robot, field, kicker=False):
     ball_coordinates = ball.get_coordinates()
 
     if kicker:
-        radius = 15
+        radius = 20
         ball_obstacle = 10
 
         goal_y = 150
@@ -461,7 +461,7 @@ def projection_stop_target(robot, field, kicker=False):
 
         angle_robot = angle_ball_to_goal
     else:
-        radius = 60
+        radius = 70
         ball_obstacle = 20
 
         goal_y = 150
@@ -519,6 +519,101 @@ def idle_behavior_avoid_ball_stop_game(robot, field):
     )
 
     go_to_point(robot, x_target, y_target, field, theta_robot)
+
+def stop_kickoff_positioning(robot, field, attacking=False, attacker=False):
+
+    ball = field.ball
+
+    if attacking:
+        ball_obst_radius = 15
+        if attacker:
+            target_x = 205
+            target_y = 150
+
+        else:
+            target_x = 150
+            target_y = 150
+
+    else:
+        ball_obst_radius = 15
+        if attacker:
+            target_x = 155
+            target_y = 150
+
+        else:
+            target_x = 120
+            target_y = 150
+
+    # Configura a bola como obstáculo
+    obst = Obstacle()
+    obst.set_obst(
+        ball.get_coordinates().X, ball.get_coordinates().Y, 0, radius=ball_obst_radius
+    )
+    robot.map_obstacle.add_obstacle(obst)
+
+    go_to_point(robot, target_x, target_y, field, np.pi)
+
+
+def penalty_idle_offensive(robot_goleiro, robot_zagueiro, robot_atacante, field):
+    """
+    Move os robôs para posições específicas para a posição de penalty idle.
+
+    Parameters:
+    skills: módulo contendo a função go_to_point para mover os robôs.
+    robot_goleiro: objeto representando o robô goleiro.
+    robot_zagueiro: objeto representando o robô zagueiro.
+    robot_atacante: objeto representando o robô atacante.
+    field: objeto representando o campo.
+    """
+    go_to_point(robot_goleiro, 150, 300, field, 0)
+    go_to_point(robot_zagueiro, 150, 20, field, 0)
+    go_to_point(robot_atacante, 0, 150, field, 0)
+
+
+def penalty_idle_offensive_game_on(robot_goleiro, robot_zagueiro, field):
+    """
+    Move os robôs para posições específicas para a posição de penalty idle.
+
+    Parameters:
+    skills: módulo contendo a função go_to_point para mover os robôs.
+    robot_goleiro: objeto representando o robô goleiro.
+    robot_zagueiro: objeto representando o robô zagueiro.
+    robot_atacante: objeto representando o robô atacante.
+    field: objeto representando o campo.
+    """
+    go_to_point(robot_goleiro, 230, 300, field, 0)
+    go_to_point(robot_zagueiro, 230, 20, field, 0)
+
+
+def penalty_idle_defensive(robot_goleiro, robot_zagueiro, robot_atacante, field):
+    """
+    Move os robôs para posições específicas para a posição de penalty idle.
+
+    Parameters:
+    skills: módulo contendo a função go_to_point para mover os robôs.
+    robot_goleiro: objeto representando o robô goleiro.
+    robot_zagueiro: objeto representando o robô zagueiro.
+    robot_atacante: objeto representando o robô atacante.
+    field: objeto representando o campo.
+    """
+    go_to_point(robot_goleiro, 0, 150, field, 0)
+    go_to_point(robot_zagueiro, 230, 300, field, 0)
+    go_to_point(robot_atacante, 250, 20, field, 0)
+
+
+def penalty_idle_game_on(robot_zagueiro, robot_atacante, field):
+    """
+    Move os robôs para posições específicas para a posição de penalty idle.
+
+    Parameters:
+    skills: módulo contendo a função go_to_point para mover os robôs.
+    robot_goleiro: objeto representando o robô goleiro.
+    robot_zagueiro: objeto representando o robô zagueiro.
+    robot_atacante: objeto representando o robô atacante.
+    field: objeto representando o campo.
+    """
+    go_to_point(robot_zagueiro, 230, 300, field, 0)
+    go_to_point(robot_atacante, 250, 20, field, 0)
 
 def attack_ball_fisico(robot0, field):
     """

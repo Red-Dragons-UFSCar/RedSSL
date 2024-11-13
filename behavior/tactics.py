@@ -67,6 +67,19 @@ def atacante(robot0, field):
     else:
         skills.shoot(robot0, field)
 
+def atacante_campo_todo(robot0, field):
+    ball_position = field.ball.get_coordinates()
+
+    for robot_field in field.enemy_robots:
+        obst = Obstacle()
+        obst.set_obst(robot_field.get_coordinates().X, 
+                      robot_field.get_coordinates().Y, 
+                      robot_field.get_coordinates().rotation)
+        robot0.map_obstacle.add_obstacle(obst)
+    
+        skills.shoot(robot0, field)
+      
+
 def atacante_real(robot0, field):
     ball_position = field.ball.get_coordinates()
 
