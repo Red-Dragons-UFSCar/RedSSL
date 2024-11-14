@@ -1,4 +1,5 @@
 from behavior import skills, tactics
+from entities.Obstacle import Obstacle
 import numpy as np
 
 
@@ -212,3 +213,20 @@ def offensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
     skills.stop_kickoff_positioning(
         robot_atacante, field, attacking=True, attacker=True
     )
+
+def defensive_kickoff_real(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Estratégia de kickoff defensivo
+    """
+    ball = field.ball
+    obst = Obstacle()  # Configura a bola como obstáculo
+    obst.set_obst(
+        ball.get_coordinates().X, ball.get_coordinates().Y, 0, radius=30
+    )
+    robot_goalie.map_obstacle.add_obstacle(obst)
+    robot_zagueiro.map_obstacle.add_obstacle(obst)
+    robot_atacante.map_obstacle.add_obstacle(obst)
+    # print("Posicionando robô goleiro no ponto específico.")
+    skills.go_to_point(robot_goalie, 30, 150, field, 0)
+    skills.go_to_point(robot_zagueiro, 100, 150, field, 0)
+    skills.go_to_point(robot_atacante, 160, 150, field, 0)

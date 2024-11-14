@@ -248,13 +248,14 @@ class RobotController:
                 # Recebe a mensagem do árbitro
                 self.referee.get_referee_message()
                 # Trata o comando do árbitro
-                self.referee.handle_referee_command()
+                # self.referee.handle_referee_command()
+                self.referee.parse_referee_command(self.field)
             else:
                 self.field.game_on = True
                 self.field.game_stopped = False
 
             #Coach.escolher_estrategia(self.coach, self.robot2, self.robot1, self.robot0)
-            Coach.escolher_estrategia_real(self.coach, self.robot2,self.robot1,self.robot0)
+            Coach.escolher_estrategia_real_2(self.coach, self.robot2,self.robot1,self.robot0)
             #skills.go_to_point(self.robot0, self.field.ball.get_coordinates().X, self.field.ball.get_coordinates().Y, self.field, 0, threshold=15)
             #estrategia_basica_real(self.robot2,self.robot1,self.robot0,self.field)
             #skills.attack_ball_fisico(self.robot0, self.field)
@@ -282,10 +283,10 @@ class RobotController:
             # print("vx: ", self.robot0.vx)
             # print("vy: ", self.robot0.vy)
             # print("w: ", self.robot0.w)
-            print("Robo zagueiro, id=", self.robot1.vision_id)
-            print("x: ", self.robot1.get_coordinates().X)
-            print("y: ", self.robot1.get_coordinates().X)
-            print("r: ", self.robot1.get_coordinates().rotation)
+            # print("Robo zagueiro, id=", self.robot1.vision_id)
+            # print("x: ", self.robot1.get_coordinates().X)
+            # print("y: ", self.robot1.get_coordinates().X)
+            # print("r: ", self.robot1.get_coordinates().rotation)
             # print("Robo atacante, id=", self.robot2.vision_id)
             # print("x: ", self.robot2.get_coordinates().X)
             # print("y: ", self.robot2.get_coordinates().X)
