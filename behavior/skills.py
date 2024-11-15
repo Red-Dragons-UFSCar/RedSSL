@@ -480,8 +480,18 @@ def projection_stop_target(robot, field, kicker=False):
         radius = 70
         ball_obstacle = 20
 
-        goal_y = 150
-        goal_x = 0
+        quadrant1 = ball.get_coordinates().Y > 230 and ball.get_coordinates().X > 300
+        quadrant2 = ball.get_coordinates().Y < 70 and ball.get_coordinates().X > 300
+
+        if quadrant1:
+            goal_y = 300
+            goal_x = 225
+        elif quadrant2:
+            goal_y = 0
+            goal_x = 225
+        else:
+            goal_y = 150
+            goal_x = 0
 
         angle_ball_to_goal = np.arctan2(
             (goal_y - ball_coordinates.Y), (ball_coordinates.X - goal_x)
@@ -685,7 +695,7 @@ def attack_ball_fisico(robot0, field, index):
 
     approach_offset = -20
     #threshold = 2
-    threshold = 15
+    threshold = 10
 
     print("Contador: ", field.counter_attacker_stop)
     if current_state == STATE_A:
@@ -721,7 +731,8 @@ def attack_ball_fisico(robot0, field, index):
         print("Estado R1")
         target_x = ball_position.X + approach_offset * np.cos(angle_ball_to_target)
         target_y = ball_position.Y + approach_offset * np.sin(angle_ball_to_target)
-        target_theta = angle_ball_to_target
+        #target_theta = np.arctan2(np.sin(angle_ball_to_target + np.pi), np.cos(angle_ball_to_target + np.pi)) 
+        target_theta = angle_robot_to_ball
         go_to_point(robot0, target_x, target_y, field, target_theta, threshold)
 
         robot0.vx = 0
@@ -736,10 +747,10 @@ def attack_ball_fisico(robot0, field, index):
             print("vish")
             current_state = STATE_A
         else:
-            if abs(robot0.get_coordinates().rotation - target_theta) < 60*np.pi/180:
+            if abs(robot0.get_coordinates().rotation - target_theta) <25*np.pi/180:
                 robot0.w = 0
                 field.counter_attacker_stop[index] += 1
-                if field.counter_attacker_stop[index] > 4*field.threshold_attacker_stop[index]:
+                if field.counter_attacker_stop[index] > 5*field.threshold_attacker_stop[index]:
                     current_state = STATE_B
                     field.counter_attacker_stop[index] = 0
             else:
@@ -757,17 +768,25 @@ def attack_ball_fisico(robot0, field, index):
         # if robot0.v_max < 1:
         #     robot0.v_max += 0.01
 
-        if not abs(angle_diff) <= 60:
-            current_state = STATE_A
-            field.counter_attacker_stop[index] = 0
-        elif (
-            90 <= np.degrees(angle_robot_to_ball) <= 180
-            or -180 <= np.degrees(angle_robot_to_ball) <= -90
+        # if not abs(angle_diff) <= 60:
+        #     current_state = STATE_A
+        #     field.counter_attacker_stop[index] = 0
+        # elif (
+        #     90 <= np.degrees(angle_robot_to_ball) <= 180
+        #     or -180 <= np.degrees(angle_robot_to_ball) <= -90
+        # ):
+        
+        ball_distance = np.sqrt((ball_position.X - robot_position.X)**2 + (ball_position.Y - robot_position.Y)**2) 
+        if (
+            ball_distance < 40
         ):
-            field.counter_attacker_stop += 1
+            field.counter_attacker_stop[index] += 1
             if field.counter_attacker_stop[index] > 5*field.threshold_attacker_stop[index]:
                 current_state = STATE_C
                 robot0.v_max = 0.5
+        else:
+            current_state = STATE_C
+
 
     elif current_state == STATE_C:
         # Estado D: Evitar a bola
@@ -800,23 +819,23 @@ def attack_ball_fisico(robot0, field, index):
     # Usa a função adequada para mover o robô
     if current_state == STATE_B:
         field.send_local = False
-        robot0.vMax = 1.0
+        robot0.v_max = 1.7
         field.send_local = True
         robot0.vx = robot0.v_max
         robot0.vy = 0
         go_to_point_angled(robot0, target_x, target_y, field, target_theta, threshold)
     elif current_state == STATE_A:
         field.send_local = False
-        robot0.vMax = 1.0
+        robot0.v_max = 1.0
         go_to_point(robot0, target_x, target_y, field, target_theta, threshold)
         robot0.w = 0
     elif current_state == STATE_C:
-        robot0.vMax = 1.0
+        robot0.v_max = 1.0
         go_to_point(robot0, target_x, target_y, field, target_theta, threshold)
         robot0.w = 0
     else:
         field.send_local = False
-        robot0.vMax = 1.0
+        robot0.v_max = 1.0
         go_to_point(robot0, target_x, target_y, field, target_theta, threshold)
         robot0.vx = 0
         robot0.vy = 0

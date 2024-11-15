@@ -271,6 +271,19 @@ class Coach:
             plays.estrategia_basica_real(
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
                     )
+        elif self.field.game_halted:
+            robot_goleiro.vx = 0
+            robot_goleiro.vy = 0
+            robot_goleiro.w = 0
+
+            robot_zagueiro.vx = 0
+            robot_zagueiro.vy = 0
+            robot_zagueiro.w = 0
+
+            robot_atacante.vx = 0
+            robot_atacante.vy = 0
+            robot_atacante.w = 0
+
         elif self.field.kickoff_defensive or self.field.kickoff_offensive:
             print("Kickoff")
             plays.defensive_kickoff(robot_goleiro, robot_zagueiro, robot_atacante, self.field)

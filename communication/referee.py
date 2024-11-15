@@ -85,17 +85,15 @@ class RefereeCommunication:
     def parse_referee_command(self, field):
         if self.referee_state:
             command = self.referee_state.command
-            print("command: ", command)
-            print("tempo: ", self.referee_state.stage_time_left)
+            #print("command: ", command)
+            #print("tempo: ", self.referee_state.stage_time_left)
 
             if (command == Referee.Command.FORCE_START):
                 print("Game on")
                 self.change_foul_flags(field, game_on=True)
             elif command == Referee.Command.NORMAL_START:
-                print("EAI")
                 self.verify_their_kickoff(field, command)
                 if self.their_kickoff:
-                    print("TUDU BEM?")
                     print("FREE KICK - Deles")
                     ball_coordinates = field.ball.get_coordinates()
                     dist = (ball_coordinates.X - self.ball_x_saved_kickoff)**2 + (ball_coordinates.Y - self.ball_y_saved_kickoff)**2
@@ -103,7 +101,7 @@ class RefereeCommunication:
                     if dist < 40*40 :
                         print("Aguardando")
                     else:
-                        print("Ataca po")
+                        print("Atacando")
                         self.change_foul_flags(field, game_on=True)
                         self.their_kickoff = False
                 elif self.our_kickoff:
@@ -120,7 +118,7 @@ class RefereeCommunication:
                 if dist < 10*10 :
                     print("Aguardando")
                 else:
-                    print("Ataca po")
+                    print("Atacando")
                     self.change_foul_flags(field, game_on=True)
             elif self.verify_our_kickoff(field, command):
                 print("KICKOFF - Nosso")
@@ -130,9 +128,8 @@ class RefereeCommunication:
                 self.change_foul_flags(field, kickoff_defensive=True)
                 ball_coordinates = field.ball.get_coordinates()
                 dist = (ball_coordinates.X - self.ball_x_saved_kickoff)**2 + (ball_coordinates.Y - self.ball_y_saved_kickoff)**2
-                print("Distância: ", dist)
                 if dist > 10*10:
-                    print("Ataca po")
+                    print("Atacando")
                     self.change_foul_flags(field, game_on=True)
                 else:
                     print("Aguardando")

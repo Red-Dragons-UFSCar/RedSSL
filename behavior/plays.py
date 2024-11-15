@@ -17,7 +17,7 @@ def estrategia_basica_real(robot_goalie, robot_zagueiro, robot_atacante, field):
     Função que combina as estratégias do goleiro e do zagueiro.
     Chama as funções goalie e zagueiro para controlar os dois robôs.
     """
-    tactics.goleiro(robot_goalie, field)
+    tactics.goleiro_real_2(robot_goalie, field)
     tactics.zagueiro_real(robot_zagueiro, field)
     tactics.atacante_real(robot_atacante, field)
 
@@ -157,7 +157,7 @@ def basic_stop_behavior_offensive(robot_goleiro, robot_zagueiro, robot_atacante,
         )  # Zagueiro vai pra bola cobrar
 
         # Ponto alvo do atacante no meio campo
-        x_target_atacante = 270
+        x_target_atacante = 300
         y_target_atacante = 150
         robot_atacante.target.set_target(
             robot_atacante, (x_target_atacante, y_target_atacante), field, 0

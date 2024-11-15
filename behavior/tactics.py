@@ -107,7 +107,7 @@ def atacante_real(robot0, field):
     
     if (ball_position.X > 370) and (70 <= ball_position.Y <= 240):
         skills.follow_ball_y(robot0, field, 380)
-    elif ball_position.X < 190:
+    elif ball_position.X < 210:
         skills.follow_ball_y(robot0, field, 300)
     else:
         skills.attack_ball_fisico(robot0, field, robot0.robot_id)
@@ -155,3 +155,23 @@ def goleiro_real(robot0, field):
             skills.stay_on_center(
                 robot0, field
             )  # manda pro centrofrom behavior.skills import follow_ball_y, pursue_ball
+
+def goleiro_real_2(robot0, field):
+
+    Goalie_Chase_line = 75  # Limite para considerar perto
+    Goaie_Y_Enable = 420  # Quando o goleiro começa a perseguir a bola
+
+    # Posição atual da bola
+    ball_position = field.ball.get_coordinates()
+
+
+    if ball_position.X <= Goaie_Y_Enable:
+        # A bola não está na área, mas está perto
+        skills.follow_ball_y(robot0, field, 22)  # foca em y
+
+    else:
+        # a bola não está perto o suficiente para o goleiro precisar se preocupar, então manda ele pro centor do gol
+        # poupar bateria e motor (não sei se é tão relevante assim)
+        skills.stay_on_center(
+            robot0, field
+        )  # manda pro centrofrom behavior.skills import follow_ball_y, pursue_ball

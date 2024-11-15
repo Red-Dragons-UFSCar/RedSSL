@@ -21,7 +21,7 @@ import json
 CONTROL_FPS = 60  # FPS original para o controle de posição
 CAM_FPS = 7 * CONTROL_FPS  # FPS para processar os dados da visão
 
-REFEREE_ON = True  # Habilita a comunicação com o Referee
+REFEREE_ON = False  # Habilita a comunicação com o Referee
 
 
 class RepeatTimer(threading.Timer):
@@ -100,7 +100,7 @@ class RobotController:
             self.field.add_blue_robot(self.robot0)
             self.field.add_blue_robot(self.robot1)
             self.field.add_blue_robot(self.robot2)
-            self.field.team_robots = [self.robot0, self.robot1, self.robot2]
+            self.field.team_robots = [self.robot0, self.robot2, self.robot1]
 
             # Cria e adiciona robôs inimigos
             self.enemy_robot0 = Robot(robot_id=0, actuator=None)
@@ -194,24 +194,36 @@ class RobotController:
         )
         """
         # Envio de velocidades do sistema global diretamente para as rodas
-        self.actuator.send_wheel_from_global(
-            self.robot0,
-            self.robot0.vx,
-            self.robot0.vy,
-            self.robot0.w,
-            self.mode_playing["simulated_mode"],
-        )
-        self.actuator.send_wheel_from_global(
-            self.robot1,
-            self.robot1.vx,
-            self.robot1.vy,
-            self.robot1.w,
-            self.mode_playing["simulated_mode"],
-        )
         if self.field.send_local:
             print("--------------------------------------------------------------")
             self.actuator.send_wheel_from_local_fisico(
-                self.robot2, self.robot2.vx, self.robot2.vy, self.robot2.w, self.mode_playing['simulated_mode']
+                self.robot0, self.robot0.vx, self.robot0.vx*0.4, self.robot0.w, self.mode_playing['simulated_mode']
+            )
+        else:
+            self.actuator.send_wheel_from_global(
+              self.robot0,
+              self.robot0.vx,
+              self.robot0.vy,
+              self.robot0.w,
+              self.mode_playing["simulated_mode"],
+            )
+        if self.field.send_local:
+            print("--------------------------------------------------------------")
+            self.actuator.send_wheel_from_local_fisico(
+                self.robot1, self.robot1.vx, self.robot1.vx, self.robot1.w, self.mode_playing['simulated_mode']
+            )
+        else:
+            self.actuator.send_wheel_from_global(
+              self.robot1,
+              self.robot1.vx,
+              self.robot1.vy,
+              self.robot1.w,
+              self.mode_playing["simulated_mode"],
+            )
+        if self.field.send_local:
+            print("--------------------------------------------------------------")
+            self.actuator.send_wheel_from_local_fisico(
+                self.robot2, self.robot2.vx, self.robot2.vx, self.robot2.w, self.mode_playing['simulated_mode']
             )
         else:
             self.actuator.send_wheel_from_global(
@@ -255,7 +267,7 @@ class RobotController:
                 self.field.game_stopped = False
 
             #Coach.escolher_estrategia(self.coach, self.robot2, self.robot1, self.robot0)
-            Coach.escolher_estrategia_real_2(self.coach, self.robot2,self.robot1,self.robot0)
+            Coach.escolher_estrategia_real_2(self.coach, self.robot1,self.robot2,self.robot0)
             #skills.go_to_point(self.robot0, self.field.ball.get_coordinates().X, self.field.ball.get_coordinates().Y, self.field, 0, threshold=15)
             #estrategia_basica_real(self.robot2,self.robot1,self.robot0,self.field)
             #skills.attack_ball_fisico(self.robot0, self.field)
@@ -263,6 +275,17 @@ class RobotController:
             #self.robot0.vx = 1
             #self.robot0.vy = 0
             #self.robot0.w = 0
+
+            # self.actuator.send_wheel_from_local_fisico(
+            #     self.robot2, 1.0, 0, 100, self.mode_playing['simulated_mode']
+            # )
+            # self.actuator.send_wheel_from_local_fisico(
+            #     self.robot1, 1.0, 0, 100, self.mode_playing['simulated_mode']
+            # )
+            # self.actuator.send_wheel_from_local_fisico(
+            #     self.robot0, 1.0, 0, 100, self.mode_playing['simulated_mode']
+            # )
+
             self.send_velocities()
 
             t2 = time.time()
