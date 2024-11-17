@@ -60,7 +60,7 @@ def go_to_point_angled(robot0, target_x, target_y, field, target_theta=0, thresh
         robot0.vy = 0
 
 
-def follow_ball_y(robot0, field, fixed_x=None, target_theta=0):
+def follow_ball_y(robot0, field, fixed_x=None, target_theta=0, lim_sup = 300, lim_inf = 0):
     """
     Move o robô para seguir a bola ao longo do eixo Y, mantendo uma posição fixa no eixo X ou na área do goleiro.
 
@@ -75,7 +75,15 @@ def follow_ball_y(robot0, field, fixed_x=None, target_theta=0):
     target_x = (
         fixed_x if fixed_x is not None else 150
     )  # X padrão é 400, pode ser sobrescrito
-    target_y = ball_position.Y
+
+    if ball_position.Y > lim_sup:
+        target_y = lim_sup
+    elif ball_position.Y < lim_inf:
+        target_y = lim_inf
+    else:
+        target_y = ball_position.Y
+    
+    #target_y = ball_position.Y
 
     go_to_point(robot0, target_x, target_y, field, target_theta)
 
@@ -477,7 +485,7 @@ def projection_stop_target(robot, field, kicker=False):
 
         angle_robot = angle_ball_to_goal
     else:
-        radius = 70
+        radius = 80
         ball_obstacle = 20
 
         quadrant1 = ball.get_coordinates().Y > 230 and ball.get_coordinates().X > 300
@@ -588,6 +596,9 @@ def stop_kickoff_positioning(robot, field, attacking=False, attacker=False):
     robot.map_obstacle.add_obstacle(obst)
 
     go_to_point(robot, target_x, target_y, field, 0)
+
+    if robot.get_coordinates().rotation - robot.target.get_coordinates().rotation < 15*np.pi/180:
+            robot.w = 0
 
 
 def penalty_idle_offensive(robot_goleiro, robot_zagueiro, robot_atacante, field):
@@ -733,12 +744,20 @@ def attack_ball_fisico(robot0, field, index):
         target_y = ball_position.Y + approach_offset * np.sin(angle_ball_to_target)
         #target_theta = np.arctan2(np.sin(angle_ball_to_target + np.pi), np.cos(angle_ball_to_target + np.pi)) 
         target_theta = angle_robot_to_ball
+        if ball_position.Y > 130:
+            add_angle = 10*np.pi/180
+            #target_theta = angle_robot_to_ball
+        else:
+            add_angle = 0
+            #add_angle = -20*np.pi/180
+            #target_theta = np.arctan2(np.sin(angle_ball_to_target + np.pi), np.cos(angle_ball_to_target + np.pi)) 
+        target_theta += add_angle
         go_to_point(robot0, target_x, target_y, field, target_theta, threshold)
 
         robot0.vx = 0
         robot0.vy = 0
 
-        if not robot0.target_reached(threshold+10):
+        if not robot0.target_reached(threshold+20):
             print("Ball x: ", ball_position.X)
             print("Ball y: ", ball_position.Y)
             print("X target: ", target_x)
@@ -747,7 +766,7 @@ def attack_ball_fisico(robot0, field, index):
             print("vish")
             current_state = STATE_A
         else:
-            if abs(robot0.get_coordinates().rotation - target_theta) <25*np.pi/180:
+            if abs(robot0.get_coordinates().rotation - (target_theta-add_angle)) <25*np.pi/180:
                 robot0.w = 0
                 field.counter_attacker_stop[index] += 1
                 if field.counter_attacker_stop[index] > 5*field.threshold_attacker_stop[index]:
@@ -819,7 +838,11 @@ def attack_ball_fisico(robot0, field, index):
     # Usa a função adequada para mover o robô
     if current_state == STATE_B:
         field.send_local = False
-        robot0.v_max = 1.7
+        if ball_position.Y > 130:
+            robot0.v_max = 1.7
+        else:
+            robot0.v_max = 1.7
+            #robot0.v_max = -2.0
         field.send_local = True
         robot0.vx = robot0.v_max
         robot0.vy = 0

@@ -268,9 +268,16 @@ class Coach:
         #     robot_atacante.v_max = 1.5
 
         if self.field.game_on:
-            plays.estrategia_basica_real(
-                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
-                    )
+            if self.field.allowed_robots <= 1:
+                plays.estrategia_basica_real_1robo(
+                            robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                        )
+                print("Estratégia: Desvantagem")
+            else:
+                plays.estrategia_basica_real(
+                            robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                        )
+                print("Estratégia: Normal")
         elif self.field.game_halted:
             robot_goleiro.vx = 0
             robot_goleiro.vy = 0
@@ -287,6 +294,10 @@ class Coach:
         elif self.field.kickoff_defensive or self.field.kickoff_offensive:
             print("Kickoff")
             plays.defensive_kickoff(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
+        elif self.field.penalty_defensive:
+            plays.penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, self.field, self.field.game_on_but_is_penalty)
+        elif self.field.penalty_offensive:
+            plays.penalti_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, self.field, self.field.game_on_but_is_penalty)
         else:
             plays.basic_stop_behavior_defensive(
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field

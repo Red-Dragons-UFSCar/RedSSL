@@ -1,6 +1,7 @@
 import socket
 from communication.proto.ssl_gc_referee_message_pb2 import Referee
 from google.protobuf.message import DecodeError
+import numpy as np
 
 
 class RefereeCommunication:
@@ -23,6 +24,14 @@ class RefereeCommunication:
         self.our_kickoff = False
         self.ball_x_saved_kickoff = 0
         self.ball_y_saved_kickoff = 0
+
+        self.start_time_free_kick = 0
+        self.start_timer_free_kick = False
+
+        self.start_time_kickoff = 0
+        self.start_timer_free_kick = False
+
+        self.allowed_robots = 3
 
     def _init_referee_socket(self):
         """
@@ -82,54 +91,87 @@ class RefereeCommunication:
         field.free_kick_offensive = free_kick_offensive
         field.free_kick_defensive = free_kick_defensive
 
+        field.game_on_but_is_penalty = False
+        self.start_timer_free_kick = False
+        self.start_timer_kickoff = False
+
     def parse_referee_command(self, field):
         if self.referee_state:
             command = self.referee_state.command
-            #print("command: ", command)
-            #print("tempo: ", self.referee_state.stage_time_left)
+            if self.field.team == 'yellow':
+                self.field.allowed_robots = self.referee_state.yellow.max_allowed_bots
 
             if (command == Referee.Command.FORCE_START):
                 print("Game on")
                 self.change_foul_flags(field, game_on=True)
             elif command == Referee.Command.NORMAL_START:
+
                 self.verify_their_kickoff(field, command)
                 if self.their_kickoff:
-                    print("FREE KICK - Deles")
+                    print("KICKOFF - Deles")
                     ball_coordinates = field.ball.get_coordinates()
-                    dist = (ball_coordinates.X - self.ball_x_saved_kickoff)**2 + (ball_coordinates.Y - self.ball_y_saved_kickoff)**2
+                    dist = np.sqrt((ball_coordinates.X - self.ball_x_saved_kickoff)**2 + (ball_coordinates.Y - self.ball_y_saved_kickoff)**2)
                     print(dist)
-                    if dist < 40*40 :
-                        print("Aguardando")
-                    else:
-                        print("Atacando")
+                    if dist > 10:
+                        print("Atacando por distancia")
                         self.change_foul_flags(field, game_on=True)
-                        self.their_kickoff = False
+                    elif self.start_time_kickoff/(10**6) - self.referee_state.stage_time_left/(10**6) > 11:
+                        print("Atacando por tempo")
+                        self.change_foul_flags(field, game_on=True)
+                    else:
+                        print("Aguardando Cobranca")
+
                 elif self.our_kickoff:
                      self.change_foul_flags(field, game_on=True)
 
+                elif self.field.penalty_defensive:
+                    self.field.game_on_but_is_penalty = True
+
+                elif self.field.penalty_offensive:
+                    self.field.game_on_but_is_penalty = True
+
             elif self.verify_our_free_kick(field, command):
                 print("FREE KICK - Nosso")
+                self.start_time_free_kick = self.referee_state.stage_time_left
                 self.change_foul_flags(field, game_on=True)
             elif self.verify_their_free_kick(field, command):
                 print("FREE KICK - Deles")
+
+                if not self.start_timer_free_kick:
+                    self.start_time_free_kick = self.referee_state.stage_time_left
+                    self.start_timer_free_kick = True
                 ball_coordinates = field.ball.get_coordinates()
                 dist = (ball_coordinates.X - self.ball_x_saved_free_kick)**2 + (ball_coordinates.Y - self.ball_y_saved_free_kick)**2
                 print(dist)
                 if dist < 10*10 :
                     print("Aguardando")
                 else:
-                    print("Atacando")
+                    print("Atacando por distancia")
                     self.change_foul_flags(field, game_on=True)
+                    self.start_timer_free_kick = False
+                #print("Tempo atual: ", self.referee_state.stage_time_left)
+                #print("Tempo falta: ", self.start_time_free_kick)
+                print("Tempo decorrido:",  self.start_time_free_kick/(10**6) - self.referee_state.stage_time_left/(10**6))
+                if  self.start_time_free_kick/(10**6) - self.referee_state.stage_time_left/(10**6)> 11:
+                    print("Atacando por tempo")
+                    self.change_foul_flags(field, game_on=True)
+                    self.start_timer_free_kick = False
             elif self.verify_our_kickoff(field, command):
                 print("KICKOFF - Nosso")
                 self.change_foul_flags(field, kickoff_offensive=True)
             elif self.verify_their_kickoff(field, command):
                 print("KICKOFF - Deles")
                 self.change_foul_flags(field, kickoff_defensive=True)
+                if not self.start_timer_kickoff:
+                    self.start_timer_kickoff = True
+                    self.start_time_kickoff = self.referee_state.stage_time_left
                 ball_coordinates = field.ball.get_coordinates()
-                dist = (ball_coordinates.X - self.ball_x_saved_kickoff)**2 + (ball_coordinates.Y - self.ball_y_saved_kickoff)**2
-                if dist > 10*10:
-                    print("Atacando")
+                dist = np.sqrt((ball_coordinates.X - self.ball_x_saved_kickoff)**2 + (ball_coordinates.Y - self.ball_y_saved_kickoff)**2)
+                if dist > 10:
+                    print("Atacando por distancia")
+                    self.change_foul_flags(field, game_on=True)
+                elif self.start_time_kickoff/(10**6) - self.referee_state.stage_time_left/(10**6) > 11:
+                    print("Atacando por tempo")
                     self.change_foul_flags(field, game_on=True)
                 else:
                     print("Aguardando")
@@ -176,17 +218,22 @@ class RefereeCommunication:
             elif command == Referee.Command.DIRECT_FREE_YELLOW:
                 if self.field.team == "yellow":
                     print("FREEKICK YELLOW - Nosso")
+                    self.start_time_free_kick = self.referee_state.stage_time_left
                     self.change_foul_flags(field, free_kick_offensive=True)
                 else:
                     print("FREEKICK YELLOW - Deles")
+                    self.start_time_free_kick = self.referee_state.stage_time_left
                     self.change_foul_flags(field, free_kick_defensive=True)
 
             elif command == Referee.Command.DIRECT_FREE_BLUE:
                 if self.field.team == "blue":
                     print("FREEKICK BLUE - Nosso")
+                    self.start_time_free_kick = self.referee_state.stage_time_left
                     self.change_foul_flags(field, free_kick_offensive=True)
                 else:
                     print("FREEKICK BLUE - Deles")
+                    print("00000000000000000000000000000000000000000000000000000000000000000000000000000000")
+                    print("Tempo: ", self.referee_state.stage_time_left)
                     self.change_foul_flags(field, free_kick_defensive=True)
             else:
                 print("Outra coisa")
@@ -246,6 +293,7 @@ class RefereeCommunication:
                 '''
 
     def verify_our_free_kick(self, field, command):
+
         team = field.team
         if command == Referee.Command.DIRECT_FREE_BLUE:
             team_foul = 'blue'

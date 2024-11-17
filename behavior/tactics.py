@@ -67,6 +67,18 @@ def atacante(robot0, field):
     else:
         skills.shoot(robot0, field)
 
+# def atacante_campo_todo(robot0, field):
+#     ball_position = field.ball.get_coordinates()
+
+#     for robot_field in field.enemy_robots:
+#         obst = Obstacle()
+#         obst.set_obst(robot_field.get_coordinates().X, 
+#                       robot_field.get_coordinates().Y, 
+#                       robot_field.get_coordinates().rotation)
+#         robot0.map_obstacle.add_obstacle(obst)
+    
+#         skills.shoot(robot0, field)
+
 def atacante_campo_todo(robot0, field):
     ball_position = field.ball.get_coordinates()
 
@@ -77,20 +89,10 @@ def atacante_campo_todo(robot0, field):
                       robot_field.get_coordinates().rotation)
         robot0.map_obstacle.add_obstacle(obst)
     
-        skills.shoot(robot0, field)
-
-def atacante_campo_todo(robot0, field):
-    ball_position = field.ball.get_coordinates()
-
-    for robot_field in field.enemy_robots:
-        obst = Obstacle()
-        obst.set_obst(robot_field.get_coordinates().X, 
-                      robot_field.get_coordinates().Y, 
-                      robot_field.get_coordinates().rotation)
-        robot0.map_obstacle.add_obstacle(obst)
-    
-    if (ball_position.X > 370) and (70 <= ball_position.Y <= 240):
+    if (ball_position.X > 390) and (70 <= ball_position.Y <= 240):
         skills.follow_ball_y(robot0, field, 380)
+    elif (ball_position.X < 70) and (70 <= ball_position.Y <= 240):
+        skills.follow_ball_y(robot0, field, 100)
     else:
         skills.attack_ball_fisico(robot0, field, robot0.robot_id)
       
@@ -105,7 +107,12 @@ def atacante_real(robot0, field):
                       robot_field.get_coordinates().rotation)
         robot0.map_obstacle.add_obstacle(obst)
     
-    if (ball_position.X > 370) and (70 <= ball_position.Y <= 240):
+    if field.atacante_current_state[robot0.robot_id] == 'STATE_B':
+        area_defense = 370
+    else:
+        area_defense = 390
+
+    if (ball_position.X > 390) and (70 <= ball_position.Y <= 240):
         skills.follow_ball_y(robot0, field, 380)
     elif ball_position.X < 210:
         skills.follow_ball_y(robot0, field, 300)
@@ -167,7 +174,7 @@ def goleiro_real_2(robot0, field):
 
     if ball_position.X <= Goaie_Y_Enable:
         # A bola não está na área, mas está perto
-        skills.follow_ball_y(robot0, field, 22)  # foca em y
+        skills.follow_ball_y(robot0, field, 22, lim_sup=200, lim_inf=100)  # foca em y
 
     else:
         # a bola não está perto o suficiente para o goleiro precisar se preocupar, então manda ele pro centor do gol

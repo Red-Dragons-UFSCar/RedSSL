@@ -60,6 +60,8 @@ class Field:
 
         self.send_local = False
 
+        self.allowed_robots = 3
+
     def add_blue_robot(self, robot):
         self.blue_robots.append(robot)
 

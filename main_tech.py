@@ -203,7 +203,7 @@ class RobotController:
             if self.referee.referee_state:
                 self.tech.machine_state_update(self.referee.referee_state.command)
             #self.tech.machine_state_update(self.referee.referee_state.command)
-            self.tech.tech_control(self.robot0, self.robot1, self.robot2, self.field)
+            self.tech.tech_control(self.robot0,self.robot1,self.robot2, self.field)
 
             self.send_velocities()
 

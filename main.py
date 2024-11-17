@@ -21,7 +21,7 @@ import json
 CONTROL_FPS = 60  # FPS original para o controle de posição
 CAM_FPS = 7 * CONTROL_FPS  # FPS para processar os dados da visão
 
-REFEREE_ON = False  # Habilita a comunicação com o Referee
+REFEREE_ON = True  # Habilita a comunicação com o Referee
 
 
 class RepeatTimer(threading.Timer):
@@ -194,10 +194,18 @@ class RobotController:
         )
         """
         # Envio de velocidades do sistema global diretamente para as rodas
+
+        if self.field.ball.get_coordinates().Y  < 120:
+            factor = 0.4
+            w = 0
+        else:
+            factor = 0.4
+            w = -4
+
         if self.field.send_local:
             print("--------------------------------------------------------------")
             self.actuator.send_wheel_from_local_fisico(
-                self.robot0, self.robot0.vx, self.robot0.vx*0.4, self.robot0.w, self.mode_playing['simulated_mode']
+                self.robot0, self.robot0.vx, self.robot0.vx*factor, self.robot0.w, self.mode_playing['simulated_mode']
             )
         else:
             self.actuator.send_wheel_from_global(
@@ -210,7 +218,7 @@ class RobotController:
         if self.field.send_local:
             print("--------------------------------------------------------------")
             self.actuator.send_wheel_from_local_fisico(
-                self.robot1, self.robot1.vx, self.robot1.vx, self.robot1.w, self.mode_playing['simulated_mode']
+                self.robot1, self.robot1.vx, self.robot1.vx*0, self.robot1.w, self.mode_playing['simulated_mode']
             )
         else:
             self.actuator.send_wheel_from_global(
@@ -223,7 +231,7 @@ class RobotController:
         if self.field.send_local:
             print("--------------------------------------------------------------")
             self.actuator.send_wheel_from_local_fisico(
-                self.robot2, self.robot2.vx, self.robot2.vx, self.robot2.w, self.mode_playing['simulated_mode']
+                self.robot2, self.robot2.vx, self.robot2.vx*factor, w, self.mode_playing['simulated_mode']
             )
         else:
             self.actuator.send_wheel_from_global(
@@ -255,7 +263,7 @@ class RobotController:
     def control_loop(self):
         while True:
             t1 = time.time()
-
+            print("Robôs permitidos: ", self.field.allowed_robots)
             if REFEREE_ON:
                 # Recebe a mensagem do árbitro
                 self.referee.get_referee_message()
@@ -267,7 +275,7 @@ class RobotController:
                 self.field.game_stopped = False
 
             #Coach.escolher_estrategia(self.coach, self.robot2, self.robot1, self.robot0)
-            Coach.escolher_estrategia_real_2(self.coach, self.robot1,self.robot2,self.robot0)
+            Coach.escolher_estrategia_real_2(self.coach, self.robot1,self.robot0,self.robot2)
             #skills.go_to_point(self.robot0, self.field.ball.get_coordinates().X, self.field.ball.get_coordinates().Y, self.field, 0, threshold=15)
             #estrategia_basica_real(self.robot2,self.robot1,self.robot0,self.field)
             #skills.attack_ball_fisico(self.robot0, self.field)

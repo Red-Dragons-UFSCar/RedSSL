@@ -219,7 +219,7 @@ class Actuator():
         '''
         vx_local = velocity_x
         vy_local = velocity_y
-        angular = 0
+        #angular = 0
 
         #vx_local = -1
         #vy_local = 0
