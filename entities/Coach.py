@@ -274,9 +274,9 @@ class Coach:
                         )
                 print("Estratégia: Desvantagem")
             else:
-                plays.estrategia_basica_real(
-                            robot_goleiro, robot_zagueiro, robot_atacante, self.field
-                        )
+                #plays.estrategia_basica_real(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
+                plays.estrategia_block_ball_real(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
+                #plays.estrategia_2_atacantes_real(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
                 print("Estratégia: Normal")
         elif self.field.game_halted:
             robot_goleiro.vx = 0

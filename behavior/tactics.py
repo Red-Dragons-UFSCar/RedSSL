@@ -67,19 +67,19 @@ def atacante(robot0, field):
     else:
         skills.shoot(robot0, field)
 
-# def atacante_campo_todo(robot0, field):
-#     ball_position = field.ball.get_coordinates()
-
-#     for robot_field in field.enemy_robots:
-#         obst = Obstacle()
-#         obst.set_obst(robot_field.get_coordinates().X, 
-#                       robot_field.get_coordinates().Y, 
-#                       robot_field.get_coordinates().rotation)
-#         robot0.map_obstacle.add_obstacle(obst)
-    
-#         skills.shoot(robot0, field)
-
 def atacante_campo_todo(robot0, field):
+    ball_position = field.ball.get_coordinates()
+
+    for robot_field in field.enemy_robots:
+        obst = Obstacle()
+        obst.set_obst(robot_field.get_coordinates().X, 
+                      robot_field.get_coordinates().Y, 
+                      robot_field.get_coordinates().rotation)
+        robot0.map_obstacle.add_obstacle(obst)
+    
+        skills.shoot(robot0, field)
+
+def atacante_campo_todo_real(robot0, field):
     ball_position = field.ball.get_coordinates()
 
     for robot_field in field.enemy_robots:
@@ -130,11 +130,8 @@ def zagueiro_real(robot0, field):
 
     if ball_position.X >= offensive_line_x:
         skills.follow_ball_y(robot0, field, 150)
-        print("eu to tentando seguir 1")
-        print("Target: ", robot0.target.get_coordinates().X)
     elif (ball_position.X < 70) and (70 <= ball_position.Y <= 240):
         skills.follow_ball_y(robot0, field, 100)
-        print("eu to tentando seguir")
     else:
         skills.attack_ball_fisico(robot0, field, robot0.robot_id)
 
@@ -163,7 +160,7 @@ def goleiro_real(robot0, field):
                 robot0, field
             )  # manda pro centrofrom behavior.skills import follow_ball_y, pursue_ball
 
-def goleiro_real_2(robot0, field):
+def goleiro_real_2(robot0, field, fixed=22):
 
     Goalie_Chase_line = 75  # Limite para considerar perto
     Goaie_Y_Enable = 420  # Quando o goleiro começa a perseguir a bola
@@ -174,7 +171,7 @@ def goleiro_real_2(robot0, field):
 
     if ball_position.X <= Goaie_Y_Enable:
         # A bola não está na área, mas está perto
-        skills.follow_ball_y(robot0, field, 22, lim_sup=200, lim_inf=100)  # foca em y
+        skills.follow_ball_y(robot0, field, fixed, lim_sup=200, lim_inf=100)  # foca em y
 
     else:
         # a bola não está perto o suficiente para o goleiro precisar se preocupar, então manda ele pro centor do gol

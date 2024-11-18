@@ -19,8 +19,31 @@ def estrategia_basica_real(robot_goalie, robot_zagueiro, robot_atacante, field):
     """
     tactics.goleiro_real_2(robot_goalie, field)
     tactics.zagueiro_real(robot_zagueiro, field)
+    #skills.block_ball_y(robot_zagueiro, field, fixed_x=70)
     tactics.atacante_real(robot_atacante, field)
     #tactics.atacante_campo_todo(robot_atacante, field)
+
+def estrategia_block_ball_real(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Função que combina as estratégias do goleiro e do zagueiro.
+    Chama as funções goalie e zagueiro para controlar os dois robôs.
+    """
+
+    fixed_point = 80
+    tactics.goleiro_real_2(robot_goalie, field, fixed=10)
+    skills.block_ball_y(robot_zagueiro, field, fixed_x=fixed_point)
+    tactics.atacante_campo_todo_real(robot_atacante, field)
+
+    ball_position = field.ball.get_coordinates()
+
+def estrategia_2_atacantes_real(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Função que combina as estratégias do goleiro e do zagueiro.
+    Chama as funções goalie e zagueiro para controlar os dois robôs.
+    """
+    tactics.goleiro_real_2(robot_goalie, field, fixed=22)
+    tactics.atacante_campo_todo_real(robot_zagueiro, field)
+    tactics.atacante_campo_todo_real(robot_atacante, field)
 
 def estrategia_basica_real_1robo(robot_goalie, robot_zagueiro, robot_atacante, field):
     """
@@ -126,27 +149,29 @@ def basic_stop_behavior_defensive(robot_goleiro, robot_zagueiro, robot_atacante,
 
     if ball.X < 450 / 2 + 30:  # Se a bola está na ação do zagueiro
         skills.projection_stop_target(robot_zagueiro, field)  # Zagueiro vai pra bola
+        skills.projection_stop_target(robot_atacante, field)  # Zagueiro vai pra bola
 
-        # Ponto alvo do atacante no meio campo
-        x_target_atacante = 270
-        y_target_atacante = 150
-        robot_atacante.target.set_target(
-            robot_atacante, (x_target_atacante, y_target_atacante), field, 0
-        )
-        # Vai até o ponto alvo desviando da bola
-        skills.idle_behavior_avoid_ball_stop_game(robot_atacante, field)
+        # # Ponto alvo do atacante no meio campo
+        # x_target_atacante = 270
+        # y_target_atacante = 150
+        # robot_atacante.target.set_target(
+        #     robot_atacante, (x_target_atacante, y_target_atacante), field, 0
+        # )
+        # # Vai até o ponto alvo desviando da bola
+        # skills.idle_behavior_avoid_ball_stop_game(robot_atacante, field)
 
     else:  # Se a bola está na ação do atacante
         skills.projection_stop_target(robot_atacante, field)  # Atacante vai pra bola
+        skills.projection_stop_target(robot_zagueiro, field)  # Atacante vai pra bola
 
-        # Ponto alvo do zagueiro no meio campo
-        x_target_zagueiro = 180
-        y_target_zagueiro = 150
-        robot_zagueiro.target.set_target(
-            robot_zagueiro, (x_target_zagueiro, y_target_zagueiro), field, 0
-        )
-        # Vai até o ponto alvo desviando da bola
-        skills.idle_behavior_avoid_ball_stop_game(robot_zagueiro, field)
+        # # Ponto alvo do zagueiro no meio campo
+        # x_target_zagueiro = 180
+        # y_target_zagueiro = 150
+        # robot_zagueiro.target.set_target(
+        #     robot_zagueiro, (x_target_zagueiro, y_target_zagueiro), field, 0
+        # )
+        # # Vai até o ponto alvo desviando da bola
+        # skills.idle_behavior_avoid_ball_stop_game(robot_zagueiro, field)
 
 
 def basic_stop_behavior_offensive(robot_goleiro, robot_zagueiro, robot_atacante, field):

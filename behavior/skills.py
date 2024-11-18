@@ -92,6 +92,62 @@ def follow_ball_y(robot0, field, fixed_x=None, target_theta=0, lim_sup = 300, li
         robot0.vy = 0
         robot0.w = 0
 
+def block_ball_y(robot0, field, fixed_x=None, target_theta=0, lim_sup = 300, lim_inf = 0):
+    """
+    Move o robô para seguir a bola ao longo do eixo Y, mantendo uma posição fixa no eixo X ou na área do goleiro.
+
+    Parâmetros:
+    - robot0: Instância do robô a ser movido.
+    - field: Instância da classe Field.
+    - fixed_x: Coordenada X fixa (opcional).
+    - target_theta: Ângulo alvo (opcional).
+    """
+    ball_position = field.ball.get_coordinates()
+
+    target_x = (
+        fixed_x if fixed_x is not None else 150
+    )  # X padrão é 400, pode ser sobrescrito
+
+
+    if ball_position.Y < 100:
+        goal_y = 150
+    elif ball_position.Y > 200:
+        goal_y = 150
+    else:
+        goal_y = 150
+    goal_x = 0
+
+    angle_ball_to_goal = np.arctan2(
+        (goal_y - ball_position.Y), (ball_position.X - goal_x)
+    )
+
+    angle_global = np.pi - angle_ball_to_goal
+
+    print("Angulo: ", angle_global)
+
+    try:
+        if ball_position.X < target_x and ball_position.Y < 100:
+            target_y = 60
+            target_x = ball_position.X + 10
+        elif ball_position.X < target_x and ball_position.Y > 150:
+            target_y = 240
+            target_x = ball_position.X + 10
+        else:
+            target_y = (ball_position.X - target_x)/ball_position.X * (goal_y-ball_position.Y) + ball_position.Y
+    except:
+        target_y = 150
+
+    print(target_y)
+
+    #angle_robot = -angle_ball_to_goal
+
+    go_to_point(robot0, target_x, target_y, field, target_theta)
+
+    if robot0.target_reached(15):
+        robot0.vx = 0
+        robot0.vy = 0
+        robot0.w = 0
+
 
 def clear_ball(robot0, field, ball_position, robot_position, angle_to_ball):
     """
@@ -228,6 +284,10 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
     approach_offset = -50
     #threshold = 2
     threshold = 15
+
+    target_x = ball_position.X + approach_offset * np.cos(angle_ball_to_target)
+    target_y = ball_position.Y + approach_offset * np.sin(angle_ball_to_target)
+    target_theta = angle_ball_to_target
 
     if current_state == STATE_A:
         # Estado A: Se posicionar atrás da bola
@@ -490,6 +550,9 @@ def projection_stop_target(robot, field, kicker=False):
 
         quadrant1 = ball.get_coordinates().Y > 230 and ball.get_coordinates().X > 300
         quadrant2 = ball.get_coordinates().Y < 70 and ball.get_coordinates().X > 300
+
+        quadrant1 = False
+        quadrant2 = False
 
         if quadrant1:
             goal_y = 300
@@ -769,7 +832,7 @@ def attack_ball_fisico(robot0, field, index):
             if abs(robot0.get_coordinates().rotation - (target_theta-add_angle)) <25*np.pi/180:
                 robot0.w = 0
                 field.counter_attacker_stop[index] += 1
-                if field.counter_attacker_stop[index] > 5*field.threshold_attacker_stop[index]:
+                if field.counter_attacker_stop[index] > 3*field.threshold_attacker_stop[index]:
                     current_state = STATE_B
                     field.counter_attacker_stop[index] = 0
             else:

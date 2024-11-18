@@ -98,6 +98,7 @@ class RefereeCommunication:
     def parse_referee_command(self, field):
         if self.referee_state:
             command = self.referee_state.command
+            print("command: ", self.referee_state.command)
             if self.field.team == 'yellow':
                 self.field.allowed_robots = self.referee_state.yellow.max_allowed_bots
 
