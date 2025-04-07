@@ -15,12 +15,13 @@ from behavior.tactics import *
 import time
 import threading
 import json
+import os
 
 
 CONTROL_FPS = 60  # FPS original para o controle de posição
 CAM_FPS = 7 * CONTROL_FPS  # FPS para processar os dados da visão
 
-REFEREE_ON = True  # Habilita a comunicação com o Referee
+REFEREE_ON = False  # Habilita a comunicação com o Referee
 
 
 class RepeatTimer(threading.Timer):
@@ -53,6 +54,9 @@ class RobotController:
             # Lendo as configurações de jogo para vida real
             with open("constants/game_real.json", "r") as file:
                 self.game = json.load(file)
+        
+        with open("constants/filter_parameters.json", "r") as file:
+            filter_parameters = json.load(file)
 
         self.team_color = self.game["team"]["color"]  # Lê a cor do time
 
@@ -145,6 +149,12 @@ class RobotController:
                 self.enemy_robot1,
                 self.enemy_robot2,
             ]
+        
+        self.file_simulation_data = None
+
+        for param in filter_parameters:
+            setattr(self.robot0.filter, param, np.asarray(filter_parameters[param]))
+            print(getattr(self.robot0.filter, param))
 
     def update_coordinates(self, frame):
         if frame["frame_number"] == 0:
@@ -153,13 +163,30 @@ class RobotController:
         # Atualiza as posições dos robôs azuis no campo com base nas informações da visão
         self.field.verify_team_id(frame[f"robots_{self.team_color}"])
         for detection in frame[f"robots_{self.team_color}"]:
+            # detection_pos = np.array([detection["x"], detection["y"]])
+            # detection_pos_with_noise = self.add_gaussian_noise(detection_pos, 0.01, 0.08)
+            # # print([detection["x"], detection["y"]])
+            # # print(detection_pos_with_noise)
+            # detection["x"] = detection_pos_with_noise[0]
+            # detection["y"] = detection_pos_with_noise[1]
+
             self.field.update_robot_position(
                 detection["robot_id"],
                 detection["x"],
                 detection["y"],
+                # detection_pos_with_noise[0],
+                # detection_pos_with_noise[1],
                 detection["orientation"],
                 self.team_color,
             )
+
+            if detection["robot_id"] == 0:
+                data = [self.visao.last_frame['frame_number'], self.robot0.robot_id, detection["x"], detection["y"], self.robot0.get_coordinates().X, self.robot0.get_coordinates().Y, self.robot0._velocities_cache[0], self.robot0._velocities_cache[1]]
+            elif detection["robot_id"] == 1:
+                data = [self.visao.last_frame['frame_number'], self.robot1.robot_id, detection["x"], detection["y"], self.robot1.get_coordinates().X, self.robot1.get_coordinates().Y, self.robot1._velocities_cache[0], self.robot1._velocities_cache[1]]
+            elif detection["robot_id"] == 2:
+                data = [self.visao.last_frame['frame_number'], self.robot2.robot_id, detection["x"], detection["y"], self.robot2.get_coordinates().X, self.robot2.get_coordinates().Y, self.robot2._velocities_cache[0], self.robot2._velocities_cache[1]]
+            np.savetxt(self.file_simulation_data, np.array([data]))            
 
         # Atualiza as posições dos robôs inimigos no campo com base nas informações da visão
         enemy_color = "yellow" if self.team_color == "blue" else "blue"
@@ -177,6 +204,22 @@ class RobotController:
         if frame["ball"]:
             ball_detection = frame["ball"]
             self.field.update_ball_position(ball_detection["x"], ball_detection["y"])
+    
+    def add_gaussian_noise(self, pos, min_sigma, max_sigma):
+        field_center = [225, 150]
+        upper_right_corner = [450, 300]
+
+        dist_between_center_to_corner = np.sqrt(np.power(upper_right_corner[0] - field_center[0], 2) + np.power(upper_right_corner[1] - field_center[1], 2))
+        dist_pos_to_center = np.sqrt(np.power(pos[0] - field_center[0], 2) + np.power(pos[1] - field_center[1], 2))
+
+        k = dist_pos_to_center / dist_between_center_to_corner
+        std = min_sigma + k * (max_sigma - min_sigma)
+        noise1 = np.random.randn(1)*std
+        noise2 = np.random.randn(1)*std
+
+        pos_with_noise = np.array([pos[0] + noise1[0], pos[1] + noise2[0]])
+
+        return pos_with_noise
 
     def send_velocities(self):
         # Envio de velocidades no sistema global
@@ -230,12 +273,24 @@ class RobotController:
         Descrição:
             Função que inicia a thread da visão
         """
+
+        filename = 'dados_simulador4.txt'
+        # self.file_simulation_data = open('treinamento_filtro/' + filename, 'w')
+        
+        if not os.path.isfile('treinamento_filtro/' + filename):
+            self.file_simulation_data = open('treinamento_filtro/' + filename, 'w')
+        else:
+            print("Arquivo já existe!")
+            exit(1)
+
         self.vision_thread = RepeatTimer((1 / CAM_FPS), self.get_vision_frame)
         self.vision_thread.start()
 
     def control_loop(self):
         while True:
             t1 = time.time()
+
+            self.field.allowed_robots = 3
 
             if REFEREE_ON:
                 # Recebe a mensagem do árbitro
@@ -254,21 +309,20 @@ class RobotController:
             self.robot0.map_obstacle.clear_map()
             self.robot1.map_obstacle.clear_map()
             self.robot2.map_obstacle.clear_map()
-
             print("---------------------------------------")
             print("    LOGGING DOS ROBÔS TIME     ")
             print("---------------------------------------")
             print("Robo goleiro, id=", self.robot0.vision_id)
             print("x: ", self.robot0.get_coordinates().X)
-            print("y: ", self.robot0.get_coordinates().X)
+            print("y: ", self.robot0.get_coordinates().Y)
             print("r: ", self.robot0.get_coordinates().rotation)
             print("Robo zagueiro, id=", self.robot1.vision_id)
             print("x: ", self.robot1.get_coordinates().X)
-            print("y: ", self.robot1.get_coordinates().X)
+            print("y: ", self.robot1.get_coordinates().Y)
             print("r: ", self.robot1.get_coordinates().rotation)
             print("Robo goleiro, id=", self.robot2.vision_id)
             print("x: ", self.robot2.get_coordinates().X)
-            print("y: ", self.robot2.get_coordinates().X)
+            print("y: ", self.robot2.get_coordinates().Y)
             print("r: ", self.robot2.get_coordinates().rotation)
 
             print("---------------------------------------")
@@ -276,15 +330,15 @@ class RobotController:
             print("---------------------------------------")
             print("Robo goleiro, id=", self.enemy_robot0.vision_id)
             print("x: ", self.enemy_robot0.get_coordinates().X)
-            print("y: ", self.enemy_robot0.get_coordinates().X)
+            print("y: ", self.enemy_robot0.get_coordinates().Y)
             print("r: ", self.enemy_robot0.get_coordinates().rotation)
             print("Robo zagueiro, id=", self.enemy_robot1.vision_id)
             print("x: ", self.enemy_robot1.get_coordinates().X)
-            print("y: ", self.enemy_robot1.get_coordinates().X)
+            print("y: ", self.enemy_robot1.get_coordinates().Y)
             print("r: ", self.enemy_robot1.get_coordinates().rotation)
             print("Robo goleiro, id=", self.enemy_robot2.vision_id)
             print("x: ", self.enemy_robot2.get_coordinates().X)
-            print("y: ", self.enemy_robot2.get_coordinates().X)
+            print("y: ", self.enemy_robot2.get_coordinates().Y)
             print("r: ", self.enemy_robot2.get_coordinates().rotation)
 
             if (t2 - t1) < 1 / CONTROL_FPS:
