@@ -171,10 +171,10 @@ class Field:
         ):
             if self.game_on and (self.penalty_offensive or self.penalty_defensive):
                 self.game_on_but_is_penalty = True
-                print("Jogando situacao de penalty")
+                #print("Jogando situacao de penalty")
 
             else:
-                print("Game iniciado")
+                #print("Game iniciado")
                 self.game_on = True
                 self.game_stopped = False
                 self.game_halted = False
@@ -192,7 +192,7 @@ class Field:
             self.penalty_defensive = False
             self.game_on_but_is_penalty = False
 
-            print("JOGO PARADO")
+            #print("JOGO PARADO")
         elif command == Referee.Command.HALT:
             self.game_on = False
             self.game_stopped = False
@@ -201,10 +201,10 @@ class Field:
             self.penalty_defensive = False
             self.game_on_but_is_penalty = False
 
-            print("JOGO INTERROMPIDO")
+            #print("JOGO INTERROMPIDO")
 
         elif command == Referee.Command.PREPARE_KICKOFF_YELLOW:
-            print("KICKOFF YELLOW")
+            #print("KICKOFF YELLOW")
             if self.team == "yellow":
                 # flag do coach de kickoff ofensivo
                 self.kickoff_offensive = True
@@ -228,7 +228,7 @@ class Field:
                 self.game_on_but_is_penalty = False
 
         elif command == Referee.Command.PREPARE_KICKOFF_BLUE:
-            print("KICKOFF BLUE")
+            #print("KICKOFF BLUE")
             if self.team == "blue":
                 # flag do coach de kickoff ofensivo
                 self.kickoff_offensive = True
@@ -246,7 +246,7 @@ class Field:
                 self.game_on_but_is_penalty = False
 
         elif command == Referee.Command.PREPARE_PENALTY_YELLOW:
-            print("PENALTY YELLOW")
+            #print("PENALTY YELLOW")
             if self.team == "yellow":
                 # flag do coach de kickoff ofensivo
                 self.kickoff_offensive = False
@@ -320,7 +320,7 @@ class Field:
             self.penalty_offensive = False
             self.penalty_defensive = False
             self.game_on_but_is_penalty = False
-            print("TIMEOUT YELLOW")
+            #print("TIMEOUT YELLOW")
 
         elif command == Referee.Command.TIMEOUT_BLUE:
             self.game_on = False
@@ -329,7 +329,7 @@ class Field:
             self.penalty_offensive = False
             self.penalty_defensive = False
             self.game_on_but_is_penalty = False
-            print("TIMEOUT BLUE")
+            #print("TIMEOUT BLUE")
 
         elif command == Referee.Command.GOAL_YELLOW:
             print("GOL YELLOW")
@@ -349,7 +349,7 @@ class Field:
             self.game_on_but_is_penalty = False
 
         elif command == Referee.Command.BALL_PLACEMENT_BLUE:
-            print("BALL PLACEMENT BLUE")
+            #print("BALL PLACEMENT BLUE")
             self.game_on = False
             self.game_stopped = True
             self.game_halted = False
@@ -376,7 +376,7 @@ class Field:
             yellow_team_info.yellow_cards > self.yellow_cards_counter
             and self.team == "yellow"
         ):
-            print("CARTAO PRO TIME AMARELO")
+            #print("CARTAO PRO TIME AMARELO")
             self.yellow_card_flag = True
             self.yellow_card_timestamp = time.time()  # Registra o tempo do cartão
             self.yellow_cards_counter = yellow_team_info.yellow_cards
@@ -386,7 +386,7 @@ class Field:
             blue_team_info.yellow_cards > self.yellow_cards_counter
             and self.team == "blue"
         ):
-            print("CARTAO PRO TIME AZUL")
+            #print("CARTAO PRO TIME AZUL")
             self.yellow_card_flag = True
             self.yellow_card_timestamp = time.time()  # Registra o tempo do cartão
             self.yellow_cards_counter = blue_team_info.yellow_cards
@@ -396,11 +396,11 @@ class Field:
             yellow_team_info.red_cards > self.red_cards_counter
             and self.team == "yellow"
         ):
-            print("CARTAO VERMELHO PRO TIME AMARELO")
+            #print("CARTAO VERMELHO PRO TIME AMARELO")
             self.red_card_flag = True
             self.red_cards_counter = yellow_team_info.red_cards
 
         if blue_team_info.red_cards > self.red_cards_counter and self.team == "blue":
-            print("CARTAO VERMELHO PRO TIME AZUL")
+            #print("CARTAO VERMELHO PRO TIME AZUL")
             self.red_card_flag = True
             self.red_cards_counter = blue_team_info.red_cards

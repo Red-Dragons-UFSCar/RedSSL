@@ -193,8 +193,8 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
     angle_diff = np.degrees(angle_ball_to_target - angle_robot_to_ball)
 
     approach_offset = -40
-    #threshold = 2
-    threshold = 10
+    threshold = 2
+    #threshold = 10
     
     if current_state == STATE_A:
         # Estado A: Se posicionar atrás da bola
