@@ -255,7 +255,7 @@ class RobotController:
 
             #Coach.escolher_estrategia(self.coach, self.robot2, self.robot1, self.robot0)
             #skills.go_to_point(self.robot0, self.field.ball.get_coordinates().X, self.field.ball.get_coordinates().Y, self.field, 0, threshold=15)
-            estrategia_basica_real(self.robot2,self.robot0,self.robot1,self.field)
+            estrategia_basica(self.robot2,self.robot0,self.robot1,self.field)
             #skills.attack_ball_fisico(self.robot0, self.field)
 
             #self.robot0.vx = 1
