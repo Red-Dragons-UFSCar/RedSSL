@@ -232,13 +232,13 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         robot0.v_max = 1.25 if robot_position.X < 335 else 1.5
         # print("Estado C")
 
-        if not abs(angle_diff) <= 20:
-            current_state = STATE_B
-        elif (
-            90 <= np.degrees(angle_robot_to_ball) <= 180
-            or -180 <= np.degrees(angle_robot_to_ball) <= -90
-        ):
+        if ( 90 <= np.degrees(angle_robot_to_ball) <= 180
+            or -180 <= np.degrees(angle_robot_to_ball) <= -90):
             current_state = STATE_D
+        elif not abs(angle_diff) <= 20:
+            current_state = STATE_B
+        
+            
 
     elif current_state == STATE_D:
         # Estado D: Evitar a bola
