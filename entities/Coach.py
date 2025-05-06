@@ -65,186 +65,118 @@ class Coach:
         """
 
         if self.field.game_halted:
-            # Estratégia para quando o jogo está pausado permanentemente (halted)
+            #print("Jogo pausado permanentemente (halted)")
             robot_goleiro.v_max = 0
             robot_zagueiro.v_max = 0
             robot_atacante.v_max = 0
             return  # Sai da função para garantir que os robôs permaneçam parados
 
         if self.field.game_stopped:
+            #print("Jogo parado (stopped)")
             robot_goleiro.v_max = 0.75
             robot_zagueiro.v_max = 0.75
             robot_atacante.v_max = 0.75
+            plays.basic_stop_behavior_defensive(
+                robot_goleiro, robot_zagueiro, robot_atacante, self.field
+            )
+
+
+            if self.field.defending_foul:
+                #print("Estratégia: Jogo parado em stop defensivo")
+                plays.basic_stop_behavior_defensive(
+                    robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                )
+            elif self.field.offensive_foul:
+                #print("Estratégia: Jogo parado em stop ofensivo")
+                plays.basic_stop_behavior_offensive(
+                    robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                )
         else:
+            #print("Jogo em andamento")
             robot_goleiro.v_max = 1.5
             robot_zagueiro.v_max = 1.5
             robot_atacante.v_max = 1.5
 
         if not self.verificar_bola_em_campo():
-            # Se o jogo estiver parado, move os robôs para pontos específicos
-            # print("Bola Fora. Posicionando robôs.")
+            #print("Bola fora de campo")
             plays.posicionar_robos(
                 robot_goleiro, robot_zagueiro, robot_atacante, self.field
             )
         else:
-            # Se o jogo estiver em andamento, usa a estratégia básica
-            if self.field.game_on and self.field.game_on_but_is_penalty == False:
+            #print("Bola dentro de campo")
+            if self.field.game_on and not self.field.game_on_but_is_penalty:
+                #print("Jogo em andamento")
 
-                if self.field.red_cards_counter == 3:
-                    # Estratégia com 3 robôs a menos em ação")
+                if self.field.allowed_robots == 3:
+                    #print("Estratégia: Normal")
+                    plays.estrategia_basica(
+                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                    )
+                elif self.field.allowed_robots == 2:
+                    #print("Estratégia: Desvantagem com 2 robôs")
+                    plays.estrategia_desvantagem_2(
+                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                    )
+                elif self.field.allowed_robots == 1:
+                    #print("Estratégia: Desvantagem com 1 robô")
+                    plays.estrategia_desvantagem_1(
+                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                    )
+                else:
+                    #print("Estratégia: Desvantagem extrema")
                     plays.estrategia_desvantagem_0(
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
                     )
 
-                elif (
-                    self.field.red_cards_counter == 2
-                    and self.field.yellow_card_flag == False
-                ):
-                    # Estratégia com 2 robôs a menos em ação")
-                    plays.estrategia_desvantagem_1(
-                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
-                    )
-
-                elif (
-                    self.field.red_cards_counter == 2
-                    and self.field.yellow_card_flag == True
-                ):
-                    elapsed_time = time.time() - self.field.yellow_card_timestamp
-                    if elapsed_time >= 15:
-                        self.field.yellow_card_flag = False
-                        self.field.true_yellow_cards_counter -= 1
-
-                    else:
-                        plays.estrategia_desvantagem_0(
-                            robot_goleiro, robot_zagueiro, robot_atacante, self.field
-                        )
-
-                elif (
-                    self.field.red_cards_counter == 1
-                    and self.field.yellow_card_flag == True
-                ):
-                    # Estratégia com 1 robôs a menos em ação
-                    elapsed_time = time.time() - self.field.yellow_card_timestamp
-                    if elapsed_time >= 15:
-                        self.field.yellow_card_flag = False
-                        self.field.true_yellow_cards_counter -= 1
-
-                    else:
-                        plays.estrategia_desvantagem_1(
-                            robot_goleiro, robot_zagueiro, robot_atacante, self.field
-                        )
-
-                elif (
-                    self.field.red_cards_counter == 1
-                    and self.field.yellow_card_flag == False
-                ):
-                    # Estratégia com 1 robôs a menos em ação
-                    print("estratégia com 1 robô a menos em ação")
-                    plays.estrategia_desvantagem_2(
-                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
-                    )
-
-                elif (
-                    self.field.yellow_card_flag == True
-                    and self.field.true_yellow_cards_counter == 2
-                ):
-                    # Estratégia com 1 cartão amarelo ativo
-                    elapsed_time = time.time() - self.field.yellow_card_timestamp
-
-                    if elapsed_time >= 15:  # 2 minutos = 120 segundos
-                        self.field.yellow_card_flag = False  # Desativa a flag após 2
-                        self.field.true_yellow_cards_counter -= 1
-                    else:
-                        plays.estrategia_desvantagem_1(
-                            robot_goleiro, robot_zagueiro, robot_atacante, self.field
-                        )
-
-                elif (
-                    self.field.yellow_card_flag == True
-                    and self.field.true_yellow_cards_counter == 1
-                ):
-                    # Estratégia com 1 cartão amarelo ativo
-                    elapsed_time = time.time() - self.field.yellow_card_timestamp
-                    if elapsed_time >= 15:  # 2 minutos = 120 segundos
-                        self.field.yellow_card_flag = False  # Desativa a flag após 2
-                        self.field.true_yellow_cards_counter -= 1
-
-                    else:
-                        plays.estrategia_desvantagem_2(
-                            robot_goleiro, robot_zagueiro, robot_atacante, self.field
-                        )
-
-                else:
-                    # Estrategia basica em ação
-                    plays.estrategia_basica(
-                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
-                    )
-
-            elif self.field.game_on and self.field.game_on_but_is_penalty == True:
+            elif self.field.game_on and self.field.game_on_but_is_penalty:
+                #print("Pênalti")
                 if self.penalty_start_time is None:
                     self.penalty_start_time = time.time()
 
                 if self.field.penalty_defensive:
-                    print("estratégia de pênalti defensivo em ação")
+                    #print("Estratégia: Pênalti defensivo")
                     plays.estrategia_penalti_defensivo(
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
                     )
+                elif self.field.penalty_offensive:
+                    #print("Estratégia: Pênalti ofensivo")
+                    plays.estrategia_penalti_ofensivo(
+                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                    )
                 else:
-                    if self.field.penalty_offensive:
-                        print("estratégia de pênalti ofensivo em ação")
-                        plays.estrategia_penalti_ofensivo(
-                            robot_goleiro, robot_zagueiro, robot_atacante, self.field
-                        )
-                    else:
-                        self.penalty_start_time = (
-                            None  # "Zerando" tempo de incio do pênalti após a cobrança
-                        )
-
-            elif self.field.game_stopped and self.field.defending_foul:
-                # Estratégia de jogo parado em stop defensivo
-                # Faz a estratégia normal e desvia da bola
-                plays.basic_stop_behavior_defensive(
-                    robot_goleiro, robot_zagueiro, robot_atacante, self.field
-                )
-
-            elif self.field.game_stopped and self.field.offensive_foul:
-                # Estratégia de jogo parado em stop ofensivo
-                # Calcula o angulo desejado da estrategia normal, mas para perto da bola
-                plays.basic_stop_behavior_offensive(
-                    robot_goleiro, robot_zagueiro, robot_atacante, self.field
-                )
+                    #print("Pênalti finalizado")
+                    self.penalty_start_time = None
 
             elif self.field.kickoff_offensive:
-                # Estratégia de kickoff ofensivo
+                #print("Estratégia: Kickoff ofensivo")
                 plays.offensive_kickoff(
                     robot_goleiro, robot_zagueiro, robot_atacante, self.field
                 )
 
             elif self.field.kickoff_defensive:
-                # Estratégia de kickoff defensivo
+                #print("Estratégia: Kickoff defensivo")
                 plays.defensive_kickoff(
                     robot_goleiro, robot_zagueiro, robot_atacante, self.field
                 )
 
             elif self.field.penalty_offensive or self.field.penalty_defensive:
+                #print("Estratégia: Pênalti em andamento")
                 if self.penalty_start_time is None:
                     self.penalty_start_time = time.time()
 
                 if self.field.penalty_defensive:
-                    print("estratégia de pênalti defensivo em ação")
+                    #print("Estratégia: Pênalti defensivo")
                     plays.estrategia_penalti_defensivo(
                         robot_goleiro, robot_zagueiro, robot_atacante, self.field
                     )
+                elif self.field.penalty_offensive:
+                    #print("Estratégia: Pênalti ofensivo")
+                    plays.estrategia_penalti_ofensivo(
+                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                    )
                 else:
-                    if self.field.penalty_offensive:
-                        print("estratégia de pênalti ofensivo em ação")
-                        plays.estrategia_penalti_ofensivo(
-                            robot_goleiro, robot_zagueiro, robot_atacante, self.field
-                        )
-                    else:
-                        self.penalty_start_time = (
-                            None  # "Zerando" tempo de incio do pênalti após a cobrança
-                        )
+                    #print("Pênalti finalizado")
+                    self.penalty_start_time = None
     
     def escolher_estrategia_real_2(self, robot_goleiro, robot_zagueiro, robot_atacante):
         """
@@ -272,12 +204,12 @@ class Coach:
                 plays.estrategia_basica_real_1robo(
                             robot_goleiro, robot_zagueiro, robot_atacante, self.field
                         )
-                print("Estratégia: Desvantagem")
+                #print("Estratégia: Desvantagem")
             else:
                 #plays.estrategia_basica_real(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
                 plays.estrategia_block_ball_real(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
                 #plays.estrategia_2_atacantes_real(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
-                print("Estratégia: Normal")
+                #print("Estratégia: Normal")
         elif self.field.game_halted:
             robot_goleiro.vx = 0
             robot_goleiro.vy = 0
@@ -292,7 +224,7 @@ class Coach:
             robot_atacante.w = 0
 
         elif self.field.kickoff_defensive or self.field.kickoff_offensive:
-            print("Kickoff")
+            #print("Kickoff")
             plays.defensive_kickoff(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
         elif self.field.penalty_defensive:
             plays.penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, self.field, self.field.game_on_but_is_penalty)

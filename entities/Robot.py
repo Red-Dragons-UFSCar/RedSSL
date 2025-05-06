@@ -27,7 +27,7 @@ class Robot(KinematicBody):
         self.w = 0  # Velocidade angular do robô
 
         # Valores máximos do robô móvel
-        self.v_max = 1.0  # Velocidade linear máxima em módulo
+        self.v_max = 1.5  # Velocidade linear máxima em módulo
 
         '''
         '''
@@ -162,6 +162,19 @@ class Robot(KinematicBody):
         )
         distance_to_target = np.linalg.norm(current_position - target_position)
         return distance_to_target < treshold
+
+    def xtarget_reached(self, xTreshold=10):
+        if self.target is None:
+            return False
+        xDistance_to_target = abs(self.get_coordinates().X - self.target.get_coordinates().X)
+        return xDistance_to_target < xTreshold
+    
+    def ytarget_reached(self, yTreshold=10):
+        if self.target is None:
+            return False
+        yDistance_to_target = abs(self.get_coordinates().Y - self.target.get_coordinates().Y)
+        return yDistance_to_target < yTreshold
+
 
     def set_robot_velocity(self, target_velocity_x, target_velocity_y, target_angular):
         # Define as velocidades alvo nos controladores PID
