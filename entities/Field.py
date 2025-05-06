@@ -24,10 +24,9 @@ class Field:
 
         # Máquina de estados do zagueiro
         self.zagueiro_current_state = "A"
-        self.zagueiro_current_state = "A"
 
         # Máquina de estados do atacante
-        self.atacante_current_state = ["A", "A", "A"]
+        self.atacante_current_state = "A"
 
         # Máquina de estados do atacante real
         self.atacante_state_real = "A"

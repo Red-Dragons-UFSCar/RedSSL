@@ -181,3 +181,15 @@ class Robot(KinematicBody):
 
         # Retorna as velocidades calculadas
         return self.vx, self.vy, self.w
+
+    def xtarget_reached(self, xTreshold=10):
+         if self.target is None:
+             return False
+         xDistance_to_target = abs(self.get_coordinates().X - self.target.get_coordinates().X)
+         return xDistance_to_target < xTreshold
+     
+    def ytarget_reached(self, yTreshold=10):
+        if self.target is None:
+            return False
+        yDistance_to_target = abs(self.get_coordinates().Y - self.target.get_coordinates().Y)
+        return yDistance_to_target < yTreshold

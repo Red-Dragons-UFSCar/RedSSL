@@ -1,11 +1,11 @@
 {
     "vision": {
         "ip": "224.5.23.2",
-        "port": 10020
+        "port": 10021
     },
     "command": {
         "ip": "localhost",
-        "port": 10301
+        "port": 10302
     },
     "referee": {
         "ip": "224.5.23.1",
