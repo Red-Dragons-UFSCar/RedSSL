@@ -261,6 +261,42 @@ class Actuator():
         self.send_socket(robot_control.SerializeToString())
 
 
+    def send_full_command(self, robot_id, wheel_bl, wheel_br, wheel_fl, wheel_fr, kick_speed):
+        '''
+        Descrição:  
+                Método responsável pelo envio das velocidades das rodas e do comando de chute no mesmo pacote.
+
+        Entradas:
+                robot_id:   ID do robô.
+                wheel_bl:   Velocidade da roda traseira esquerda [m/s].
+                wheel_br:   Velocidade da roda traseira direita [m/s].
+                wheel_fl:   Velocidade da roda dianteira esquerda [m/s].
+                wheel_fr:   Velocidade da roda dianteira direita [m/s].
+                kick_speed: Velocidade do chute [m/s].
+        '''
+        # Crie uma mensagem RobotControl
+        robot_control = RobotControl()
+
+        # Crie uma mensagem RobotCommand
+        robot_command = robot_control.robot_commands.add()
+        robot_command.id = robot_id
+        robot_command.kick_speed = kick_speed
+        robot_command.kick_angle = 0  # Ângulo fixo em 0 graus (chute reto)
+
+        # Crie uma mensagem MoveWheelVelocity
+        move_command = MoveWheelVelocity()
+        move_command.front_right = wheel_fr
+        move_command.back_right = wheel_br
+        move_command.back_left = wheel_bl
+        move_command.front_left = wheel_fl
+
+        # Atribua a mensagem MoveWheelVelocity ao campo move_command da mensagem RobotCommand
+        robot_command.move_command.wheel_velocity.CopyFrom(move_command)
+
+        # Envie a mensagem serializada pelo socket
+        self.send_socket(robot_control.SerializeToString())
+
+
 if __name__ == '__main__':
     import time
     actuator = Actuator()
