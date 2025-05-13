@@ -1,13 +1,68 @@
 {
     "team":{
-        "color": "blue",
+        "color": "yellow",
         "right_side": true,
         "id_goalkeeper": 3,
-        "id_defender": 5,
+        "id_defender": 9,
         "id_attacker": 2
     },
     "game":{
         "game_on_max_velocity": 1,
         "game_stop_max_velocity": 0.5
+    },
+    "controller":{
+        "goalkeeper":{
+            "x":{
+                "Kp": 6.551,
+                "Ki": 0,
+                "Kd": 0.1,
+                "N": 52.687038988
+            },
+            "y":{
+                "Kp": 4.857,
+                "Ki": 0,
+                "Kd": 0.1,
+                "N": 52.687038988
+            },
+            "w":{
+                "Kp": 5,
+                "Ki": 0,
+                "Kd": 0
+            }
+        },
+        "defender":{
+            "x":{
+                "Kp": 6.551,
+                "Ki": 0,
+                "Kd": 0.1
+            },
+            "y":{
+                "Kp": 4.857,
+                "Ki": 0,
+                "Kd": 0.1
+            },
+            "w":{
+                "Kp": 5,
+                "Ki": 0,
+                "Kd": 0
+            }
+        },
+        "attacker":{
+            "x":{
+                "Kp": 6.551,
+                "Ki": 0,
+                "Kd": 0.1
+            },
+            "y":{
+                "Kp": 4.857,
+                "Ki": 0,
+                "Kd": 0.1
+            },
+            "w":{
+                "Kp": 5,
+                "Ki": 0,
+                "Kd": 0
+            }
+        }	
     }
 }

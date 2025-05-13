@@ -27,8 +27,10 @@ class Robot(KinematicBody):
         self.w = 0  # Velocidade angular do robô
 
         # Valores máximos do robô móvel
-        self.v_max = 1.5  # Velocidade linear máxima em módulo
+        self.v_max = 1.0  # Velocidade linear máxima em módulo
 
+        '''
+        '''
         # Parâmetros PID
         Kp_x = 6.551
         Kd_x = 0.1
@@ -38,23 +40,81 @@ class Robot(KinematicBody):
         Kd_y = 0.1
         Ki_y = 0
         N_y = 1 / 0.01805
+        Kp_theta = 3
+        Kd_theta = 0
+        Ki_theta = 0
+        
+        
+
+        ''' Controlador PID original fisico
+        Kp_x = 4.5
+        Kd_x = 0
+        Ki_x = 0
+        N_x = 30
+        Kp_y = 4.5
+        Kd_y = 0
+        Ki_y = 0
+        N_y = 30
+        Kp_theta = 2
+        Kd_theta = 0
+        Ki_theta = 0
+        '''
+
+        ''' FISICO ATUAL
+        Kp_x = 25
+        Kd_x = 0
+        Ki_x = 15
+        N_x = 30
+        Kp_y = 25
+        Kd_y = 0
+        Ki_y = 15
+        N_y = 30
         Kp_theta = 5
         Kd_theta = 0
         Ki_theta = 0
+        '''
+        
+
+        ''' SIMULACAO 2
+        Kp_x = 13
+        Kd_x = 0
+        Ki_x = 50
+        N_x = 30
+        Kp_y = 15
+        Kd_y = 0
+        Ki_y = 50
+        N_y = 30
+        Kp_theta = 7
+        Kd_theta = 0
+        Ki_theta = 0
+        '''
+        
+        
 
         # Controladores PID
         self.control_PID_x = PID_discrete(Kp_x, Kd_x, Ki_x, saturation=2, N=N_x)
         self.control_PID_y = PID_discrete(Kp_y, Kd_y, Ki_y, saturation=2, N=N_y)
+        #self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=5)
         self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=5)
 
         # Parâmetros construtivos do robo
         # Todos esses parâmetros do grSim estão em grSim/config/Parsian.ini
+        '''
+        # Simulador
         self.phi1 = 60 * np.pi/180
         self.phi2 = 135 * np.pi/180
         self.phi3 = 225 * np.pi/180
         self.phi4 = 300 * np.pi/180
         self.robot_radius = 0.09
         self.wheel_radius = 0.027
+        '''
+        # Real
+        self.phi1 = 55 * np.pi/180
+        self.phi2 = 125 * np.pi/180
+        self.phi3 = 235 * np.pi/180
+        self.phi4 = 305 * np.pi/180
+        self.robot_radius = 0.09
+        self.wheel_radius = 0.036
 
     def sim_set_vel(self, v_top_right, v_top_left, v_bottom_right, v_bottom_left):
         # Define as velocidades dos motores
@@ -121,3 +181,15 @@ class Robot(KinematicBody):
 
         # Retorna as velocidades calculadas
         return self.vx, self.vy, self.w
+
+    def xtarget_reached(self, xTreshold=10):
+         if self.target is None:
+             return False
+         xDistance_to_target = abs(self.get_coordinates().X - self.target.get_coordinates().X)
+         return xDistance_to_target < xTreshold
+     
+    def ytarget_reached(self, yTreshold=10):
+        if self.target is None:
+            return False
+        yDistance_to_target = abs(self.get_coordinates().Y - self.target.get_coordinates().Y)
+        return yDistance_to_target < yTreshold

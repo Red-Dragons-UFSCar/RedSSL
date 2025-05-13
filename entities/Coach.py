@@ -268,3 +268,60 @@ class Coach:
                         self.penalty_start_time = (
                             None  # "Zerando" tempo de incio do pênalti após a cobrança
                         )
+    
+    def escolher_estrategia_real_2(self, robot_goleiro, robot_zagueiro, robot_atacante):
+        """
+        Escolhe e executa a estratégia baseada na situação do jogo.
+        """
+
+        # if self.field.game_halted:
+        #     # Estratégia para quando o jogo está pausado permanentemente (halted)
+        #     robot_goleiro.v_max = 0
+        #     robot_zagueiro.v_max = 0
+        #     robot_atacante.v_max = 0
+        #     return  # Sai da função para garantir que os robôs permaneçam parados
+
+        # if self.field.game_stopped:
+        #     robot_goleiro.v_max = 0.75
+        #     robot_zagueiro.v_max = 0.75
+        #     robot_atacante.v_max = 0.75
+        # else:
+        #     robot_goleiro.v_max = 1.5
+        #     robot_zagueiro.v_max = 1.5
+        #     robot_atacante.v_max = 1.5
+
+        if self.field.game_on:
+            if self.field.allowed_robots <= 1:
+                plays.estrategia_basica_real_1robo(
+                            robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                        )
+                print("Estratégia: Desvantagem")
+            else:
+                #plays.estrategia_basica_real(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
+                plays.estrategia_block_ball_real(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
+                #plays.estrategia_2_atacantes_real(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
+                print("Estratégia: Normal")
+        elif self.field.game_halted:
+            robot_goleiro.vx = 0
+            robot_goleiro.vy = 0
+            robot_goleiro.w = 0
+
+            robot_zagueiro.vx = 0
+            robot_zagueiro.vy = 0
+            robot_zagueiro.w = 0
+
+            robot_atacante.vx = 0
+            robot_atacante.vy = 0
+            robot_atacante.w = 0
+
+        elif self.field.kickoff_defensive or self.field.kickoff_offensive:
+            print("Kickoff")
+            plays.defensive_kickoff(robot_goleiro, robot_zagueiro, robot_atacante, self.field)
+        elif self.field.penalty_defensive:
+            plays.penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, self.field, self.field.game_on_but_is_penalty)
+        elif self.field.penalty_offensive:
+            plays.penalti_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, self.field, self.field.game_on_but_is_penalty)
+        else:
+            plays.basic_stop_behavior_defensive(
+                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                    )

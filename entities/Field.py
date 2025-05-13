@@ -24,10 +24,15 @@ class Field:
 
         # Máquina de estados do zagueiro
         self.zagueiro_current_state = "A"
-        self.zagueiro_current_state = "A"
 
         # Máquina de estados do atacante
         self.atacante_current_state = "A"
+
+        # Máquina de estados do atacante real
+        self.atacante_state_real = "A"
+        self.enable_angular_controller_mono = False
+        self.threshold_attacker_stop = [30, 30, 30]
+        self.counter_attacker_stop = [0, 0, 0]
 
         # Define o time do robô
         self.team = team
@@ -46,6 +51,10 @@ class Field:
 
         # Flags para cartão e timestamp
         self.allowed_robots = 0
+
+        self.send_local = False
+
+        self.allowed_robots = 3
 
     def add_blue_robot(self, robot):
         self.blue_robots.append(robot)

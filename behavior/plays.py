@@ -1,4 +1,5 @@
 from behavior import skills, tactics
+from entities.Obstacle import Obstacle
 import numpy as np
 
 
@@ -10,6 +11,46 @@ def estrategia_basica(robot_goalie, robot_zagueiro, robot_atacante, field):
     tactics.goleiro(robot_goalie, field)
     tactics.zagueiro(robot_zagueiro, field)
     tactics.atacante(robot_atacante, field)
+
+def estrategia_basica_real(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Função que combina as estratégias do goleiro e do zagueiro.
+    Chama as funções goalie e zagueiro para controlar os dois robôs.
+    """
+    tactics.goleiro_real_2(robot_goalie, field)
+    tactics.zagueiro_real(robot_zagueiro, field)
+    #skills.block_ball_y(robot_zagueiro, field, fixed_x=70)
+    tactics.atacante_real(robot_atacante, field)
+    #tactics.atacante_campo_todo(robot_atacante, field)
+
+def estrategia_block_ball_real(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Função que combina as estratégias do goleiro e do zagueiro.
+    Chama as funções goalie e zagueiro para controlar os dois robôs.
+    """
+
+    fixed_point = 80
+    tactics.goleiro_real_2(robot_goalie, field, fixed=10)
+    skills.block_ball_y(robot_zagueiro, field, fixed_x=fixed_point)
+    tactics.atacante_campo_todo_real(robot_atacante, field)
+
+    ball_position = field.ball.get_coordinates()
+
+def estrategia_2_atacantes_real(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Função que combina as estratégias do goleiro e do zagueiro.
+    Chama as funções goalie e zagueiro para controlar os dois robôs.
+    """
+    tactics.goleiro_real_2(robot_goalie, field, fixed=22)
+    tactics.atacante_campo_todo_real(robot_zagueiro, field)
+    tactics.atacante_campo_todo_real(robot_atacante, field)
+
+def estrategia_basica_real_1robo(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Função que combina as estratégias do goleiro e do zagueiro.
+    Chama as funções goalie e zagueiro para controlar os dois robôs.
+    """
+    tactics.atacante_campo_todo(robot_atacante, field)
 
 
 def posicionar_robos(robot_goalie, robot_zagueiro, robot_atacante, field):
@@ -108,27 +149,29 @@ def basic_stop_behavior_defensive(robot_goleiro, robot_zagueiro, robot_atacante,
 
     if ball.X < 450 / 2 + 30:  # Se a bola está na ação do zagueiro
         skills.projection_stop_target(robot_zagueiro, field)  # Zagueiro vai pra bola
+        skills.projection_stop_target(robot_atacante, field)  # Zagueiro vai pra bola
 
-        # Ponto alvo do atacante no meio campo
-        x_target_atacante = 270
-        y_target_atacante = 150
-        robot_atacante.target.set_target(
-            robot_atacante, (x_target_atacante, y_target_atacante), field, 0
-        )
-        # Vai até o ponto alvo desviando da bola
-        skills.idle_behavior_avoid_ball_stop_game(robot_atacante, field)
+        # # Ponto alvo do atacante no meio campo
+        # x_target_atacante = 270
+        # y_target_atacante = 150
+        # robot_atacante.target.set_target(
+        #     robot_atacante, (x_target_atacante, y_target_atacante), field, 0
+        # )
+        # # Vai até o ponto alvo desviando da bola
+        # skills.idle_behavior_avoid_ball_stop_game(robot_atacante, field)
 
     else:  # Se a bola está na ação do atacante
         skills.projection_stop_target(robot_atacante, field)  # Atacante vai pra bola
+        skills.projection_stop_target(robot_zagueiro, field)  # Atacante vai pra bola
 
-        # Ponto alvo do zagueiro no meio campo
-        x_target_zagueiro = 180
-        y_target_zagueiro = 150
-        robot_zagueiro.target.set_target(
-            robot_zagueiro, (x_target_zagueiro, y_target_zagueiro), field, 0
-        )
-        # Vai até o ponto alvo desviando da bola
-        skills.idle_behavior_avoid_ball_stop_game(robot_zagueiro, field)
+        # # Ponto alvo do zagueiro no meio campo
+        # x_target_zagueiro = 180
+        # y_target_zagueiro = 150
+        # robot_zagueiro.target.set_target(
+        #     robot_zagueiro, (x_target_zagueiro, y_target_zagueiro), field, 0
+        # )
+        # # Vai até o ponto alvo desviando da bola
+        # skills.idle_behavior_avoid_ball_stop_game(robot_zagueiro, field)
 
 
 def basic_stop_behavior_defensive_desvantagem2(
@@ -195,7 +238,7 @@ def basic_stop_behavior_offensive(robot_goleiro, robot_zagueiro, robot_atacante,
         )  # Zagueiro vai pra bola cobrar
 
         # Ponto alvo do atacante no meio campo
-        x_target_atacante = 270
+        x_target_atacante = 300
         y_target_atacante = 150
         robot_atacante.target.set_target(
             robot_atacante, (x_target_atacante, y_target_atacante), field, 0
@@ -336,6 +379,101 @@ def offensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
         robot_atacante, field, attacking=True, attacker=True
     )
 
+    
+def defensive_kickoff_real(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Estratégia de kickoff defensivo
+    """
+    ball = field.ball
+    obst = Obstacle()  # Configura a bola como obstáculo
+    obst.set_obst(
+        ball.get_coordinates().X, ball.get_coordinates().Y, 0, radius=30
+    )
+    robot_goalie.map_obstacle.add_obstacle(obst)
+    robot_zagueiro.map_obstacle.add_obstacle(obst)
+    robot_atacante.map_obstacle.add_obstacle(obst)
+    # print("Posicionando robô goleiro no ponto específico.")
+    skills.go_to_point(robot_goalie, 30, 150, field, 0)
+    skills.go_to_point(robot_zagueiro, 100, 150, field, 0)
+    skills.go_to_point(robot_atacante, 160, 150, field, 0)
+
+'''
+def penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, field, game_on):
+    """
+    Posiciona zagueiro e goleiro em posições fixas no campo de defesa e
+    o atacante para cobrar o pênalti, em seguida chamando a função de atacante para cobrança.
+    """
+    if game_on:
+        # Quando o jogo ativar, todos se posicionam para o jogo normal
+        tactics.goleiro_real_2(robot_goleiro, field)
+        skills.go_to_point(robot_zagueiro, 300, 300, field, np.pi)
+        skills.go_to_point(robot_atacante, 300, 20, field, np.pi)
+    else:
+        skills.go_to_point(robot_goleiro, 30, 150, field, np.pi)
+        skills.go_to_point(robot_zagueiro, 300, 300, field, np.pi)
+        skills.go_to_point(robot_atacante, 300, 20, field, np.pi)
+'''
+        
+def penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, field, game_on):
+    """
+    Posiciona zagueiro e goleiro em posições fixas no campo de defesa e
+    o atacante para cobrar o pênalti, em seguida chamando a função de atacante para cobrança.
+    """
+    threshold = 20
+    print("eieiei")
+    if game_on:
+        # Quando o jogo ativar, todos se posicionam para o jogo normal
+        tactics.goleiro_real_2(robot_goleiro, field)
+        skills.go_to_point(robot_zagueiro, 380, 230, field, np.pi, threshold)
+        skills.go_to_point(robot_atacante, 380, 70, field, np.pi, threshold)
+
+        if robot_zagueiro.get_coordinates().rotation - robot_zagueiro.target.get_coordinates().rotation < 15*np.pi/180:
+            robot_zagueiro.w = 0
+        if robot_atacante.get_coordinates().rotation - robot_atacante.target.get_coordinates().rotation < 15*np.pi/180:
+            robot_atacante.w = 0
+
+    else:
+        skills.go_to_point(robot_goleiro, 30, 150, field, 0, threshold)
+        skills.go_to_point(robot_zagueiro, 380, 230, field, np.pi, threshold)
+        skills.go_to_point(robot_atacante, 380, 70, field, np.pi, threshold)
+
+        if robot_zagueiro.get_coordinates().rotation - robot_zagueiro.target.get_coordinates().rotation < 15*np.pi/180:
+            robot_zagueiro.w = 0
+            print("zerei 1")
+        if robot_goleiro.get_coordinates().rotation - robot_goleiro.target.get_coordinates().rotation < 15*np.pi/180:
+            robot_goleiro.w = 0
+            print("zerei 2")
+        if robot_atacante.get_coordinates().rotation - robot_atacante.target.get_coordinates().rotation < 15*np.pi/180:
+            robot_atacante.w = 0
+            print("zerei 3")
+
+def penalti_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, field, game_on):
+    """
+    Posiciona zagueiro e goleiro em posições fixas no campo de defesa e
+    o atacante para cobrar o pênalti, em seguida chamando a função de atacante para cobrança.
+    """
+    if game_on:
+        # Quando o jogo ativar, todos se posicionam para o jogo normal
+        tactics.atacante_campo_todo(robot_atacante, field)
+        skills.go_to_point(robot_zagueiro, 100, 250, field, 0)
+        if robot_zagueiro.get_coordinates().rotation - robot_zagueiro.target.get_coordinates().rotation < 15*np.pi/180:
+            robot_zagueiro.w = 0
+        skills.go_to_point(robot_goleiro, 30, 150, field, 0)
+        if robot_goleiro.get_coordinates().rotation - robot_goleiro.target.get_coordinates().rotation < 15*np.pi/180:
+            robot_goleiro.w = 0
+    else:
+        field.send_local = False
+        skills.go_to_point(robot_goleiro, 30, 150, field, 0)
+        skills.go_to_point(robot_zagueiro, 100, 250, field, 0)
+        skills.go_to_point(robot_atacante, 100, 150, field, 0)
+
+        if robot_zagueiro.get_coordinates().rotation - robot_zagueiro.target.get_coordinates().rotation < 15*np.pi/180:
+            robot_zagueiro.w = 0
+        if robot_goleiro.get_coordinates().rotation - robot_goleiro.target.get_coordinates().rotation < 15*np.pi/180:
+            robot_goleiro.w = 0
+        if robot_atacante.get_coordinates().rotation - robot_atacante.target.get_coordinates().rotation < 15*np.pi/180:
+            robot_atacante.w = 0
+            
 
 def offensive_kickoff_2(robot_goalie, robot_zagueiro, robot_atacante, field):
     """
