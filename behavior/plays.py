@@ -112,7 +112,7 @@ def estrategia_desvantagem_2(robot_goalie, robot_zagueiro, robot_atacante, field
 
     tactics.goleiro(robot_goalie, field)
     tactics.atacante_campo_todo(robot_zagueiro, field)
-    skills.go_to_point(robot_atacante, 150, 380, field, np.pi / 2, 2)
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
 
 
 def estrategia_desvantagem_1(robot_goalie, robot_zagueiro, robot_atacante, field):
@@ -122,8 +122,8 @@ def estrategia_desvantagem_1(robot_goalie, robot_zagueiro, robot_atacante, field
     """
 
     tactics.atacante_campo_todo(robot_goalie, field)
-    skills.go_to_point(robot_zagueiro, 120, 380, field, np.pi / 2, 2)
-    skills.go_to_point(robot_atacante, 150, 380, field, np.pi / 2, 2)
+    skills.go_to_point(robot_zagueiro, 120, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
 
 
 def estrategia_desvantagem_0(robot_goalie, robot_zagueiro, robot_atacante, field):
@@ -132,9 +132,9 @@ def estrategia_desvantagem_0(robot_goalie, robot_zagueiro, robot_atacante, field
     Quando a bola estiver no ataque, o robô que era goleiro se torna zagueiro e o outro atacante.
     """
 
-    skills.go_to_point(robot_goalie, 120, 380, field, np.pi / 2, 2)
-    skills.go_to_point(robot_zagueiro, 150, 380, field, np.pi / 2, 2)
-    skills.go_to_point(robot_atacante, 180, 380, field, np.pi / 2, 2)
+    skills.go_to_point(robot_goalie, 120, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_zagueiro, 150, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_atacante, 180, 360, field, np.pi / 2, 2)
 
 
 def basic_stop_behavior_defensive(robot_goleiro, robot_zagueiro, robot_atacante, field):
@@ -172,6 +172,54 @@ def basic_stop_behavior_defensive(robot_goleiro, robot_zagueiro, robot_atacante,
         # )
         # # Vai até o ponto alvo desviando da bola
         # skills.idle_behavior_avoid_ball_stop_game(robot_zagueiro, field)
+
+
+def basic_stop_behavior_defensive_desvantagem2(
+    robot_goleiro, robot_zagueiro, robot_atacante, field
+):
+    """
+    Descrição: Comportamento básico de stop em casos de faltas defensivas, que
+               precisa estar longe da bola. Um jogador cerca a ação da bola e
+               outro espera no meio campo, a depender da posição da bola
+    """
+    ball = field.ball.get_coordinates()
+
+    tactics.goleiro(robot_goleiro, field)
+
+    skills.projection_stop_target(robot_zagueiro, field)  # Zagueiro vai pra bola
+
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
+
+
+def basic_stop_behavior_defensive_desvantagem1(
+    robot_goleiro, robot_zagueiro, robot_atacante, field
+):
+    """
+    Descrição: Comportamento básico de stop em casos de faltas defensivas, que
+               precisa estar longe da bola. Um jogador cerca a ação da bola e
+               outro espera no meio campo, a depender da posição da bola
+    """
+    ball = field.ball.get_coordinates()
+
+    skills.projection_stop_target(robot_goleiro, field)  # Goleiro vai pra bola
+
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_zagueiro, 180, 360, field, np.pi / 2, 2)
+
+
+def basic_stop_behavior_defensive_desvantagem0(
+    robot_goleiro, robot_zagueiro, robot_atacante, field
+):
+    """
+    Descrição: Comportamento básico de stop em casos de faltas defensivas, que
+               precisa estar longe da bola. Um jogador cerca a ação da bola e
+               outro espera no meio campo, a depender da posição da bola
+    """
+    ball = field.ball.get_coordinates()
+
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_zagueiro, 180, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_goleiro, 120, 360, field, np.pi / 2, 2)
 
 
 def basic_stop_behavior_offensive(robot_goleiro, robot_zagueiro, robot_atacante, field):
@@ -212,6 +260,58 @@ def basic_stop_behavior_offensive(robot_goleiro, robot_zagueiro, robot_atacante,
         skills.idle_behavior_avoid_ball_stop_game(robot_zagueiro, field)
 
 
+def basic_stop_behavior_offensive_desvantagem_2(
+    robot_goleiro, robot_zagueiro, robot_atacante, field
+):
+    """
+    Descrição: Comportamento básico de stop em casos de faltas ofensivas, que
+               precisa estar longe da bola. . Um jogador vai para a cobrança e
+               outro espera no meio campo, a depender da posição da bola
+    """
+    ball = field.ball.get_coordinates()
+
+    tactics.goleiro(robot_goleiro, field)
+
+    skills.projection_stop_target(
+        robot_zagueiro, field, kicker=True
+    )  # Zagueiro vai pra bola cobrar
+
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
+
+
+def basic_stop_behavior_offensive_desvantagem_1(
+    robot_goleiro, robot_zagueiro, robot_atacante, field
+):
+    """
+    Descrição: Comportamento básico de stop em casos de faltas ofensivas, que
+               precisa estar longe da bola. . Um jogador vai para a cobrança e
+               outro espera no meio campo, a depender da posição da bola
+    """
+    ball = field.ball.get_coordinates()
+
+    skills.projection_stop_target(
+        robot_goleiro, field, kicker=True
+    )  # Zagueiro vai pra bola cobrar
+
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_zagueiro, 180, 360, field, np.pi / 2, 2)
+
+
+def basic_stop_behavior_offensive_desvantagem_0(
+    robot_goleiro, robot_zagueiro, robot_atacante, field
+):
+    """
+    Descrição: Comportamento básico de stop em casos de faltas ofensivas, que
+               precisa estar longe da bola. . Um jogador vai para a cobrança e
+               outro espera no meio campo, a depender da posição da bola
+    """
+    ball = field.ball.get_coordinates()
+
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_zagueiro, 180, 360, field, np.pi / 2, 2)
+    skills.go_to_point(robot_goleiro, 120, 360, field, np.pi / 2, 2)
+
+
 def defensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
     """
     Estratégia de kickoff defensivo
@@ -228,6 +328,38 @@ def defensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
     skills.stop_kickoff_positioning(
         robot_atacante, field, attacking=False, attacker=True
     )
+
+
+def defensive_kickoff_2(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Estratégia de kickoff defensivo com um robô a menos
+    """
+    # print("Posicionando robô goleiro no ponto específico.")
+    skills.go_to_point(robot_goalie, 30, 150, field, 0)
+
+    # print("Posicionando robô zagueiro no ponto específico.")
+    skills.stop_kickoff_positioning(
+        robot_zagueiro, field, attacking=False, attacker=True
+    )
+
+    # print("Posicionando robô atacante no ponto específico.")
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
+
+
+def defensive_kickoff_1(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Estratégia de kickoff defensivo com um robô a menos
+    """
+    # print("Posicionando robô zagueiro no ponto específico.")
+    skills.stop_kickoff_positioning(
+        robot_goalie, field, attacking=False, attacker=False
+    )
+
+    # print("Posicionando robô zagueiro no ponto específico.")
+    skills.go_to_point(robot_zagueiro, 120, 360, field, np.pi / 2, 2)
+
+    # print("Posicionando robô atacante no ponto específico.")
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
 
 
 def offensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
@@ -247,6 +379,7 @@ def offensive_kickoff(robot_goalie, robot_zagueiro, robot_atacante, field):
         robot_atacante, field, attacking=True, attacker=True
     )
 
+    
 def defensive_kickoff_real(robot_goalie, robot_zagueiro, robot_atacante, field):
     """
     Estratégia de kickoff defensivo
@@ -340,3 +473,35 @@ def penalti_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, field, game_
             robot_goleiro.w = 0
         if robot_atacante.get_coordinates().rotation - robot_atacante.target.get_coordinates().rotation < 15*np.pi/180:
             robot_atacante.w = 0
+            
+
+def offensive_kickoff_2(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Estratégia de kickoff ofensivo com um robô a menos
+    """
+    # print("Posicionando robô goleiro no ponto específico.")
+    skills.go_to_point(robot_goalie, 30, 150, field, 0)
+
+    # print("Posicionando robô zagueiro no ponto específico.")
+    skills.stop_kickoff_positioning(
+        robot_zagueiro, field, attacking=True, attacker=True
+    )
+
+    # print("Posicionando robô atacante no ponto específico.")
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
+
+
+def offensive_kickoff_1(robot_goalie, robot_zagueiro, robot_atacante, field):
+    """
+    Estratégia de kickoff ofensivo com dois robôs a menos
+    """
+    # print("Posicionando robô goleiro no ponto específico.")
+    skills.stop_kickoff_positioning(
+        robot_goalie, field, attacking=True, attacker=True
+    )
+
+    # print("Posicionando robô zagueiro no ponto específico.")
+    skills.go_to_point(robot_zagueiro, 120, 360, field, np.pi / 2, 2)
+
+    # print("Posicionando robô atacante no ponto específico.")
+    skills.go_to_point(robot_atacante, 150, 360, field, np.pi / 2, 2)
