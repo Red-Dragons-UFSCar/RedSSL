@@ -25,6 +25,9 @@ class Robot(KinematicBody):
         self.vx = 0  # Velocidade X do robô
         self.vy = 0  # Velocidade Y do robô
         self.w = 0  # Velocidade angular do robô
+        self.kick_speed = 0  # Velocidade do chute [m/s]
+        self.kick_angle = 0  # Ângulo do chute [graus]
+
 
         # Valores máximos do robô móvel
         self.v_max = 1.5  # Velocidade linear máxima em módulo
@@ -211,7 +214,7 @@ class Robot(KinematicBody):
         self.actuator.send_kicker_command(self.robot_id, kick_speed, kick_angle)
 
 
-    def set_full_command(self, v_top_right, v_top_left, v_bottom_right, v_bottom_left, kick_speed, kick_angle=0):
+    def set_full_command(self, v_top_right, v_top_left, v_bottom_right, v_bottom_left, kick_speed=0, kick_angle=0):
         """
         Define as velocidades das rodas e envia o comando combinado (velocidades das rodas e chute) no mesmo pacote.
 
