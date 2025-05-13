@@ -27,10 +27,9 @@ class Robot(KinematicBody):
         self.w = 0  # Velocidade angular do robô
 
         # Valores máximos do robô móvel
-        self.v_max = 1.0  # Velocidade linear máxima em módulo
+        self.v_max = 1.5  # Velocidade linear máxima em módulo
 
-        '''
-        '''
+
         # Parâmetros PID
         Kp_x = 6.551
         Kd_x = 0.1
@@ -43,8 +42,7 @@ class Robot(KinematicBody):
         Kp_theta = 3
         Kd_theta = 0
         Ki_theta = 0
-        
-        
+
 
         ''' Controlador PID original fisico
         Kp_x = 4.5
@@ -72,8 +70,7 @@ class Robot(KinematicBody):
         Kp_theta = 5
         Kd_theta = 0
         Ki_theta = 0
-        '''
-        
+        '''        
 
         ''' SIMULACAO 2
         Kp_x = 13
@@ -116,12 +113,14 @@ class Robot(KinematicBody):
         self.robot_radius = 0.09
         self.wheel_radius = 0.036
 
+
     def sim_set_vel(self, v_top_right, v_top_left, v_bottom_right, v_bottom_left):
         # Define as velocidades dos motores
         self.v_top_right = v_top_left
         self.v_top_left = v_top_right
         self.v_bottom_right = v_bottom_right
         self.v_bottom_left = v_bottom_left
+
 
         self.set_velocities(
             0,
@@ -140,15 +139,18 @@ class Robot(KinematicBody):
             self.v_bottom_left,
         )
 
+
     def sim_set_global_vel(self, velocity_x, velocity_y, angular):
         # Envia as velocidades globais para o atuador
         self.actuator.send_globalVelocity_message(
             self.robot_id, velocity_x, velocity_y, angular
         )
 
+
     def set_target(self, target):
         # Define o alvo do robô
         self.target = target
+
 
     def target_reached(self, treshold=10):
         # Verifica se o robô alcançou o alvo
@@ -162,6 +164,7 @@ class Robot(KinematicBody):
         )
         distance_to_target = np.linalg.norm(current_position - target_position)
         return distance_to_target < treshold
+
 
     def set_robot_velocity(self, target_velocity_x, target_velocity_y, target_angular):
         # Define as velocidades alvo nos controladores PID
@@ -182,14 +185,57 @@ class Robot(KinematicBody):
         # Retorna as velocidades calculadas
         return self.vx, self.vy, self.w
 
+
     def xtarget_reached(self, xTreshold=10):
-         if self.target is None:
-             return False
-         xDistance_to_target = abs(self.get_coordinates().X - self.target.get_coordinates().X)
-         return xDistance_to_target < xTreshold
-     
+        if self.target is None:
+            return False
+        xDistance_to_target = abs(self.get_coordinates().X - self.target.get_coordinates().X)
+        return xDistance_to_target < xTreshold
+
+
     def ytarget_reached(self, yTreshold=10):
         if self.target is None:
             return False
         yDistance_to_target = abs(self.get_coordinates().Y - self.target.get_coordinates().Y)
         return yDistance_to_target < yTreshold
+
+
+    def set_kick_vel(self, kick_speed, kick_angle=0):
+        """
+        Envia o comando de chute para o atuador via Protobuf.
+
+        Parâmetros:
+        - kick_speed: Velocidade do chute [m/s].
+        - kick_angle: Ângulo do chute [graus]. Padrão é 0 (chute reto).
+        """
+        self.actuator.send_kicker_command(self.robot_id, kick_speed, kick_angle)
+
+
+    def set_full_command(self, v_top_right, v_top_left, v_bottom_right, v_bottom_left, kick_speed, kick_angle=0):
+        """
+        Define as velocidades das rodas e envia o comando combinado (velocidades das rodas e chute) no mesmo pacote.
+
+        Parâmetros:
+        - wheel_bl: Velocidade da roda traseira esquerda [m/s].
+        - wheel_br: Velocidade da roda traseira direita [m/s].
+        - wheel_fl: Velocidade da roda dianteira esquerda [m/s].
+        - wheel_fr: Velocidade da roda dianteira direita [m/s].
+        - kick_speed: Velocidade do chute [m/s].
+        - kick_angle: Ângulo do chute [graus]. Padrão é 0 (chute reto).
+        """
+        # Define as velocidades das rodas
+        self.v_top_right = v_top_left
+        self.v_top_left = v_top_right
+        self.v_bottom_right = v_bottom_right
+        self.v_bottom_left = v_bottom_left
+
+        # Envia o comando combinado para o atuador
+        self.actuator.send_full_command(
+            self.robot_id,
+            self.v_bottom_left,
+            self.v_bottom_right,
+            self.v_top_left,
+            self.v_top_right,
+            kick_speed,
+            kick_angle
+        )
