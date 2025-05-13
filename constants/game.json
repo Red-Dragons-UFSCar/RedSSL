@@ -1,7 +1,7 @@
 {
     "team":{
-        "color": "yellow",
-        "right_side": true,
+        "color": "blue",
+        "right_side": false,
         "id_goalkeeper": 0,
         "id_defender": 1,
         "id_attacker": 2
