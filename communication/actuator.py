@@ -44,7 +44,7 @@ class Actuator():
         self.socket.setblocking(False) 
         self.socket.settimeout(0.0)
 
-    
+
     def send_socket(self, data):
         '''
         Descrição:  
@@ -95,7 +95,7 @@ class Actuator():
 
         
         self.send_socket(robot_control.SerializeToString())
-        
+
 
 
     def send_globalVelocity_message(self, robot,velocity_x, velocity_y, angular):
@@ -167,7 +167,7 @@ class Actuator():
 
         self.send_socket(robot_control.SerializeToString())
 
-    
+
     def send_wheel_from_global(self, robot, velocity_x, velocity_y, angular, simulated_mode):
         '''
         Descrição:  
@@ -210,7 +210,7 @@ class Actuator():
         else:
             self.send_wheelVelocity_message(robot.robot_id, dw1, dw2, dw3, dw4)
 
-    
+
     def send_wheel_from_local_fisico(self, robot, velocity_x, velocity_y, angular, simulated_mode):
         '''
         Descrição:  
@@ -237,6 +237,28 @@ class Actuator():
             self.send_wheelVelocity_message(robot.vision_id, dw4, dw3, dw2, dw1)
         else:
             self.send_wheelVelocity_message(robot.robot_id, dw1, dw2, dw3, dw4)
+
+
+    def send_kicker_command(self, robot_id, kick_speed):
+        '''
+        Descrição:  
+                Método responsável pelo envio do comando de chute para o robô.
+
+        Entradas:
+                robot_id:   ID do robô que realizará o chute.
+                kick_speed: Velocidade do chute [m/s].
+        '''
+        # Cria uma mensagem RobotControl
+        robot_control = RobotControl()
+
+        # Cria uma mensagem RobotCommand
+        robot_command = robot_control.robot_commands.add()
+        robot_command.id = robot_id
+        robot_command.kick_speed = kick_speed
+        robot_command.kick_angle = 0  # Ângulo fixo em 0 graus (chute reto)
+
+        # Envia a mensagem serializada pelo socket
+        self.send_socket(robot_control.SerializeToString())
 
 
 if __name__ == '__main__':
