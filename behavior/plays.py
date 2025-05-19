@@ -2,16 +2,16 @@ from behavior import skills, tactics
 import numpy as np
 
 
-def estrategia_basica(robot_goalie, robot_zagueiro, robot_atacante, field):
+def estrategia_basica(robot_goalie, robot_zagueiro, robot_atacante, field, controller):
     """
     Função que combina as estratégias do goleiro e do zagueiro.
     Chama as funções goalie e zagueiro para controlar os dois robôs.
     """
     tactics.goleiro(robot_goalie, field)
-    tactics.zagueiro(robot_zagueiro, field)
-    tactics.atacante(robot_atacante, field)
+    tactics.zagueiro(robot_zagueiro, field, controller)
+    tactics.atacante(robot_atacante, field, controller)
 
-def estrategia_basica_real(robot_goalie, robot_zagueiro, robot_atacante, field):
+def estrategia_basica_real(robot_goalie, robot_zagueiro, robot_atacante, field, controller):
     """
     Função que combina as estratégias do goleiro e do zagueiro.
     Chama as funções goalie e zagueiro para controlar os dois robôs.

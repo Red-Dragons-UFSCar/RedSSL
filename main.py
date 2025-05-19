@@ -179,6 +179,15 @@ class RobotController:
             ball_detection = frame["ball"]
             self.field.update_ball_position(ball_detection["x"], ball_detection["y"])
 
+
+    def chute(self, robot, forca):
+
+        vx_ant, vy_ant, w_ant = robot.vx, robot.vy, robot.w
+
+        self.actuator.send_globalVelocity_message(robot, 0, 0, 0, kick_speed=forca)
+
+        robot.vx, robot.vy, robot.w = vx_ant, vy_ant, w_ant
+
     def send_velocities(self):
         # Envio de velocidades no sistema global
         """
@@ -255,7 +264,7 @@ class RobotController:
 
             #Coach.escolher_estrategia(self.coach, self.robot2, self.robot1, self.robot0)
             #skills.go_to_point(self.robot0, self.field.ball.get_coordinates().X, self.field.ball.get_coordinates().Y, self.field, 0, threshold=15)
-            estrategia_basica_real(self.robot2,self.robot0,self.robot1,self.field)
+            estrategia_basica(self.robot2,self.robot0,self.robot1,self.field, self)
             #skills.attack_ball_fisico(self.robot0, self.field)
 
             #self.robot0.vx = 1
@@ -317,3 +326,6 @@ if __name__ == "__main__":
     controller = RobotController()
     controller.start_vision_thread()
     controller.control_loop()
+
+
+

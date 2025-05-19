@@ -98,7 +98,7 @@ class Actuator():
         
 
 
-    def send_globalVelocity_message(self, robot,velocity_x, velocity_y, angular):
+    def send_globalVelocity_message(self, robot,velocity_x, velocity_y, angular, kick_speed=0):
         '''
         Descrição:  
                 Método responsável pelo envio da velocidade global do robô
@@ -133,6 +133,9 @@ class Actuator():
 
         # Atribua a mensagem MoveGlobalVelocity ao campo move_command da mensagem RobotCommand
         robot_command.move_command.global_velocity.CopyFrom(move_command)
+
+        if kick_speed > 0:
+            robot_command.kick_speed = kick_speed 
 
 
         self.send_socket(robot_control.SerializeToString())
@@ -246,7 +249,7 @@ if __name__ == '__main__':
     while True:
         t1 = time.time()
         actuator.send_wheelVelocity_message(4,15,1,15,1)
-        actuator.send_globalVelocity_message(2,5,10,15)
+        actuator.send_globalVelocity_message(2,5,10,15,5)
         actuator.send_localVelocity_message(3,5,10,15)
         t2 = time.time()
 
