@@ -148,6 +148,26 @@ def block_ball_y(robot0, field, fixed_x=None, target_theta=0, lim_sup = 300, lim
         robot0.vy = 0
         robot0.w = 0
 
+def pass_ball(robot0, robot1, field, target_theta):
+    """
+    Faz com que um robô persiga a bola e passe a bola para outro robô.
+
+    Parâmetros:
+    - robot0: Instância do robô a ser movido.
+    - field: Instância da classe Field.
+    """
+    ball_position = field.ball.get_coordinates()
+    robot0_position = robot0.get_coordinates()
+    robot1_position = robot1.get_coordinates()
+    
+    if (robot0_position - ball_position) > 0.2: 
+        #Quando chegar na bola, faz o passe para o atacante
+        go_to_point(robot0, ball_position.X, ball_position.Y, field, target_theta)
+    else:
+        direction_vector = (robot1_position - robot0_position).normalized()
+        angle = np.arctan2(direction_vector.y, direction_vector.x)
+        robot0.kick_speed = 1.5  
+        robot0.kick_angle = np.degrees(angle)  # Converte de radianos para graus
 
 def clear_ball(robot0, field, ball_position, robot_position, angle_to_ball):
     """

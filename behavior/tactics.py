@@ -35,19 +35,24 @@ def goleiro(robot0, field):
             )  # manda pro centrofrom behavior.skills import follow_ball_y, pursue_ball
 
 
-def zagueiro(robot0, field):
+def zagueiro(robot0, robot1, field):
     """
     Função que controla o comportamento do robô zagueiro.
-    O robô segue a bola no eixo Y quando a bola está no ataque,
-    e persegue a bola com alinhamento ofensivo quando está na defesa.
+    O robô marca o adversário mais próximo quando a bola está no ataque,
+    persegue a bola com alinhamento ofensivo quando está na defesa próximo ao gol
+    e passa a bola para o atacante quando está na defesa mais distante do gol.
+
     """
     offensive_line_x = 225.00  # Meio de campo
+    first_half_offensiveline_x = 112.50 # Primeira metade da linha de defensiva contando a partir do meio de campo
     ball_position = field.ball.get_coordinates()
 
-    if ball_position.X >= offensive_line_x:
-        skills.follow_ball_y(robot0, field)
-    else:
-        skills.pursue_ball(robot0, field)
+    if first_half_offensiveline_x <= ball_position.X <= offensive_line_x: #Bola entre meio de campo e primeira metade da área da defesa
+        skills.pass_ball(robot0, robot1, field, target_theta=np.pi) #Passar a bola para o atacante
+    elif ball_position.X < first_half_offensiveline_x: #Bola próxima ao gol
+        skills.pursue_ball(robot0, field) #Isolar bola
+    else: 
+        skills.mark_player(robot0, robot1, field, target_theta=np.pi) #Marcar adverário na ofensiva
 
 
 def atacante(robot0, field):
