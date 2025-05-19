@@ -167,7 +167,7 @@ def pass_ball(robot0, robot1, field, target_theta):
         direction_vector = (robot1_position - robot0_position).normalized()
         angle = np.arctan2(direction_vector.y, direction_vector.x)
         robot0.kick_speed = 1.5  
-        robot0.kick_angle = np.degrees(angle)  # Converte de radianos para graus
+        robot0.kick_angle = np.degrees(angle)  
 
 def clear_ball(robot0, field, ball_position, robot_position, angle_to_ball):
     """
