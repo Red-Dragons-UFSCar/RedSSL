@@ -257,6 +257,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta, cont
     else:
         go_to_point(robot0, target_x, target_y, field, target_theta, threshold)
 
+
 def pursue_ball(robot0, field, controller):
     """
     Faz com que o robô persiga a bola e se alinhe para o lado ofensivo do campo.
@@ -858,7 +859,7 @@ def pursue_ball_fisico(robot0, field):
 
 
 
-def passe_ensaiado(zaga, ataq, field, controller, avanço=40):
+'''def passe_ensaiado(zaga, ataq, field, controller, avanço=40):
             
     bola = field.ball.get_coordinates()
     dst = ataq.get_coordinates()
@@ -878,4 +879,326 @@ def passe_ensaiado(zaga, ataq, field, controller, avanço=40):
         controller.chute(zaga, 3)     
 
     # atacante corre pro ponto de recepção
-    go_to_point(ataq, alvo_x, alvo_y, field, alvo_theta)
+    go_to_point(ataq, alvo_x, alvo_y, field, alvo_theta)'''
+
+
+
+
+
+'''def pass_ball(robot0, robot1, field, controller):
+    """
+Faz com que um robô persiga a bola e passe a bola para outro robô.
+
+    Parâmetros:
+    
+
+    robot0: Instância do robô a ser movido.
+
+        field: Instância da classe Field.
+        """
+    ball_position = field.ball.get_coordinates()
+    robot0_position = robot0.get_coordinates()
+    robot1_position = robot1.get_coordinates()
+    #direction_vector = robot1.get_coordinates()
+    dx = robot1_position.X - robot0_position.X
+    dy = robot1_position.Y - robot0_position.Y
+
+    # Normaliza (manual)
+    norma = math.hypot(dx, dy)  # mesmo que sqrt(dx**2 + dy**2)
+    if norma == 0:
+        direction_vector.X = 0
+        direction_vector.Y = 0
+    else:
+        direction_vector.X = dx / norma
+        direction_vector.Y = dy / norma
+
+    angle = np.arctan2(0, 0)
+
+
+
+
+    if (robot0_position.X - ball_position.X) > 0.2 and (robot0_position.Y - ball_position.Y) > 0.2  : #Quando chegar na bola, faz o passe para o atacante
+        go_to_point(robot0, ball_position.X, ball_position.Y, field, angle)
+        
+    controller.chute(robot0, 3)
+
+
+    else:
+        direction_vector = (robot1_position - robot0_position).normalized()
+        angle = np.arctan2(direction_vector.y, direction_vector.x)
+        robot0.kick_speed = 1.5
+        robot0.kick_angle = np.degrees(angle)'''
+        
+
+        
+
+'''def pass_ball(robot0, robot1 ,field, target_theta, controller):
+    """
+    Alinha o robô para atacar a bola no gol.
+
+    Parâmetros:
+    - robot0: Instância do robô a ser movido.
+    - field: Instância da classe Field.
+    - ball_position: Coordenadas atuais da bola.
+    - robot_position: Coordenadas atuais do robô.
+    - target_theta: Ângulo alvo.
+    """
+    robot1_position = robot1.get_coordinates()
+    ball_position = field.ball.get_coordinates()
+    robot_position = robot0.get_coordinates()
+
+    # Definição dos estados
+    STATE_A, STATE_B, STATE_C, STATE_D = "A", "B", "C", "D"
+
+    # Define o alvo final (centro do gol)
+    target_x_final = robot1_position.X
+    target_y_final = robot1_position.Y
+
+    # Ajusta o alvo com base na posição da bola
+    if 110 < ball_position.Y < 120 and 180 < ball_position.X < 190:
+        target_y_final = ball_position.Y
+        # print("Bola no alvo")
+    else:
+        target_y_final = target_y_final + (-30 if ball_position.Y < 150 else 30)
+
+    current_state = field.atacante_current_state
+
+    # Calcula o ângulo entre o robô e a bola
+    angle_robot_to_ball = np.arctan2(
+        ball_position.Y - robot_position.Y, ball_position.X - robot_position.X
+    )
+    angle_ball_to_target = np.arctan2(
+        target_y_final - ball_position.Y, target_x_final - ball_position.X
+    )
+
+    # Calcula a diferença angular entre o robô e a bola em relação ao alvo
+    angle_diff = np.degrees(angle_ball_to_target - angle_robot_to_ball)
+
+    approach_offset = -50
+    #threshold = 2
+    threshold = 15
+
+    target_x = ball_position.X + approach_offset * np.cos(angle_ball_to_target)
+    target_y = ball_position.Y + approach_offset * np.sin(angle_ball_to_target)
+    target_theta = angle_ball_to_target
+
+    if current_state == STATE_A:
+        # Estado A: Se posicionar atrás da bola
+        target_x = ball_position.X + approach_offset * np.cos(angle_ball_to_target)
+        target_y = ball_position.Y + approach_offset * np.sin(angle_ball_to_target)
+        target_theta = angle_ball_to_target
+        robot0.v_max = 1.25
+        # print("Estado A")
+        # print(f"target_x: {target_x}, target_y: {target_y}, target_theta: {target_theta}")
+
+        if robot0.target_reached(threshold):
+            current_state = STATE_B
+            # print("Transitando para o estado B")
+        elif (
+            90 <= np.degrees(angle_robot_to_ball) <= 180
+            or -180 <= np.degrees(angle_robot_to_ball) <= -90
+        ):
+            current_state = STATE_D
+
+    elif current_state == STATE_B:
+        # Estado B: Ir até a bola
+        target_x = ball_position.X - 20 * np.cos(angle_ball_to_target)
+        target_y = ball_position.Y - 20 * np.sin(angle_ball_to_target)
+        target_theta = angle_ball_to_target
+        robot0.v_max = 1.5
+        # print("Estado B")
+
+        if robot0.target_reached(threshold):
+            current_state = STATE_C
+        elif (
+            90 <= np.degrees(angle_robot_to_ball) <= 180
+            or -180 <= np.degrees(angle_robot_to_ball) <= -90
+        ):
+            current_state = STATE_D
+
+    elif current_state == STATE_C:
+        # Estado C: Chutar a bola em direção ao gol
+        target_x = target_x_final
+        target_y = target_y_final
+        target_theta = angle_ball_to_target
+        target_theta = 0
+        robot0.v_max = 1.5
+        controller.chute(robot0, 3)
+        # print("Estado C")
+
+        if not abs(angle_diff) <= 30:
+            current_state = STATE_B
+        elif (
+            90 <= np.degrees(angle_robot_to_ball) <= 180
+            or -180 <= np.degrees(angle_robot_to_ball) <= -90
+        ):
+            current_state = STATE_D
+
+    elif current_state == STATE_D:
+        # Estado D: Evitar a bola
+        target_x = ball_position.X - 25
+        target_y = ball_position.Y
+        target_theta = angle_ball_to_target
+        robot0.v_max = 1.5
+        # print("Estado D")
+
+        # Ajusta a posição Y do alvo para evitar a bola
+        if 90 <= np.degrees(angle_robot_to_ball) <= 180:
+            target_y -= 20
+        elif -180 <= np.degrees(angle_robot_to_ball) <= -90:
+            target_y += 20
+
+        if robot0.target_reached(threshold):
+            current_state = STATE_B
+
+    # Atualiza o estado atual do atacante
+    field.atacante_current_state = current_state
+
+    # Ajusta a velocidade do robô se ele estiver perto do gol
+    if (
+        ball_position.X >= 380
+        and 85 <= ball_position.Y <= 200
+        and robot_position.X >= 370
+    ):
+        robot0.v_max = 1
+
+    # Usa a função adequada para mover o robô
+    if current_state == STATE_C:
+        go_to_point_angled(robot0, target_x, target_y, field, target_theta, threshold)
+    else:
+        go_to_point(robot0, target_x, target_y, field, target_theta, threshold)'''
+
+
+def pass_ball(robot0,robot1, field, target_theta, controller):
+    """
+    Alinha o robô para atacar a bola no gol.
+
+    Parâmetros:
+    - robot0: Instância do robô a ser movido.
+    - field: Instância da classe Field.
+    - ball_position: Coordenadas atuais da bola.
+    - robot_position: Coordenadas atuais do robô.
+    - target_theta: Ângulo alvo.
+    """
+    # Definição dos estados
+    STATE_A, STATE_B, STATE_C, STATE_D = "A", "B", "C", "D"
+
+    # Define o alvo final (centro do gol)
+    robot1_position = robot1.get_coordinates()
+    ball_position = field.ball.get_coordinates()
+    robot_position = robot0.get_coordinates()
+    target_y_final = robot1_position.Y
+    target_x_final = robot1_position.X
+
+
+    current_state = field.atacante_current_state
+
+    # Calcula o ângulo entre o robô e a bola
+    angle_robot_to_ball = np.arctan2(
+        ball_position.Y - robot_position.Y, ball_position.X - robot_position.X
+    )
+    angle_ball_to_target = np.arctan2(
+        target_y_final - ball_position.Y, target_x_final - ball_position.X
+    )
+
+    # Calcula a diferença angular entre o robô e a bola em relação ao alvo
+    angle_diff = np.degrees(angle_ball_to_target - angle_robot_to_ball)
+
+    approach_offset = -40
+    #threshold = 2
+    threshold = 8
+
+    if current_state == STATE_A:
+        # Estado A: Se posicionar atrás da bola
+        target_x = ball_position.X + approach_offset * np.cos(angle_ball_to_target)
+        target_y = ball_position.Y + approach_offset * np.sin(angle_ball_to_target)
+        target_theta = angle_ball_to_target
+        robot0.v_max = 1.35
+        # print("Estado A")
+        # print(f"target_x: {target_x}, target_y: {target_y}, target_theta: {target_theta}")
+
+        if robot0.target_reached(threshold):
+            current_state = STATE_B
+            # print("Transitando para o estado B")
+
+    elif current_state == STATE_B:
+        # Estado B: Ir até a bola
+        target_x = ball_position.X - 20 * np.cos(angle_ball_to_target)
+        target_y = ball_position.Y - 20 * np.sin(angle_ball_to_target)
+        target_theta = angle_ball_to_target
+        robot0.v_max = 1.25
+        # controller.chute(robot0, 5)
+        # print("Estado B")
+
+        if robot0.target_reached(threshold):
+            
+            if abs(angle_diff <= 15):
+                controller.chute(robot0, 3)
+                current_state = STATE_C
+        else:
+            current_state = STATE_A
+
+
+    elif current_state == STATE_C:
+        # Estado C: Chutar a bola em direção ao gol
+        
+        target_x = target_x_final
+        target_y = target_y_final
+        target_theta = angle_ball_to_target
+        target_theta = 0
+        
+
+
+        #Faz o robo conduzir e chutar quando tiver perto do gol
+        robot0.v_max = 1.25 if robot_position.X < 335 else 1.5
+        controller.chute(robot0, 2)
+        # print("Estado C")
+
+        if not abs(angle_diff) <= 20:
+            current_state = STATE_B
+        elif (
+            90 <= np.degrees(angle_robot_to_ball) <= 180
+            or -180 <= np.degrees(angle_robot_to_ball) <= -90
+        ):
+            current_state = STATE_D
+
+    elif current_state == STATE_D:
+        # Estado D: Evitar a bola
+        target_x = ball_position.X -40
+        target_y = ball_position.Y 
+        target_theta = angle_ball_to_target
+        robot0.v_max = 1.5
+        # print("Estado D")
+        
+        '''# desvia mais lateralmente, sempre para o lado oposto do robô
+        lateral_offset = 15 if robot_position.Y < ball_position.Y else -35
+        target_y = ball_position.Y + lateral_offset
+        target_theta = angle_ball_to_target
+        robot0.v_max = 1.5
+'''
+
+
+    # Atualiza o estado atual do atacante
+    field.atacante_current_state = current_state
+
+    # Ajusta a velocidade do robô se ele estiver perto do gol
+    if (
+        ball_position.X >= 380
+        and 85 <= ball_position.Y <= 200
+        and robot_position.X >= 375
+    ):
+        robot0.v_max = 1
+
+    # Usa a função adequada para mover o robô
+    if current_state == STATE_C:
+        go_to_point_angled(robot0, target_x, target_y, field, target_theta, threshold)
+    else:
+        go_to_point(robot0, target_x, target_y, field, target_theta, threshold)
+
+
+
+
+
+
+
+
