@@ -362,6 +362,7 @@ class RobotController:
             self.field.send_local = False
 
             self.data_to_interface()
+            
             # print("---------------------------------------")
             # print("    LOGGING DOS ROBÔS TIME     ")
             # print("---------------------------------------")

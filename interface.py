@@ -1,6 +1,8 @@
 import sys # Módulo para interagir com o interpretador Python, usado para sair da aplicação (sys.exit)
 import os  # Módulo para interagir com o sistema operacional, usado para construir caminhos de arquivos (os.path)
 import math # Módulo para funções matemáticas, como pi e conversão de graus/radianos
+import socket
+import json
 
 # Importações de classes e módulos específicos do PyQt5 para construir a interface gráfica
 from PyQt5.QtWidgets import (
@@ -14,24 +16,21 @@ from PyQt5.QtCore import (
     Qt, QRectF, QLineF, QPointF, QSize, QThread, pyqtSignal
 )
 
-import socket
-import json
-
+# Host e porta para abrir o socket
 HOST = ''
 PORT = 12000
 
+# Thread: socket que recebe informações do código
 class UDPListenerThread(QThread):
-    message_received = pyqtSignal(str)  # Sinal emitido quando uma mensagem é recebida
+    message_received = pyqtSignal(str) 
 
     def run(self):
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         server_socket.bind((HOST, PORT))
-        print(f"SERVIDOR ESCUTANDO NA PORTA {PORT}")
 
         while True:
             msg_bytes, ip_client = server_socket.recvfrom(2048)
             msg_decod = msg_bytes.decode()
-            print(f"Recebido: {msg_decod}")
             self.message_received.emit(msg_decod)
 
 class SoccerFieldWidget(QWidget): # Define uma classe personalizada que herda de QWidget
@@ -76,9 +75,6 @@ class SoccerFieldWidget(QWidget): # Define uma classe personalizada que herda de
         palette.setColor(self.backgroundRole(), QColor("#4a1e1e")) # Vermelho escuro para a área de segurança
         self.setPalette(palette) # Aplica a nova paleta ao widget
 
-        # --- Dados de Exemplo para os Robôs e Bola ---
-        # Estes dados são usados para desenhar os elementos no campo.
-        # Em uma aplicação real, seriam atualizados dinamicamente.
         self.robots_data = [
             # Time Azul: id, posição x (m), posição y (m), orientação (radianos), cor
             {"id": 0, "x": self.FIELD_PLAYING_LENGTH_M * 0.25, "y": self.FIELD_PLAYING_WIDTH_M * 0.3, "orientation": math.pi / 4, "team_color": QColor("blue")},
@@ -98,12 +94,17 @@ class SoccerFieldWidget(QWidget): # Define uma classe personalizada que herda de
     def draw_robot(self, painter, robot_info, pixels_per_meter):
         """Desenha um robô no campo."""
         # Extrai informações do robô do dicionário 'robot_info'
-        x_m, y_m = robot_info["x"], robot_info["y"]
+        x_m, y_m = robot_info["x"] / 100, robot_info["y"] / 100     # dados vêm em cm
         orientation_rad, team_color = robot_info["orientation"], robot_info["team_color"]
 
         # Converte dimensões e posições de metros para pixels
         robot_radius_px = (self.ROBOT_DIAMETER_M / 2.0) * pixels_per_meter
-        center_x_px, center_y_px = x_m * pixels_per_meter, y_m * pixels_per_meter
+        center_x_px = x_m * pixels_per_meter
+        center_y_px = (self.FIELD_PLAYING_WIDTH_M - y_m) * pixels_per_meter     # precisa inverter o referencial y
+        
+        # DEBUG: verifique se está desenhando corretamente
+        # print(f"[Desenho] Robô {robot_info['id']} em ({x_m}, {y_m}) -> px ({center_x_px}, {center_y_px})")
+        # print(f"  Raio em px: {robot_radius_px}, Cor válida: {team_color.isValid()}")
 
         painter.save() # Salva o estado atual do QPainter (transformações, caneta, pincel)
         painter.translate(center_x_px, center_y_px) # Move a origem do sistema de coordenadas para o centro do robô
@@ -130,10 +131,11 @@ class SoccerFieldWidget(QWidget): # Define uma classe personalizada que herda de
 
     def draw_ball(self, painter, ball_info, pixels_per_meter):
         """Desenha a bola no campo."""
-        x_m, y_m = ball_info["x"], ball_info["y"] # Posição da bola em metros
+        x_m, y_m = ball_info["x"] / 100, ball_info["y"] / 100   # dados vêm em cm 
         # Converte dimensões e posições para pixels
         ball_radius_px = (self.BALL_DIAMETER_M / 2.0) * pixels_per_meter
-        center_x_px, center_y_px = x_m * pixels_per_meter, y_m * pixels_per_meter
+        center_x_px = x_m * pixels_per_meter
+        center_y_px = (self.FIELD_PLAYING_WIDTH_M - y_m) * pixels_per_meter     # precisa inverter o referencial y
 
         painter.save() # Salva estado do painter
         painter.translate(center_x_px, center_y_px) # Move origem para o centro da bola
@@ -231,6 +233,15 @@ class SoccerFieldWidget(QWidget): # Define uma classe personalizada que herda de
         self.update() # Agenda um redesenho do widget para refletir o novo tamanho
         super().resizeEvent(event) # Chama o método da classe pai
         
+    # Função que atuzaliza o campo, convertendo os dados recebidos no formato de robot_data e ball_data
+    def load_from_json(self, game_state_json):
+        self.robots_data = self.json_to_robot_data(game_state_json)
+        self.ball_data = {
+            "x": game_state_json["ball"]["x"],
+            "y": game_state_json["ball"]["y"]
+        }
+        self.update()
+        
     def json_to_robot_data(self, json_data):
         robots = []
         for i in range(3):
@@ -251,13 +262,6 @@ class SoccerFieldWidget(QWidget): # Define uma classe personalizada que herda de
             })
         return robots
 
-    def load_from_json(self, game_state_json):
-        self.robots_data = self.json_to_robot_data(game_state_json)
-        self.ball_data = {
-            "x": game_state_json["ball"]["x"],
-            "y": game_state_json["ball"]["y"]
-        }
-        self.update()
 
 class MainWindow(QMainWindow): # Define a classe da janela principal, herda de QMainWindow
     SIDEBAR_FIXED_WIDTH = 300 # Largura fixa para as barras laterais em pixels
@@ -336,7 +340,7 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
         
         # Comunicação com o código principal
         self.last_udp_message = None
-        self.listener_thread = UDPListenerThread()
+        self.listener_thread = UDPListenerThread()      # Thread de comunicação
         self.listener_thread.message_received.connect(self.receive_message)
         self.listener_thread.start()
         
@@ -348,10 +352,11 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
             print("Erro ao decodificar JSON")
             return
 
-        self.display_left_sidebar(data)
-        self.update_wheel_speeds(data)
-        self.soccer_field_widget.load_from_json(data)
+        self.display_left_sidebar(data)     # dados para a left bar
+        self.update_wheel_speeds(data)      # dados para a right bar
+        self.soccer_field_widget.load_from_json(data)       # dados para o campo
 
+    # Função que atuzaliza a left sidebar
     def display_left_sidebar(self, data):
         team = "robot" if self.cb_red_dragons.isChecked() else "enemy_robot"
 
@@ -359,8 +364,8 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
             key = f"{team}{i}"
             if key in data:
                 rob = data[key]
-                self.pos_labels[i][0].setText(f"{rob['x']:.1f}")
-                self.pos_labels[i][1].setText(f"{rob['y']:.1f}")
+                self.pos_labels[i][0].setText(f"{(rob['x']/100):.2f}")
+                self.pos_labels[i][1].setText(f"{(rob['y']/100):.2f}")
                 self.pos_labels[i][2].setText(f"{rob['theta']:.2f}")
             else:
                 self.pos_labels[i][0].setText("?")
@@ -368,9 +373,10 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
                 self.pos_labels[i][2].setText("?")
 
         if "ball" in data:
-            self.ball_pos_x_label_value.setText(f"{data['ball']['x']:.1f}")
-            self.ball_pos_y_label_value.setText(f"{data['ball']['y']:.1f}")
-            
+            self.ball_pos_x_label_value.setText(f"{(data['ball']['x']/100):.2f}")
+            self.ball_pos_y_label_value.setText(f"{(data['ball']['y']/100):.2f}")
+
+    # Função que atuzaliza a right sidebar (por enquanto não recebemos nada da eletrônica)
     def update_wheel_speeds(self, data):
         wheel_keys = ["FR", "FL", "BR", "BL"]
 
