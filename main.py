@@ -16,6 +16,7 @@ from behavior.tactics import *
 import time
 import threading
 import json
+import socket
 
 
 CONTROL_FPS = 60  # FPS original para o controle de posição
@@ -260,6 +261,62 @@ class RobotController:
         self.vision_thread = RepeatTimer((1 / CAM_FPS), self.get_vision_frame)
         self.vision_thread.start()
 
+    def data_to_interface(self):
+        try:
+            data = {
+                "robot0": {
+                    "x": self.robot0.get_coordinates().X,
+                    "y": self.robot0.get_coordinates().Y,
+                    "theta": self.robot0.get_coordinates().rotation,
+                    "wheels": {"FR": self.robot0.get_velocities().v_top_right, "FL": self.robot0.get_velocities().v_top_left,
+                               "BR": self.robot0.get_velocities().v_bottom_right, "BL": self.robot0.get_velocities().v_bottom_left}
+                },
+                "robot1": {
+                    "x": self.robot1.get_coordinates().X,
+                    "y": self.robot1.get_coordinates().Y,
+                    "theta": self.robot1.get_coordinates().rotation,
+                    "wheels": {"FR": self.robot1.get_velocities().v_top_right, "FL": self.robot1.get_velocities().v_top_left,
+                               "BR": self.robot1.get_velocities().v_bottom_right, "BL": self.robot1.get_velocities().v_bottom_left}
+                },
+                "robot2": {
+                    "x": self.robot2.get_coordinates().X,
+                    "y": self.robot2.get_coordinates().Y,
+                    "theta": self.robot2.get_coordinates().rotation,
+                    "wheels": {"FR": self.robot2.get_velocities().v_top_right, "FL": self.robot2.get_velocities().v_top_left,
+                               "BR": self.robot2.get_velocities().v_bottom_right, "BL": self.robot2.get_velocities().v_bottom_left}
+                },
+                "enemy_robot0": {
+                    "x": self.enemy_robot0.get_coordinates().X,
+                    "y": self.enemy_robot0.get_coordinates().Y,
+                    "theta": self.enemy_robot0.get_coordinates().rotation,
+                    "wheels": {"FR": self.enemy_robot0.get_velocities().v_top_right, "FL": self.enemy_robot0.get_velocities().v_top_left,
+                               "BR": self.enemy_robot0.get_velocities().v_bottom_right, "BL": self.enemy_robot0.get_velocities().v_bottom_left}
+                },
+                "enemy_robot1": {
+                    "x": self.enemy_robot1.get_coordinates().X,
+                    "y": self.enemy_robot1.get_coordinates().Y,
+                    "theta": self.enemy_robot1.get_coordinates().rotation,
+                    "wheels": {"FR": self.enemy_robot1.get_velocities().v_top_right, "FL": self.enemy_robot1.get_velocities().v_top_left,
+                               "BR": self.enemy_robot1.get_velocities().v_bottom_right, "BL": self.enemy_robot1.get_velocities().v_bottom_left}
+                },
+                "enemy_robot2": {
+                    "x": self.enemy_robot2.get_coordinates().X,
+                    "y": self.enemy_robot2.get_coordinates().Y,
+                    "theta": self.enemy_robot2.get_coordinates().rotation,
+                    "wheels": {"FR": self.enemy_robot2.get_velocities().v_top_right, "FL": self.enemy_robot2.get_velocities().v_top_left,
+                               "BR": self.enemy_robot2.get_velocities().v_bottom_right, "BL": self.enemy_robot2.get_velocities().v_bottom_left}
+                },
+                "ball": {
+                    "x": self.field.ball.get_coordinates().X,
+                    "y": self.field.ball.get_coordinates().Y,
+                },
+            }
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            msg = json.dumps(data).encode("utf-8")
+            client_socket.sendto(msg, ('127.0.0.1', 12000))
+        except:
+            print('erro')
+
     def control_loop(self):
         while True:
             t1 = time.time()
@@ -304,9 +361,10 @@ class RobotController:
 
             self.field.send_local = False
 
-            print("---------------------------------------")
-            print("    LOGGING DOS ROBÔS TIME     ")
-            print("---------------------------------------")
+            self.data_to_interface()
+            # print("---------------------------------------")
+            # print("    LOGGING DOS ROBÔS TIME     ")
+            # print("---------------------------------------")
             # print("Robo goleiro, id=", self.robot0.vision_id)
             # print("x: ", self.robot0.get_coordinates().X)
             # print("y: ", self.robot0.get_coordinates().X)

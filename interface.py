@@ -11,9 +11,28 @@ from PyQt5.QtGui import (
     QPixmap, QPainter, QPen, QBrush, QColor, QFont, QPalette, QPolygonF, QFontMetrics # QFontMetrics ADICIONADO AQUI
 )
 from PyQt5.QtCore import (
-    Qt, QRectF, QLineF, QPointF, QSize
+    Qt, QRectF, QLineF, QPointF, QSize, QThread, pyqtSignal
 )
 
+import socket
+import json
+
+HOST = ''
+PORT = 12000
+
+class UDPListenerThread(QThread):
+    message_received = pyqtSignal(str)  # Sinal emitido quando uma mensagem é recebida
+
+    def run(self):
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        server_socket.bind((HOST, PORT))
+        print(f"SERVIDOR ESCUTANDO NA PORTA {PORT}")
+
+        while True:
+            msg_bytes, ip_client = server_socket.recvfrom(2048)
+            msg_decod = msg_bytes.decode()
+            print(f"Recebido: {msg_decod}")
+            self.message_received.emit(msg_decod)
 
 class SoccerFieldWidget(QWidget): # Define uma classe personalizada que herda de QWidget
     """
@@ -211,7 +230,34 @@ class SoccerFieldWidget(QWidget): # Define uma classe personalizada que herda de
     def resizeEvent(self, event): # Método chamado quando o widget é redimensionado
         self.update() # Agenda um redesenho do widget para refletir o novo tamanho
         super().resizeEvent(event) # Chama o método da classe pai
+        
+    def json_to_robot_data(self, json_data):
+        robots = []
+        for i in range(3):
+            robots.append({
+                "id": i,
+                "x": json_data[f"robot{i}"]["x"],
+                "y": json_data[f"robot{i}"]["y"],
+                "orientation": json_data[f"robot{i}"]["theta"],
+                "team_color": QColor("blue"),
+            })
+        for i in range(3):
+            robots.append({
+                "id": i + 3,
+                "x": json_data[f"enemy_robot{i}"]["x"],
+                "y": json_data[f"enemy_robot{i}"]["y"],
+                "orientation": json_data[f"enemy_robot{i}"]["theta"],
+                "team_color": QColor("yellow"),
+            })
+        return robots
 
+    def load_from_json(self, game_state_json):
+        self.robots_data = self.json_to_robot_data(game_state_json)
+        self.ball_data = {
+            "x": game_state_json["ball"]["x"],
+            "y": game_state_json["ball"]["y"]
+        }
+        self.update()
 
 class MainWindow(QMainWindow): # Define a classe da janela principal, herda de QMainWindow
     SIDEBAR_FIXED_WIDTH = 300 # Largura fixa para as barras laterais em pixels
@@ -287,6 +333,60 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
         # Atualiza a UI inicial
         self.update_left_panel_display()
         self.update_right_panel_display()
+        
+        # Comunicação com o código principal
+        self.last_udp_message = None
+        self.listener_thread = UDPListenerThread()
+        self.listener_thread.message_received.connect(self.receive_message)
+        self.listener_thread.start()
+        
+    def receive_message(self, msg):
+        try:
+            data = json.loads(msg)
+            self.last_udp_message = data  # salva último dado recebido
+        except json.JSONDecodeError:
+            print("Erro ao decodificar JSON")
+            return
+
+        self.display_left_sidebar(data)
+        self.update_wheel_speeds(data)
+        self.soccer_field_widget.load_from_json(data)
+
+    def display_left_sidebar(self, data):
+        team = "robot" if self.cb_red_dragons.isChecked() else "enemy_robot"
+
+        for i in range(3):
+            key = f"{team}{i}"
+            if key in data:
+                rob = data[key]
+                self.pos_labels[i][0].setText(f"{rob['x']:.1f}")
+                self.pos_labels[i][1].setText(f"{rob['y']:.1f}")
+                self.pos_labels[i][2].setText(f"{rob['theta']:.2f}")
+            else:
+                self.pos_labels[i][0].setText("?")
+                self.pos_labels[i][1].setText("?")
+                self.pos_labels[i][2].setText("?")
+
+        if "ball" in data:
+            self.ball_pos_x_label_value.setText(f"{data['ball']['x']:.1f}")
+            self.ball_pos_y_label_value.setText(f"{data['ball']['y']:.1f}")
+            
+    def update_wheel_speeds(self, data):
+        wheel_keys = ["FR", "FL", "BR", "BL"]
+
+        for i in range(3):
+            robot_key = f"robot{i}"
+            if robot_key in data and "wheels" in data[robot_key]:
+                wheels = data[robot_key]["wheels"]
+                for j, wheel in enumerate(wheel_keys):
+                    value = wheels.get(wheel, None)
+                    if value is not None:
+                        self.wheels_labels[i][j].setText(f"{value:.2f}")
+                    else:
+                        self.wheels_labels[i][j].setText("?")
+            else:
+                for j in range(4):
+                    self.wheels_labels[i][j].setText("?")
 
     def create_styled_label(self, text, is_header=False): 
         label = QLabel(text)
