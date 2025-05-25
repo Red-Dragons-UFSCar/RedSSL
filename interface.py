@@ -1,6 +1,6 @@
-import sys # Módulo para interagir com o interpretador Python, usado para sair da aplicação (sys.exit)
-import os  # Módulo para interagir com o sistema operacional, usado para construir caminhos de arquivos (os.path)
-import math # Módulo para funções matemáticas, como pi e conversão de graus/radianos
+import sys
+import os
+import math
 import socket
 import json
 
@@ -121,6 +121,34 @@ class SoccerFieldWidget(QWidget): # Define uma classe personalizada que herda de
         painter.setPen(Qt.NoPen)     # Remove a borda para o ponto de visão
         painter.drawEllipse(QPointF(0, 0), vision_center_dot_radius_px, vision_center_dot_radius_px)
         
+        # --- Desenha o ID do Robô (Não rotativo, flutuando acima) ---
+        painter.save() # Salva o estado atual (que inclui a rotação do robô)
+        
+        # Contra-rotaciona para que o texto fique na vertical em relação ao campo
+        painter.rotate(math.degrees(orientation_rad)) 
+
+        robot_id_str = str(robot_info["id"])
+        font = painter.font() 
+        font_size = max(7, int(vision_center_dot_radius_px * 0.8)) 
+        font.setPointSize(font_size)
+        font.setBold(True)
+        painter.setFont(font)
+        
+        fm = QFontMetrics(painter.font())
+        text_width = fm.horizontalAdvance(robot_id_str)
+        text_height = fm.height()
+        
+        text_x_offset = -text_width / 2.0
+        
+        padding_above_robot_px = 2 # Espaçamento acima do robô
+        text_y_offset = -robot_radius_px - text_height - padding_above_robot_px
+
+        painter.setPen(QPen(Qt.white)) # Cor do texto (branco para contraste)
+        painter.drawText(QPointF(text_x_offset, text_y_offset), robot_id_str)
+        
+        painter.restore() # Restaura o estado para antes do desenho do texto (volta para a rotação do robô)
+
+
         # Desenha um indicador de orientação (linha na "frente" do robô)
         front_indicator_length = robot_radius_px * 0.8 # Comprimento do indicador
         # Define a caneta para o indicador (branca, espessura escalonada)
