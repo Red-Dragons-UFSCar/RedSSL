@@ -8,6 +8,7 @@ IS_PYTHON_MODULE = False
 
 if IS_PYTHON_MODULE:
         import pyvisgraph as vg
+
 else:
         import sys
         import os
@@ -29,6 +30,7 @@ class VisibilityGraph:
         self.target = vg.Point(0, 0)  # Target do path
         self.logger_obstacle = False  # Habilita o log de tempo da construção do mapa de obstaculos
 
+
     def set_origin(self, coordinates: np.ndarray) -> None:
         """
         Descrição:
@@ -38,6 +40,7 @@ class VisibilityGraph:
         """
         self.origin = vg.Point(coordinates[0], coordinates[1])
 
+
     def set_target(self, coordinates: np.ndarray) -> None:
         """
         Descrição:
@@ -46,6 +49,7 @@ class VisibilityGraph:
                 coordinates:    Vetor numpy [1x2]
         """
         self.target = vg.Point(coordinates[0], coordinates[1])
+
 
     def robot_triangle_obstacle(self, obstacle: Obstacle, robot) -> np.ndarray:
         """
@@ -99,6 +103,7 @@ class VisibilityGraph:
 
         return triangle
 
+
     def convert_to_vgPoly(self, points: np.ndarray) -> vg.Point:
         """
         Descrição:
@@ -113,7 +118,9 @@ class VisibilityGraph:
         for point in points:
             poly = vg.Point(point[0], point[1])
             polygons.append(poly)
+            
         return polygons
+
 
     def update_obstacle_map(self) -> None:
         """
@@ -124,6 +131,7 @@ class VisibilityGraph:
         self.obstacle_map = vg.VisGraph()
         if IS_PYTHON_MODULE:
                 self.obstacle_map.build(self.vg_obstacles, status=False, workers=1)
+
         else:
                 if len(self.vg_obstacles) > 0:
                         self.obstacle_map.build(self.vg_obstacles)
@@ -139,6 +147,7 @@ class VisibilityGraph:
         """
         path = self.obstacle_map.shortest_path(self.origin, self.target)
         return path
+
 
     def update_target_with_obstacles(
         self, robot, field, x_target, y_target, cont_target
@@ -173,6 +182,7 @@ class VisibilityGraph:
                         triangle = self.robot_triangle_obstacle(obstacle, robot)
                         vg_triangle = self.convert_to_vgPoly(triangle)
                         vg_obstacles.append(vg_triangle)
+
         self.vg_obstacles = vg_obstacles
 
         t1 = time.time()
@@ -193,6 +203,7 @@ class VisibilityGraph:
                 # Pega o próximo ponto no caminho gerado pelo algoritmo de visibilidade
                 next_point = path[1] if len(path) > 1 else path[0]
                 next_target = np.array([next_point.x, next_point.y])
+
         else:
                 print("Alvo atual")
                 # Se não há caminho, mantém o alvo atual
@@ -200,6 +211,7 @@ class VisibilityGraph:
 
         return next_target
     
+
     def ignore_obstacle(self, robot, ball, obstacle):
         """
         Descrição:
@@ -227,6 +239,7 @@ class VisibilityGraph:
 
         if t>1:
               return True
+        
         else:
               return False
 

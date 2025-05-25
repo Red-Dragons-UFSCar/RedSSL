@@ -2,7 +2,7 @@ from communication.vision import Vision
 from communication.actuator import Actuator
 from entities.Robot import Robot
 from control.PID import PID
-from control.PID_discrete import PID_discrete
+from control.PID_discrete import PIDDiscrete
 from path.visibilityGraph import VisibilityGraph
 import time
 import numpy as np
@@ -37,13 +37,13 @@ KP_X = 6.551
 KD_X = 1.004 
 KI_X = 0
 N_X = 1/0.01898
-control_PID_x = PID_discrete(KP_X, KD_X, KI_X, saturation=2, N=N_X)
+control_PID_x = PIDDiscrete(KP_X, KD_X, KI_X, saturation=2, N=N_X)
 
 KP_Y = 4.857
 KD_Y = 1.077 
 KI_Y = 0
 N_Y = 1/0.01805
-control_PID_y = PID_discrete(KP_Y, KD_Y, KI_Y, saturation=2, N=N_Y)
+control_PID_y = PIDDiscrete(KP_Y, KD_Y, KI_Y, saturation=2, N=N_Y)
 
 KP_THETA, KD_THETA, KI_THETA = 0.6, 0, 0
 control_PID_theta = PID(KP_THETA, KD_THETA, KI_THETA, saturation=1)

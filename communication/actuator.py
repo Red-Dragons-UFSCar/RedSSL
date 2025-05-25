@@ -1,10 +1,7 @@
 import socket
 import numpy as np
-
 from commons.math import rotate_vector
 from communication.proto.ssl_simulation_robot_control_pb2 import RobotControl, MoveWheelVelocity, MoveGlobalVelocity, MoveLocalVelocity
-
-
 
 class Actuator():
     def __init__(self, ip:str='localhost', port:int=10000,team_port:int=10302, logger:bool=False) -> None:
@@ -32,7 +29,6 @@ class Actuator():
         self._create_socket()
 
 
-
     def _create_socket(self):
         '''
         Descrição:  
@@ -58,9 +54,9 @@ class Actuator():
             if e.errno == socket.errno.EAGAIN:
                 if self.logger:
                     print("[Actuator] Falha ao enviar. Socket bloqueado")
+
             else:
                 print("[Actuator] Socket error:", e)
-
 
 
     def send_wheelVelocity_message(self, index, wheel_bl, wheel_br, wheel_fl, wheel_fr):
@@ -96,7 +92,6 @@ class Actuator():
         
         self.send_socket(robot_control.SerializeToString())
         
-
 
     def send_globalVelocity_message(self, robot,velocity_x, velocity_y, angular):
         '''
@@ -136,6 +131,7 @@ class Actuator():
 
 
         self.send_socket(robot_control.SerializeToString())
+
 
     def send_localVelocity_message(self, index, forward, left, angular):
         '''
@@ -207,6 +203,7 @@ class Actuator():
         # O simulador inverteu os motores
         if simulated_mode:
             self.send_wheelVelocity_message(robot.vision_id, dw4, dw3, dw2, dw1)
+
         else:
             self.send_wheelVelocity_message(robot.robot_id, dw1, dw2, dw3, dw4)
 
@@ -235,6 +232,7 @@ class Actuator():
         # O simulador inverteu os motores
         if simulated_mode:
             self.send_wheelVelocity_message(robot.vision_id, dw4, dw3, dw2, dw1)
+            
         else:
             self.send_wheelVelocity_message(robot.robot_id, dw1, dw2, dw3, dw4)
 

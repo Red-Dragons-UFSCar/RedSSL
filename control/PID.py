@@ -3,22 +3,22 @@ import entities.Robot as Robot
 
 
 class PID:
-    def __init__(self, Kp, Kd, Ki, saturation) -> None:
+    def __init__(self, KP, KD, KI, saturation) -> None:
         """
         Descrição:
                 Classe responsável pelo algoritmo de controle
                 Proporcional, Integral e Derivativo (PID)
         Entradas:
-                Kp:     float
-                Ki:     float
-                Kd:     float
+                KP:     float
+                KI:     float
+                KD:     float
 
         TODO: Sincronizar fps com o código da estratégia
         """
         # Constantes do controlador
-        self.Kp = Kp
-        self.Kd = Kd
-        self.Ki = Ki
+        self.KP = KP
+        self.KD = KD
+        self.KI = KI
 
         # Variaveis para controle
         self.target = 0
@@ -35,6 +35,7 @@ class PID:
         # Valores de saruração do controlador
         self.saturation = saturation
 
+
     def set_actual_value(self, value: float) -> None:
         """
         Descrição:
@@ -45,6 +46,7 @@ class PID:
         """
         self.actual_value = value
 
+
     def set_target(self, target: float) -> None:
         """
         Descrição:
@@ -54,6 +56,7 @@ class PID:
                 target:     float
         """
         self.target = target
+
 
     def saturate_control_signal(self, u: float) -> float:
         """
@@ -67,11 +70,15 @@ class PID:
         """
         if u > self.saturation:
             u_saturated = self.saturation
+
         elif u < -self.saturation:
             u_saturated = -self.saturation
+
         else:
             u_saturated = u
+
         return u_saturated
+
 
     def update(self) -> float:
         """
@@ -84,9 +91,9 @@ class PID:
         self.error = self.target - self.actual_value
 
         u = (
-            self.Kp * self.error
-            + self.Kd * (self.error - self.last_error) / (1 / self.fps)
-            + self.Ki * self.sum_error
+            self.KP * self.error
+            + self.KD * (self.error - self.last_error) / (1 / self.fps)
+            + self.KI * self.sum_error
         )
         u = self.saturate_control_signal(u)
 
@@ -94,8 +101,8 @@ class PID:
         self.sum_error = self.sum_error + self.error
 
         self.sum_error = self.saturate_control_signal(self.sum_error)
-
         return u
+
 
     def update_angular(self):
         """
@@ -107,6 +114,7 @@ class PID:
 
         TODO: Repensar esse controlador, alguns problemas em -180 ocorrem nele
         """
+
 
     def update_angular(self):
         """
@@ -124,21 +132,22 @@ class PID:
         self.error = np.arctan2(sin_error, cos_error)
 
         u = (
-            self.Kp * self.error
-            + self.Kd * (self.error - self.last_error) / (1 / self.fps)
-            + self.Ki * self.sum_error
+            self.KP * self.error
+            + self.KD * (self.error - self.last_error) / (1 / self.fps)
+            + self.KI * self.sum_error
         )
         u = self.saturate_control_signal(u)
 
         self.last_error = self.error
         self.sum_error = self.sum_error + self.error
-
         return u
 
+
     def inicializar_controladores_PID(self):
-        self.control_PID_x = PID(self.Kp, self.Kd, self.Ki, saturation=2)
-        self.control_PID_y = PID(self.Kp, self.Kd, self.Ki, saturation=2)
-        self.control_PID_theta = PID(self.Kp, self.Kd, self.Ki, saturation=1)
+        self.control_PID_x = PID(self.KP, self.KD, self.KI, saturation=2)
+        self.control_PID_y = PID(self.KP, self.KD, self.KI, saturation=2)
+        self.control_PID_theta = PID(self.KP, self.KD, self.KI, saturation=1)
+
 
     def setRobotVelocity(self, robot0):
         if robot0.target is None:
@@ -158,5 +167,4 @@ class PID:
         w = self.control_PID_theta.update_angular()
 
         robot0.sim_set_global_vel(vx, vy, w)
-
         return vx, vy, w

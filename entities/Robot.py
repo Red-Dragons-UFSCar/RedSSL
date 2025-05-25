@@ -3,7 +3,7 @@ from communication.actuator import Actuator
 from entities.Obstacle import ObstacleMap
 from entities.Target import Target
 from control.PID import PID
-from control.PID_discrete import PID_discrete
+from control.PID_discrete import PIDDiscrete
 import numpy as np
 
 
@@ -92,8 +92,8 @@ class Robot(KinematicBody):
         
 
         # Controladores PID
-        self.control_PID_x = PID_discrete(KP_X, KD_X, KI_X, saturation=2, N=N_X)
-        self.control_PID_y = PID_discrete(KP_Y, KD_Y, KI_Y, saturation=2, N=N_Y)
+        self.control_PID_x = PIDDiscrete(KP_X, KD_X, KI_X, saturation=2, N=N_X)
+        self.control_PID_y = PIDDiscrete(KP_Y, KD_Y, KI_Y, saturation=2, N=N_Y)
         #self.control_PID_theta = PID(KP_THETA, KD_THETA, KI_THETA, saturation=5)
         self.control_PID_theta = PID(KP_THETA, KD_THETA, KI_THETA, saturation=5)
 
@@ -116,13 +116,13 @@ class Robot(KinematicBody):
         self.robot_radius = 0.09
         self.wheel_radius = 0.036
 
+
     def sim_set_vel(self, v_top_right, v_top_left, v_bottom_right, v_bottom_left):
         # Define as velocidades dos motores
         self.v_top_right = v_top_left
         self.v_top_left = v_top_right
         self.v_bottom_right = v_bottom_right
         self.v_bottom_left = v_bottom_left
-
         self.set_velocities(
             0,
             0,
@@ -140,20 +140,24 @@ class Robot(KinematicBody):
             self.v_bottom_left,
         )
 
+
     def sim_set_global_vel(self, velocity_x, velocity_y, angular):
         # Envia as velocidades globais para o atuador
         self.actuator.send_globalVelocity_message(
             self.robot_id, velocity_x, velocity_y, angular
         )
 
+
     def set_target(self, target):
         # Define o alvo do robô
         self.target = target
+
 
     def target_reached(self, treshold=10):
         # Verifica se o robô alcançou o alvo
         if self.target is None:
             return False
+        
         current_position = np.array(
             [self.get_coordinates().X, self.get_coordinates().Y]
         )
@@ -162,6 +166,7 @@ class Robot(KinematicBody):
         )
         distance_to_target = np.linalg.norm(current_position - target_position)
         return distance_to_target < treshold
+
 
     def set_robot_velocity(self, target_velocity_x, target_velocity_y, target_angular):
         # Define as velocidades alvo nos controladores PID
@@ -182,14 +187,18 @@ class Robot(KinematicBody):
         # Retorna as velocidades calculadas
         return self.vx, self.vy, self.w
 
+
     def xtarget_reached(self, xTreshold=10):
-         if self.target is None:
-             return False
-         xDistance_to_target = abs(self.get_coordinates().X - self.target.get_coordinates().X)
-         return xDistance_to_target < xTreshold
+        if self.target is None:
+            return False
+        
+        xDistance_to_target = abs(self.get_coordinates().X - self.target.get_coordinates().X)
+        return xDistance_to_target < xTreshold
      
+
     def ytarget_reached(self, yTreshold=10):
         if self.target is None:
             return False
+        
         yDistance_to_target = abs(self.get_coordinates().Y - self.target.get_coordinates().Y)
         return yDistance_to_target < yTreshold

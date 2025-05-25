@@ -50,6 +50,7 @@ class RobotController:
             # Lendo as configurações de jogo para simulação
             with open("constants/game.json", "r") as file:
                 self.game = json.load(file)
+
         else:
             # Lendo as configurações de jogo para vida real
             with open("constants/game_real.json", "r") as file:
@@ -114,6 +115,7 @@ class RobotController:
                 self.enemy_robot1,
                 self.enemy_robot2,
             ]
+
         elif self.team_color == "yellow":
             self.robot0 = Robot(
                 robot_id=0,
@@ -147,6 +149,7 @@ class RobotController:
                 self.enemy_robot2,
             ]
 
+
     def update_coordinates(self, frame):
         if frame["frame_number"] == 0:
             return
@@ -179,6 +182,7 @@ class RobotController:
             ball_detection = frame["ball"]
             self.field.update_ball_position(ball_detection["x"], ball_detection["y"])
 
+
     def send_velocities(self):
         # Envio de velocidades no sistema global
         """
@@ -198,6 +202,7 @@ class RobotController:
         if self.field.ball.get_coordinates().Y  < 120:
             factor = 0.4
             w = 0
+
         else:
             factor = 0.4
             w = -4
@@ -207,6 +212,7 @@ class RobotController:
             self.actuator.send_wheel_from_local_fisico(
                 self.robot0, self.robot0.vx, self.robot0.vx*factor, self.robot0.w, self.mode_playing['simulated_mode']
             )
+            
         else:
             self.actuator.send_wheel_from_global(
               self.robot0,
@@ -215,11 +221,13 @@ class RobotController:
               self.robot0.w,
               self.mode_playing["simulated_mode"],
             )
+
         if self.field.send_local:
             print("--------------------------------------------------------------")
             self.actuator.send_wheel_from_local_fisico(
                 self.robot1, self.robot1.vx, self.robot1.vx*0, self.robot1.w, self.mode_playing['simulated_mode']
             )
+
         else:
             self.actuator.send_wheel_from_global(
               self.robot1,
@@ -228,11 +236,13 @@ class RobotController:
               self.robot1.w,
               self.mode_playing["simulated_mode"],
             )
+
         if self.field.send_local:
             print("--------------------------------------------------------------")
             self.actuator.send_wheel_from_local_fisico(
                 self.robot2, self.robot2.vx, self.robot2.vx*factor, w, self.mode_playing['simulated_mode']
             )
+
         else:
             self.actuator.send_wheel_from_global(
               self.robot2,
@@ -241,6 +251,7 @@ class RobotController:
               self.robot2.w,
               self.mode_playing["simulated_mode"],
             )
+
 
     def get_vision_frame(self):
         """
@@ -252,6 +263,7 @@ class RobotController:
         frame = self.visao.get_last_frame()
         self.update_coordinates(frame)
 
+
     def start_vision_thread(self):
         """
         Descrição:
@@ -259,6 +271,7 @@ class RobotController:
         """
         self.vision_thread = RepeatTimer((1 / CAM_FPS), self.get_vision_frame)
         self.vision_thread.start()
+
 
     def control_loop(self):
         while True:
@@ -270,6 +283,7 @@ class RobotController:
                 # Trata o comando do árbitro
                 # self.referee.handle_referee_command()
                 self.referee.parse_referee_command(self.field)
+                
             else:
                 self.field.game_on = True
                 self.field.game_stopped = False
@@ -304,44 +318,47 @@ class RobotController:
 
             self.field.send_local = False
 
+            """""
             print("---------------------------------------")
             print("    LOGGING DOS ROBÔS TIME     ")
             print("---------------------------------------")
-            # print("Robo goleiro, id=", self.robot0.vision_id)
-            # print("x: ", self.robot0.get_coordinates().X)
-            # print("y: ", self.robot0.get_coordinates().X)
-            # print("r: ", self.robot0.get_coordinates().rotation)
-            # print("vx: ", self.robot0.vx)
-            # print("vy: ", self.robot0.vy)
-            # print("w: ", self.robot0.w)
-            # print("Robo zagueiro, id=", self.robot1.vision_id)
-            # print("x: ", self.robot1.get_coordinates().X)
-            # print("y: ", self.robot1.get_coordinates().X)
-            # print("r: ", self.robot1.get_coordinates().rotation)
-            # print("Robo atacante, id=", self.robot2.vision_id)
-            # print("x: ", self.robot2.get_coordinates().X)
-            # print("y: ", self.robot2.get_coordinates().X)
-            # print("r: ", self.robot2.get_coordinates().rotation)
+            print("Robo goleiro, id=", self.robot0.vision_id)
+            print("x: ", self.robot0.get_coordinates().X)
+            print("y: ", self.robot0.get_coordinates().X)
+            print("r: ", self.robot0.get_coordinates().rotation)
+            print("vx: ", self.robot0.vx)
+            print("vy: ", self.robot0.vy)
+            print("w: ", self.robot0.w)
+            print("Robo zagueiro, id=", self.robot1.vision_id)
+            print("x: ", self.robot1.get_coordinates().X)
+            print("y: ", self.robot1.get_coordinates().X)
+            print("r: ", self.robot1.get_coordinates().rotation)
+            print("Robo atacante, id=", self.robot2.vision_id)
+            print("x: ", self.robot2.get_coordinates().X)
+            print("y: ", self.robot2.get_coordinates().X)
+            print("r: ", self.robot2.get_coordinates().rotation)
 
-            # print("---------------------------------------")
-            # print("    LOGGING DOS ROBÔS INIMIGO     ")
-            # print("---------------------------------------")
-            # print("Robo goleiro, id=", self.enemy_robot0.vision_id)
-            # print("x: ", self.enemy_robot0.get_coordinates().X)
-            # print("y: ", self.enemy_robot0.get_coordinates().X)
-            # print("r: ", self.enemy_robot0.get_coordinates().rotation)
-            # print("Robo zagueiro, id=", self.enemy_robot1.vision_id)
-            # print("x: ", self.enemy_robot1.get_coordinates().X)
-            # print("y: ", self.enemy_robot1.get_coordinates().X)
-            # print("r: ", self.enemy_robot1.get_coordinates().rotation)
-            # print("Robo goleiro, id=", self.enemy_robot2.vision_id)
-            # print("x: ", self.enemy_robot2.get_coordinates().X)
-            # print("y: ", self.enemy_robot2.get_coordinates().X)
-            # print("r: ", self.enemy_robot2.get_coordinates().rotation)
-
+            print("---------------------------------------")
+            print("    LOGGING DOS ROBÔS INIMIGO     ")
+            print("---------------------------------------")
+            print("Robo goleiro, id=", self.enemy_robot0.vision_id)
+            print("x: ", self.enemy_robot0.get_coordinates().X)
+            print("y: ", self.enemy_robot0.get_coordinates().X)
+            print("r: ", self.enemy_robot0.get_coordinates().rotation)
+            print("Robo zagueiro, id=", self.enemy_robot1.vision_id)
+            print("x: ", self.enemy_robot1.get_coordinates().X)
+            print("y: ", self.enemy_robot1.get_coordinates().X)
+            print("r: ", self.enemy_robot1.get_coordinates().rotation)
+            print("Robo goleiro, id=", self.enemy_robot2.vision_id)
+            print("x: ", self.enemy_robot2.get_coordinates().X)
+            print("y: ", self.enemy_robot2.get_coordinates().X)
+            print("r: ", self.enemy_robot2.get_coordinates().rotation)
+            """""
+            
             if (t2 - t1) < 1 / CONTROL_FPS:
                 time.sleep(1 / CONTROL_FPS - (t2 - t1))
                 # print("Tempo de execução: ", (t2 - t1) * 1000)
+
             else:
                 print("[TIMEOUT] - Execução de controle excedida: ", (t2 - t1) * 1000)
 

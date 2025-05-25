@@ -147,6 +147,7 @@ class KalmanFilter:
             for member in members:
                 print(f'{member} = {getattr(self, member)}')
 
+
     def v_reset_kalman(self, _vt2d_ultima_pos):
 
         """
@@ -195,6 +196,7 @@ class KalmanFilter:
         # P = ident;
 
         self.P = np.identity(4)
+
 
     def v_atualiza_kalman(self, _vt2d_posicao_atual, print_attr=False):
         """
@@ -250,6 +252,7 @@ class KalmanFilter:
             print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
             self.v_reset_kalman(np.array([0.0, 0.0]))
             
+
     def v_prediz_kalman(self):
         """
         @brief Executa o passo de predição do Filtro de Kalman
@@ -260,6 +263,7 @@ class KalmanFilter:
 
         self.x_k_1 = np.matmul(self.A, self.x) + np.matmul(self.B, self.u)
         self.P_k_1 = np.matmul(np.matmul(self.A, self.P), self.A.T) + self.Q
+
 
     def v_atualiza_matrizes(self, _delta_t):
         """
@@ -322,6 +326,7 @@ class KalmanFilter:
         if self.vtVelocidade.shape[0] > 1:
             self.u[0, 0] = (self.vtVelocidade[0][0] - self.vtVelocidade[1][0]) * (self.dt)  # -0.05
             self.u[1, 0] = (self.vtVelocidade[0][1] - self.vtVelocidade[1][1]) * (self.dt)  # -0.05
+
         else:
             self.u[0, 0] = 0.0
             self.u[1, 0] = 0.0
@@ -331,6 +336,7 @@ class KalmanFilter:
 
         if self.vtVelocidade.shape[0] > 2:
             self.vtVelocidade = np.delete(self.vtVelocidade, self.vtVelocidade.shape[0] - 1, 0)
+
 
     def v_atualiza_variancia(self, _var_x, _var_y):
         """
@@ -345,6 +351,7 @@ class KalmanFilter:
 
         self.R[0, 0] = _var_x
         self.R[1, 1] = _var_y
+
 
     def vt2d_prediz_futuro(self, _vt_kalman, _x_pred, _p_pred, _d_t, num):
         """
@@ -429,13 +436,13 @@ class KalmanFilter:
                 p_k_1_ = np.matmul(np.identity(4) - np.matmul(k_, self.H), p_k_1_aux)
 
             else:
-
                 # beep()
                 # return vector2d(x_k_1_[0, 0], x_k_1_[1, 0]) # <- usando namedtuple
                 return np.array([x_k_1_[0, 0], x_k_1_[1, 0]])  # <- usando numpy.array
 
         # return vector2d(x_k_1_[0, 0], x_k_1_[1, 0]) # <- usando namedtuple
         return np.array([x_k_1_[0, 0], x_k_1_[1, 0]])  # <- usando numpy.array
+
 
     def v_inicializa_kalman(self, pos):
 

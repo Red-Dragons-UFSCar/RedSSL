@@ -1,26 +1,26 @@
 import numpy as np
 
 
-class PID_discrete:
-    def __init__(self, Kp, Kd, Ki, saturation, N=1) -> None:
+class PIDDiscrete:
+    def __init__(self, KP, KD, KI, saturation, N=1) -> None:
         """
         Descrição:
                 Classe responsável pelo algoritmo de controle
                 Proporcional, Integral e Derivativo discreto
                 com filtro (PID-F)
         Entradas:
-                Kp:     float
-                Ki:     float
-                Kd:     float
+                KP:     float
+                KI:     float
+                KD:     float
                 saturation:     float
                 N:      float
 
         TODO: Sincronizar fps com o código da estratégia
         """
         # Constantes do controlador
-        self.Kp = Kp
-        self.Kd = Kd
-        self.Ki = Ki
+        self.KP = KP
+        self.KD = KD
+        self.KI = KI
         self.N = N
 
         # Variaveis para controle
@@ -43,6 +43,7 @@ class PID_discrete:
         # Valores de saruração do controlador
         self.saturation = saturation
 
+
     def set_actual_value(self, value: float) -> None:
         """
         Descrição:
@@ -53,6 +54,7 @@ class PID_discrete:
         """
         self.actual_value = value / 100
 
+
     def set_target(self, target: float) -> None:
         """
         Descrição:
@@ -62,6 +64,7 @@ class PID_discrete:
                 target:     float
         """
         self.target = target / 100
+
 
     def saturate_control_signal(self, u: float) -> float:
         """
@@ -81,6 +84,7 @@ class PID_discrete:
             u_saturated = u
         return u_saturated
 
+
     def update(self) -> float:
         """
         Descrição:
@@ -94,8 +98,8 @@ class PID_discrete:
         self.error = self.target - self.actual_value
 
         # Constantes para calculo da ação de controle
-        a1 = self.Kp + self.Kd * self.N
-        a2 = self.N * self.Ts - 1 - self.N * self.Kd
+        a1 = self.KP + self.KD * self.N
+        a2 = self.N * self.Ts - 1 - self.N * self.KD
         a3 = self.N * self.Ts - 1
 
         # Ação de controle
@@ -108,6 +112,7 @@ class PID_discrete:
         self.c_k1 = self.c
 
         return self.c
+
 
     def update_angular(self):
         """
@@ -123,8 +128,8 @@ class PID_discrete:
         self.error = np.arctan2(sin_error, cos_error)
 
         # Constantes para calculo da ação de controle
-        a1 = self.Kp + self.Kd * self.N
-        a2 = self.N * self.Ts - 1 - self.N * self.Kd
+        a1 = self.KP + self.KD * self.N
+        a2 = self.N * self.Ts - 1 - self.N * self.KD
         a3 = self.N * self.Ts - 1
 
         # Ação de controle
@@ -137,6 +142,7 @@ class PID_discrete:
         self.c_k1 = self.c
 
         return self.c
+
 
     def set_robot_velocity(robot0, control_PID_x, control_PID_y, control_PID_theta):
         if robot0.target is None:

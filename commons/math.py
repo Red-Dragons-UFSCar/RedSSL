@@ -60,6 +60,7 @@ def get_dif(points, dt=1 / 60):
 
     return np.array(dif)
 
+
 def convert_coordinates(robots_blue, robots_yellow, balls, length, width, is_right_side):
     """
     Descrição:
@@ -77,27 +78,28 @@ def convert_coordinates(robots_blue, robots_yellow, balls, length, width, is_rig
             Nenhuma. A função altera os valores das coordenadas dos robôs e da bola diretamente.
     """
 
-    correction_positioN_X = length / 2
+    correction_position_x = length / 2
     correction_position_y = width / 2
 
     if is_right_side:
         for robot in robots_blue + robots_yellow:
-            robot.x = (correction_positioN_X - robot.x) / 10
+            robot.x = (correction_position_x - robot.x) / 10
             robot.y = (correction_position_y - robot.y) / 10   
             robot.orientation = (robot.orientation + np.pi) % (2 * np.pi)
 
         if balls:
-            balls[0].x = (correction_positioN_X - balls[0].x) / 10
+            balls[0].x = (correction_position_x - balls[0].x) / 10
             balls[0].y = (correction_position_y - balls[0].y) / 10
 
     else:
         for robot in robots_blue + robots_yellow:
-            robot.x = (robot.x + correction_positioN_X) / 10
+            robot.x = (robot.x + correction_position_x) / 10
             robot.y = (robot.y + correction_position_y) / 10
 
         if balls:
-            balls[0].x = (balls[0].x + correction_positioN_X) / 10
+            balls[0].x = (balls[0].x + correction_position_x) / 10
             balls[0].y = (balls[0].y + correction_position_y) / 10
+
 
 def dot_product(v1, v2):
     """
@@ -110,6 +112,7 @@ def dot_product(v1, v2):
             v1*v2:  Vetor numpy (1x2) com o produto escalar v1*v2
     """
     return v1[0]*v2[0] + v1[1]*v2[1]
+
 
 def ortogonal_projection(p_origin, p_line, p_to_project):
     """

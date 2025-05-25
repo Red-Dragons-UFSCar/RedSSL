@@ -54,6 +54,7 @@ class Vision:
                                "robots_yellow": [],
                                "robots_blue": []}
 
+
     def _create_socket(self):
         """
         Descrição:
@@ -71,6 +72,7 @@ class Vision:
         self.socket.bind((self.ip, self.port))
         self.socket.setblocking(False)
         self.socket.settimeout(0.0)
+
 
     def _initialize_frame(self):
         """
@@ -108,6 +110,7 @@ class Vision:
             "robots_yellow": robots,
             "robots_blue": robots,
         }
+
 
     def _convert_parameters(self, msgRaw):
         """
@@ -180,6 +183,7 @@ class Vision:
             "robots_blue": robots_blue,
         }
     
+
     def _convert_parameters2(self, msgRaw):
         """
         Descrição:
@@ -206,6 +210,7 @@ class Vision:
 
         # Verifica se houve mudança do frame number entre os frames recebidos
         # Reseta os dados validados para processar novos dados
+
         if not self.before_last_frame_frame_number == self.last_frame_frame_number:
             self.validated_data = {"ball": [],
                                    "robots_yellow": [],
@@ -227,6 +232,7 @@ class Vision:
                 }
             )
             validated_data["ball"] = True
+
         else:
             ball = ()
         
@@ -273,6 +279,7 @@ class Vision:
             "robots_blue": robots_blue_validated,
         }
 
+
     def update(self):
         """
         Descrição:
@@ -292,8 +299,10 @@ class Vision:
             if e.errno == socket.errno.EAGAIN:
                 if self.logger:
                     print("[VISION] Falha ao receber. Socket bloqueado.")
+
             else:
                 print("[VISION] Erro no socket:", e)
+
 
     def get_last_frame(self):
         """
@@ -304,6 +313,7 @@ class Vision:
         """
         return self.last_frame
     
+
     def reset_last_frame(self):
         """
         Descrição:
@@ -318,6 +328,7 @@ class Vision:
             "robots_yellow": [],
             "robots_blue": [],
         }
+
 
 if __name__ == "__main__":
     import time
@@ -334,6 +345,7 @@ if __name__ == "__main__":
         print("Robots blue: ")
         for robot in frame["robots_blue"]:
             print(f"Index: {robot['robot_id']} X: {robot['x']} Y: {robot['y']}")
+            
         print("Robots yellow: ")
         for robot in frame["robots_yellow"]:
             print(f"Index: {robot['robot_id']} X: {robot['x']} Y: {robot['y']}")

@@ -4,7 +4,6 @@ from entities.Robot import Robot
 from entities.Ball import Ball
 from entities.Obstacle import Obstacle
 from entities.Field import Field
-
 from matplotlib.patches import Polygon
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation

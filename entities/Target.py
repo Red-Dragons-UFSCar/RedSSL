@@ -9,6 +9,7 @@ class Target(KinematicBody):
         super().__init__()
         self.visibility_graph = VisibilityGraph()  # Inicializa o grafo de visibilidade
 
+
     def set_target(self, robot, target_coordinates, field, target_rotation=0):
         """
         Define o alvo para um robô, considerando os obstáculos no campo.
