@@ -108,7 +108,7 @@ class SoccerFieldWidget(QWidget): # Define uma classe personalizada que herda de
 
         painter.save() # Salva o estado atual do QPainter (transformações, caneta, pincel)
         painter.translate(center_x_px, center_y_px) # Move a origem do sistema de coordenadas para o centro do robô
-        painter.rotate(math.degrees(orientation_rad)) # Rotaciona o sistema de coordenadas de acordo com a orientação do robô
+        painter.rotate(math.degrees(-orientation_rad)) # Rotaciona o sistema de coordenadas de acordo com a orientação do robô
 
         # Desenha o corpo do robô (círculo base)
         painter.setBrush(QColor(50, 50, 50)) # Define a cor de preenchimento (cinza escuro)
