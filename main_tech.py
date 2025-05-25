@@ -8,8 +8,8 @@ from behavior.skills import go_to_point
 from behavior.plays import (
     estrategia_basica,
     estrategia_basica_real,
-    estrategia_penalti_defensivo,
-    estrategia_penalti_ofensivo,
+    estrategia_penalty_defensivo,
+    estrategia_penalty_ofensivo,
 )
 from behavior.tech_challenge import TechChallenge
 from communication.referee import RefereeCommunication

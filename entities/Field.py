@@ -47,7 +47,7 @@ class Field:
         self.kickoff_defensive = False
         self.penalty_offensive = False
         self.penalty_defensive = False
-        self.game_on_but_is_penalty = False
+        self.game_on_is_penalty = False
 
         # Flags para cartão e timestamp
         self.allowed_robots = 0
@@ -83,6 +83,7 @@ class Field:
     def update_robot_position(self, robot_id, x, y, theta, color):
         if color == "blue":
             robots = self.blue_robots
+
         else:
             robots = self.yellow_robots
 
@@ -91,14 +92,17 @@ class Field:
                 robot.set_coordinates(x, y, theta)
                 break
 
+
     def update_ball_position(self, x, y):
         self.ball.set_coordinates(x, y)
+
 
     def verify_enemy_id(self, robots):
         for robot in robots:
             if robot["robot_id"] in self.enemy_vision_id:
                 index = self.enemy_vision_id.index(robot["robot_id"])
                 self.count_enemy_id[index] = 0
+
             else:
                 self.enemy_vision_id.append(robot["robot_id"])
                 self.count_enemy_id.append(0)
@@ -124,14 +128,18 @@ class Field:
         # print("Robos: ", self.enemy_vision_id)
         if len(self.enemy_vision_id) < 3:
             resets = 3 - len(self.enemy_vision_id)
+
             for i in range(len(self.enemy_vision_id)):
                 self.enemy_robots[i].vision_id = self.enemy_vision_id[i]
+
             for i in range(resets):
                 self.enemy_robots[2 - i].set_coordinates(0, 0, 0)
                 self.enemy_robots[2 - i].vision_id = None
+
         else:
             for i in range(3):
                 self.enemy_robots[i].vision_id = self.enemy_vision_id[i]
+
 
     def verify_team_id(self, robots):
         for i in range(len(robots)):
@@ -145,8 +153,10 @@ class Field:
             # print("Contadores: ", self.count_team_id)
             if self.count_team_id[i] > self.threshold_team_id:
                 self.team_robots[i].set_coordinates(0, 0, 0)
+
             else:
                 self.count_team_id[i] += 1
+
 
     def update_game_state(self, referee_state):
         """
@@ -157,6 +167,7 @@ class Field:
         # Processa e imprime os eventos relevantes
         self.process_event(command, referee_state)
 
+
     def process_event(self, command, referee_state):
         """
         Processa e imprime os eventos relevantes do jogo.
@@ -166,7 +177,7 @@ class Field:
             or command == Referee.Command.FORCE_START
         ):
             if self.game_on and (self.penalty_offensive or self.penalty_defensive):
-                self.game_on_but_is_penalty = True
+                self.game_on_is_penalty = True
                 print("Jogando situacao de penalty")
 
             else:
@@ -176,7 +187,7 @@ class Field:
                 self.game_halted = False
                 self.kickoff_offensive = False
                 self.kickoff_defensive = False
-                self.game_on_but_is_penalty = False
+                self.game_on_is_penalty = False
                 self.penalty_offensive = False
                 self.penalty_defensive = False
                 self.defending_foul = False
@@ -190,11 +201,12 @@ class Field:
             self.offensive_foul = False
             self.penalty_offensive = False
             self.penalty_defensive = False
-            self.game_on_but_is_penalty = False
+            self.game_on_is_penalty = False
             self.kickoff_offensive = False
             self.kickoff_defensive = False
 
             print("JOGO PARADO")
+
         elif command == Referee.Command.HALT:
             self.game_on = False
             self.game_stopped = False
@@ -203,7 +215,7 @@ class Field:
             self.offensive_foul = False
             self.penalty_offensive = False
             self.penalty_defensive = False
-            self.game_on_but_is_penalty = False
+            self.game_on_is_penalty = False
 
             print("JOGO INTERROMPIDO")
 
@@ -218,7 +230,7 @@ class Field:
                 self.game_halted = False
                 self.penalty_offensive = False
                 self.penalty_defensive = False
-                self.game_on_but_is_penalty = False
+                self.game_on_is_penalty = False
 
             else:
                 # flag do coach de kickoff defensivo
@@ -229,7 +241,7 @@ class Field:
                 self.game_halted = False
                 self.penalty_offensive = False
                 self.penalty_defensive = False
-                self.game_on_but_is_penalty = False
+                self.game_on_is_penalty = False
 
         elif command == Referee.Command.PREPARE_KICKOFF_BLUE:
             print("KICKOFF BLUE")
@@ -242,7 +254,7 @@ class Field:
                 self.game_stopped = False
                 self.game_halted = False
                 self.game_on = False
-                self.game_on_but_is_penalty = False
+                self.game_on_is_penalty = False
 
             else:
                 # flag do coach de kickoff defensivo
@@ -253,7 +265,7 @@ class Field:
                 self.game_stopped = False
                 self.game_halted = False
                 self.game_on = False
-                self.game_on_but_is_penalty = False
+                self.game_on_is_penalty = False
 
         elif command == Referee.Command.PREPARE_PENALTY_YELLOW:
             print("PENALTY YELLOW")
@@ -307,6 +319,7 @@ class Field:
             if self.team == "yellow":
                 self.offensive_foul = True
                 self.defending_foul = False
+
             else:
                 self.offensive_foul = False
                 self.defending_foul = True
@@ -319,6 +332,7 @@ class Field:
             if self.team == "blue":
                 self.offensive_foul = True
                 self.defending_foul = False
+
             else:
                 self.offensive_foul = False
                 self.defending_foul = True
@@ -329,7 +343,7 @@ class Field:
             self.game_halted = True
             self.penalty_offensive = False
             self.penalty_defensive = False
-            self.game_on_but_is_penalty = False
+            self.game_on_is_penalty = False
             print("TIMEOUT YELLOW")
 
         elif command == Referee.Command.TIMEOUT_BLUE:
@@ -338,7 +352,7 @@ class Field:
             self.game_halted = True
             self.penalty_offensive = False
             self.penalty_defensive = False
-            self.game_on_but_is_penalty = False
+            self.game_on_is_penalty = False
             print("TIMEOUT BLUE")
 
         elif command == Referee.Command.GOAL_YELLOW:
@@ -356,7 +370,7 @@ class Field:
             self.defending_foul = True
             self.kickoff_offensive = False
             self.kickoff_defensive = False
-            self.game_on_but_is_penalty = False
+            self.game_on_is_penalty = False
 
         elif command == Referee.Command.BALL_PLACEMENT_BLUE:
             print("BALL PLACEMENT BLUE")
@@ -367,12 +381,13 @@ class Field:
             self.defending_foul = True
             self.kickoff_offensive = False
             self.kickoff_defensive = False
-            self.game_on_but_is_penalty = False
+            self.game_on_is_penalty = False
 
         else:
             print(f"Comando desconhecido: {command}")
 
         self.process_cards(referee_state)
+
 
     def process_cards(self, referee_state):
         """

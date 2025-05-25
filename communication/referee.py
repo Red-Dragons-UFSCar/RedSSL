@@ -91,7 +91,7 @@ class RefereeCommunication:
         field.free_kick_offensive = free_kick_offensive
         field.free_kick_defensive = free_kick_defensive
 
-        field.game_on_but_is_penalty = False
+        field.game_on_is_penalty = False
         self.start_timer_free_kick = False
         self.start_timer_kickoff = False
 
@@ -126,10 +126,10 @@ class RefereeCommunication:
                      self.change_foul_flags(field, game_on=True)
 
                 elif self.field.penalty_defensive:
-                    self.field.game_on_but_is_penalty = True
+                    self.field.game_on_is_penalty = True
 
                 elif self.field.penalty_offensive:
-                    self.field.game_on_but_is_penalty = True
+                    self.field.game_on_is_penalty = True
 
             elif self.verify_our_free_kick(field, command):
                 print("FREE KICK - Nosso")
@@ -249,7 +249,7 @@ class RefereeCommunication:
                 self.game_halted = True
                 self.penalty_offensive = False
                 self.penalty_defensive = False
-                self.game_on_but_is_penalty = False
+                self.game_on_is_penalty = False
                 print("TIMEOUT YELLOW")
 
             elif command == Referee.Command.TIMEOUT_BLUE:
@@ -258,7 +258,7 @@ class RefereeCommunication:
                 self.game_halted = True
                 self.penalty_offensive = False
                 self.penalty_defensive = False
-                self.game_on_but_is_penalty = False
+                self.game_on_is_penalty = False
                 print("TIMEOUT BLUE")
 
             elif command == Referee.Command.GOAL_YELLOW:
@@ -276,7 +276,7 @@ class RefereeCommunication:
                 self.defending_foul = False
                 self.kickoff_offensive = False
                 self.kickoff_defensive = False
-                self.game_on_but_is_penalty = False
+                self.game_on_is_penalty = False
 
             elif command == Referee.Command.BALL_PLACEMENT_BLUE:
                 print("BALL PLACEMENT BLUE")
@@ -287,7 +287,7 @@ class RefereeCommunication:
                 self.defending_foul = False
                 self.kickoff_offensive = False
                 self.kickoff_defensive = False
-                self.game_on_but_is_penalty = False
+                self.game_on_is_penalty = False
 
             else:
                 print(f"Comando desconhecido: {command}")

@@ -90,8 +90,8 @@ class TechChallenge():
             self.set_robot_targets('kickoff')
             self.moving_behavior(robot0, robot1, robot2, field)
         elif self.state_penalty_kick:
-            print("PENALTI KICK")
-            self.set_robot_targets('penalti')
+            print("penalty KICK")
+            self.set_robot_targets('penalty')
             self.moving_behavior(robot0, robot1, robot2, field)
         elif self.state_free_kick_ofense:
             print("FREE KICK OFENSIVO")
@@ -117,7 +117,7 @@ class TechChallenge():
             self.robot2_xTarget = 225+25
             self.robot2_yTarget = 150+0
             self.robot2_aTarget = np.pi
-        elif foul=='penalti':
+        elif foul=='penalty':
             self.robot0_xTarget = 225+31
             self.robot0_yTarget = 150-70
             self.robot0_aTarget = np.pi

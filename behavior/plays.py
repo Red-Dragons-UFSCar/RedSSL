@@ -68,9 +68,9 @@ def posicionar_robos(robot_goalie, robot_zagueiro, robot_atacante, field):
     skills.go_to_point(robot_atacante, 300, 150, field, 0)
 
 
-def estrategia_penalti_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, field):
+def estrategia_penalty_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, field):
 
-    if field.penalty_offensive == True and field.game_on_but_is_penalty == False:
+    if field.penalty_offensive == True and field.game_on_is_penalty == False:
         """
         Posiciona zagueiro e goleiro em posições fixas no campo de defesa e
         o atacante para cobrar o pênalti, em seguida chamando a função de atacante para cobrança.
@@ -81,17 +81,17 @@ def estrategia_penalti_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, f
         )
 
     else:
-        # chamando a função de atacante para cobrança do penalti.
+        # chamando a função de atacante para cobrança do penalty.
         tactics.atacante(robot_atacante, field)
         skills.penalty_idle_offensive_game_on(robot_goleiro, robot_zagueiro, field)
 
 
-def estrategia_penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, field):
+def estrategia_penalty_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, field):
     """
     Posiciona zagueiro e goleiro em posições fixas no campo de defesa e
     o atacante para cobrar o pênalti, em seguida chamando a função de atacante para cobrança.
     """
-    if field.penalty_defensive == True and field.game_on_but_is_penalty == False:
+    if field.penalty_defensive == True and field.game_on_is_penalty == False:
         # Se o jogo estiver no modo penalty parado, preparacao do penalty
 
         skills.penalty_idle_defensive(
@@ -398,7 +398,7 @@ def defensive_kickoff_real(robot_goalie, robot_zagueiro, robot_atacante, field):
     skills.go_to_point(robot_atacante, 160, 150, field, 0)
 
 '''
-def penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, field, game_on):
+def penalty_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, field, game_on):
     """
     Posiciona zagueiro e goleiro em posições fixas no campo de defesa e
     o atacante para cobrar o pênalti, em seguida chamando a função de atacante para cobrança.
@@ -414,7 +414,7 @@ def penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, field, game
         skills.go_to_point(robot_atacante, 300, 20, field, np.pi)
 '''
         
-def penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, field, game_on):
+def penalty_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, field, game_on):
     """
     Posiciona zagueiro e goleiro em posições fixas no campo de defesa e
     o atacante para cobrar o pênalti, em seguida chamando a função de atacante para cobrança.
@@ -447,7 +447,7 @@ def penalti_defensivo(robot_goleiro, robot_zagueiro, robot_atacante, field, game
             robot_atacante.w = 0
             print("zerei 3")
 
-def penalti_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, field, game_on):
+def penalty_ofensivo(robot_goleiro, robot_zagueiro, robot_atacante, field, game_on):
     """
     Posiciona zagueiro e goleiro em posições fixas no campo de defesa e
     o atacante para cobrar o pênalti, em seguida chamando a função de atacante para cobrança.

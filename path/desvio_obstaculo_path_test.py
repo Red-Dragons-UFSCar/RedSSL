@@ -33,20 +33,20 @@ enemy_robot1 = Robot(robot_id=1, actuator=None)
 enemy_robots = [enemy_robot0, enemy_robot1]
 # Controladores PID para posição e orientação
 
-Kp_x = 6.551
-Kd_x = 1.004 
-Ki_x = 0
-N_x = 1/0.01898
-control_PID_x = PID_discrete(Kp_x, Kd_x, Ki_x, saturation=2, N=N_x)
+KP_X = 6.551
+KD_X = 1.004 
+KI_X = 0
+N_X = 1/0.01898
+control_PID_x = PID_discrete(KP_X, KD_X, KI_X, saturation=2, N=N_X)
 
-Kp_y = 4.857
-Kd_y = 1.077 
-Ki_y = 0
-N_y = 1/0.01805
-control_PID_y = PID_discrete(Kp_y, Kd_y, Ki_y, saturation=2, N=N_y)
+KP_Y = 4.857
+KD_Y = 1.077 
+KI_Y = 0
+N_Y = 1/0.01805
+control_PID_y = PID_discrete(KP_Y, KD_Y, KI_Y, saturation=2, N=N_Y)
 
-Kp_theta, Kd_theta, Ki_theta = 0.6, 0, 0
-control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=1)
+KP_THETA, KD_THETA, KI_THETA = 0.6, 0, 0
+control_PID_theta = PID(KP_THETA, KD_THETA, KI_THETA, saturation=1)
 
 # Visibilidade
 vg = VisibilityGraph()

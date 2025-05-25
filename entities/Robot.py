@@ -32,70 +32,70 @@ class Robot(KinematicBody):
         '''
         '''
         # Parâmetros PID
-        Kp_x = 6.551
-        Kd_x = 0.1
-        Ki_x = 0
-        N_x = 1 / 0.01898
-        Kp_y = 4.857
-        Kd_y = 0.1
-        Ki_y = 0
-        N_y = 1 / 0.01805
-        Kp_theta = 3
-        Kd_theta = 0
-        Ki_theta = 0
+        KP_X = 6.551
+        KD_X = 0.1
+        KI_X = 0
+        N_X = 1 / 0.01898
+        KP_Y = 4.857
+        KD_Y = 0.1
+        KI_Y = 0
+        N_Y = 1 / 0.01805
+        KP_THETA = 3
+        KD_THETA = 0
+        KI_THETA = 0
         
         
 
         ''' Controlador PID original fisico
-        Kp_x = 4.5
-        Kd_x = 0
-        Ki_x = 0
-        N_x = 30
-        Kp_y = 4.5
-        Kd_y = 0
-        Ki_y = 0
-        N_y = 30
-        Kp_theta = 2
-        Kd_theta = 0
-        Ki_theta = 0
+        KP_X = 4.5
+        KD_X = 0
+        KI_X = 0
+        N_X = 30
+        KP_Y = 4.5
+        KD_Y = 0
+        KI_Y = 0
+        N_Y = 30
+        KP_THETA = 2
+        KD_THETA = 0
+        KI_THETA = 0
         '''
 
         ''' FISICO ATUAL
-        Kp_x = 25
-        Kd_x = 0
-        Ki_x = 15
-        N_x = 30
-        Kp_y = 25
-        Kd_y = 0
-        Ki_y = 15
-        N_y = 30
-        Kp_theta = 5
-        Kd_theta = 0
-        Ki_theta = 0
+        KP_X = 25
+        KD_X = 0
+        KI_X = 15
+        N_X = 30
+        KP_Y = 25
+        KD_Y = 0
+        KI_Y = 15
+        N_Y = 30
+        KP_THETA = 5
+        KD_THETA = 0
+        KI_THETA = 0
         '''
         
 
         ''' SIMULACAO 2
-        Kp_x = 13
-        Kd_x = 0
-        Ki_x = 50
-        N_x = 30
-        Kp_y = 15
-        Kd_y = 0
-        Ki_y = 50
-        N_y = 30
-        Kp_theta = 7
-        Kd_theta = 0
-        Ki_theta = 0
+        KP_X = 13
+        KD_X = 0
+        KI_X = 50
+        N_X = 30
+        KP_Y = 15
+        KD_Y = 0
+        KI_Y = 50
+        N_Y = 30
+        KP_THETA = 7
+        KD_THETA = 0
+        KI_THETA = 0
         '''
         
         
 
         # Controladores PID
-        self.control_PID_x = PID_discrete(Kp_x, Kd_x, Ki_x, saturation=2, N=N_x)
-        self.control_PID_y = PID_discrete(Kp_y, Kd_y, Ki_y, saturation=2, N=N_y)
-        #self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=5)
-        self.control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=5)
+        self.control_PID_x = PID_discrete(KP_X, KD_X, KI_X, saturation=2, N=N_X)
+        self.control_PID_y = PID_discrete(KP_Y, KD_Y, KI_Y, saturation=2, N=N_Y)
+        #self.control_PID_theta = PID(KP_THETA, KD_THETA, KI_THETA, saturation=5)
+        self.control_PID_theta = PID(KP_THETA, KD_THETA, KI_THETA, saturation=5)
 
         # Parâmetros construtivos do robo
         # Todos esses parâmetros do grSim estão em grSim/config/Parsian.ini

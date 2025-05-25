@@ -15,11 +15,13 @@ class KinematicBody:
         self.filter: KalmanFilter = KalmanFilter()
         self.unfiltered_coordinate_buffer = self._coordinates
 
+
     def set_coordinates(self, x, y, rotation=0):
         if self._is_filtered:
             self.filtered_coordinates(x, y, rotation)
         else:
             self.unfiltered_coordinates(x, y, rotation)
+
 
     def filtered_coordinates(self, x, y, rotation):
         self._coordinates.rotation = rotation
@@ -40,10 +42,12 @@ class KinematicBody:
             self._velocities.v_bottom_left,
         )
 
+
     def unfiltered_coordinates(self, x, y, rotation):
         self._coordinates.X = x
         self._coordinates.Y = y
         self._coordinates.rotation = rotation
+
 
     def set_velocities(
         self, linear, angular, v_top_right, v_top_left, v_bottom_right, v_bottom_left
@@ -55,11 +59,13 @@ class KinematicBody:
         self._velocities.v_bottom_right = v_bottom_right
         self._velocities.v_bottom_left = v_bottom_left
 
+
     def get_coordinates(self):
         """Returns coordinates"""
         return SpatialCoordinates(
             self._coordinates.X, self._coordinates.Y, self._coordinates.rotation
         )
+
 
     def get_velocities(self):
         """Returns velocities"""
@@ -72,12 +78,14 @@ class KinematicBody:
             self._velocities.v_bottom_left,
         )
 
+
     def calculate_distance(self, body):
         """calculates the distance between self and another kinematic body"""
         return sqrt(
             (self.get_coordinates().X - body.get_coordinates().X) ** 2
             + (self.get_coordinates().Y - body.get_coordinates().Y) ** 2
         )
+
 
     def show_info(self):
         """Input: None

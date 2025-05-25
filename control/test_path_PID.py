@@ -18,24 +18,24 @@ robot0 = Robot(robot_id=0, actuator=actuator)
 
 
 # Controlador para a posição x
-Kp_x = 1 / 100
-Kd_x = -0.0631 / 100
-Ki_x = 0
-control_PID_x = PID(Kp_x, Kd_x, Ki_x, saturation=2)
+KP_X = 1 / 100
+KD_X = -0.0631 / 100
+KI_X = 0
+control_PID_x = PID(KP_X, KD_X, KI_X, saturation=2)
 
 
 # Controlador para a posição y
-Kp_y = 1 / 100
-Kd_y = -0.0169 / 100
-Ki_y = 0
-control_PID_y = PID(Kp_y, Kd_y, Ki_y, saturation=2)
+KP_Y = 1 / 100
+KD_Y = -0.0169 / 100
+KI_Y = 0
+control_PID_y = PID(KP_Y, KD_Y, KI_Y, saturation=2)
 
 
 # Controlador para a rotação theta
-Kp_theta = 0.6
-Kd_theta = 0
-Ki_theta = 0
-control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=1)
+KP_THETA = 0.6
+KD_THETA = 0
+KI_THETA = 0
+control_PID_theta = PID(KP_THETA, KD_THETA, KI_THETA, saturation=1)
 
 
 # Alvos para cada eixo coordenado

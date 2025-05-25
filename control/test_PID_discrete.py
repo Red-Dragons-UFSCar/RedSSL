@@ -18,25 +18,25 @@ robot0 = Robot(robot_id=0, actuator=actuator)
 
 
 # Controlador para a posição x
-Kp_x = 6.551
-Kd_x = 1.004 
-Ki_x = 0
-N_x = 1/0.01898
-control_PID_x = PID_discrete(Kp_x, Kd_x, Ki_x, saturation=2, N=N_x)
+KP_X = 6.551
+KD_X = 1.004 
+KI_X = 0
+N_X = 1/0.01898
+control_PID_x = PID_discrete(KP_X, KD_X, KI_X, saturation=2, N=N_X)
 
 # Controlador para a posição y 
-Kp_y = 4.857
-Kd_y = 1.077 
-Ki_y = 0
-N_y = 1/0.01805
-control_PID_y = PID_discrete(Kp_y, Kd_y, Ki_y, saturation=2, N=N_y)
+KP_Y = 4.857
+KD_Y = 1.077 
+KI_Y = 0
+N_Y = 1/0.01805
+control_PID_y = PID_discrete(KP_Y, KD_Y, KI_Y, saturation=2, N=N_Y)
 
 
 # Controlador para a rotação theta
-Kp_theta = 1.5
-Kd_theta = 0
-Ki_theta = 0
-control_PID_theta = PID(Kp_theta, Kd_theta, Ki_theta, saturation=1)
+KP_THETA = 1.5
+KD_THETA = 0
+KI_THETA = 0
+control_PID_theta = PID(KP_THETA, KD_THETA, KI_THETA, saturation=1)
 
 # Alvos para cada eixo coordenado
 x_target = [100, 100, 600, 600]
