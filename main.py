@@ -22,7 +22,7 @@ import socket
 CONTROL_FPS = 60  # FPS original para o controle de posição
 CAM_FPS = 7 * CONTROL_FPS  # FPS para processar os dados da visão
 
-REFEREE_ON = True  # Habilita a comunicação com o Referee
+REFEREE_ON = False  # Habilita a comunicação com o Referee
 
 
 class RepeatTimer(threading.Timer):
@@ -268,43 +268,43 @@ class RobotController:
                     "x": self.robot0.get_coordinates().X,
                     "y": self.robot0.get_coordinates().Y,
                     "theta": self.robot0.get_coordinates().rotation,
-                    "wheels": {"FR": self.robot0.get_velocities().v_top_right, "FL": self.robot0.get_velocities().v_top_left,
-                               "BR": self.robot0.get_velocities().v_bottom_right, "BL": self.robot0.get_velocities().v_bottom_left}
+                    "wheels": {"FR": self.robot0.v_top_right, "FL": self.robot0.v_top_left,
+                               "BR": self.robot0.v_bottom_right, "BL": self.robot0.v_bottom_left}
                 },
                 "robot1": {
                     "x": self.robot1.get_coordinates().X,
                     "y": self.robot1.get_coordinates().Y,
                     "theta": self.robot1.get_coordinates().rotation,
-                    "wheels": {"FR": self.robot1.get_velocities().v_top_right, "FL": self.robot1.get_velocities().v_top_left,
-                               "BR": self.robot1.get_velocities().v_bottom_right, "BL": self.robot1.get_velocities().v_bottom_left}
+                    "wheels": {"FR": self.robot1.v_top_right, "FL": self.robot1.v_top_left,
+                               "BR": self.robot1.v_bottom_right, "BL": self.robot1.v_bottom_left}
                 },
                 "robot2": {
                     "x": self.robot2.get_coordinates().X,
                     "y": self.robot2.get_coordinates().Y,
                     "theta": self.robot2.get_coordinates().rotation,
-                    "wheels": {"FR": self.robot2.get_velocities().v_top_right, "FL": self.robot2.get_velocities().v_top_left,
-                               "BR": self.robot2.get_velocities().v_bottom_right, "BL": self.robot2.get_velocities().v_bottom_left}
+                    "wheels": {"FR": self.robot2.v_top_right, "FL": self.robot2.v_top_left,
+                               "BR": self.robot2.v_bottom_right, "BL": self.robot2.v_bottom_left}
                 },
                 "enemy_robot0": {
                     "x": self.enemy_robot0.get_coordinates().X,
                     "y": self.enemy_robot0.get_coordinates().Y,
                     "theta": self.enemy_robot0.get_coordinates().rotation,
-                    "wheels": {"FR": self.enemy_robot0.get_velocities().v_top_right, "FL": self.enemy_robot0.get_velocities().v_top_left,
-                               "BR": self.enemy_robot0.get_velocities().v_bottom_right, "BL": self.enemy_robot0.get_velocities().v_bottom_left}
+                    "wheels": {"FR": self.enemy_robot0.v_top_right, "FL": self.enemy_robot0.v_top_left,
+                               "BR": self.enemy_robot0.v_bottom_right, "BL": self.enemy_robot0.v_bottom_left}
                 },
                 "enemy_robot1": {
                     "x": self.enemy_robot1.get_coordinates().X,
                     "y": self.enemy_robot1.get_coordinates().Y,
                     "theta": self.enemy_robot1.get_coordinates().rotation,
-                    "wheels": {"FR": self.enemy_robot1.get_velocities().v_top_right, "FL": self.enemy_robot1.get_velocities().v_top_left,
-                               "BR": self.enemy_robot1.get_velocities().v_bottom_right, "BL": self.enemy_robot1.get_velocities().v_bottom_left}
+                    "wheels": {"FR": self.enemy_robot1.v_top_right, "FL": self.enemy_robot1.v_top_left,
+                               "BR": self.enemy_robot1.v_bottom_right, "BL": self.enemy_robot1.v_bottom_left}
                 },
                 "enemy_robot2": {
                     "x": self.enemy_robot2.get_coordinates().X,
                     "y": self.enemy_robot2.get_coordinates().Y,
                     "theta": self.enemy_robot2.get_coordinates().rotation,
-                    "wheels": {"FR": self.enemy_robot2.get_velocities().v_top_right, "FL": self.enemy_robot2.get_velocities().v_top_left,
-                               "BR": self.enemy_robot2.get_velocities().v_bottom_right, "BL": self.enemy_robot2.get_velocities().v_bottom_left}
+                    "wheels": {"FR": self.enemy_robot2.v_top_right, "FL": self.enemy_robot2.v_top_left,
+                               "BR": self.enemy_robot2.v_bottom_right, "BL": self.enemy_robot2.v_bottom_left}
                 },
                 "ball": {
                     "x": self.field.ball.get_coordinates().X,
@@ -315,7 +315,7 @@ class RobotController:
             msg = json.dumps(data).encode("utf-8")
             client_socket.sendto(msg, ('127.0.0.1', 12000))
         except:
-            print('erro')
+            print('Erro ao enviar dados para interface')
 
     def control_loop(self):
         while True:
