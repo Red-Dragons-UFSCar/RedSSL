@@ -7,7 +7,8 @@ import json
 # Importações de classes e módulos específicos do PyQt5 para construir a interface gráfica
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QLabel, QCheckBox, QGroupBox,
-    QHBoxLayout, QVBoxLayout, QGridLayout, QFrame, QButtonGroup, QSplitter
+    QHBoxLayout, QVBoxLayout, QGridLayout, QFrame, QButtonGroup, QSplitter,
+    QPushButton # QPushButton ADICIONADO AQUI
 )
 from PyQt5.QtGui import (
     QPixmap, QPainter, QPen, QBrush, QColor, QFont, QPalette, QPolygonF, QFontMetrics # QFontMetrics ADICIONADO AQUI
@@ -294,12 +295,28 @@ class SoccerFieldWidget(QWidget): # Define uma classe personalizada que herda de
 class MainWindow(QMainWindow): # Define a classe da janela principal, herda de QMainWindow
     SIDEBAR_FIXED_WIDTH = 300 # Largura fixa para as barras laterais em pixels
     LOGO_HEIGHT = 100         # Altura desejada para a logo em pixels
+    BASE_TEAM_LABEL_FONT_SIZE = 14 # Base font size for TeamTitleLabel from QSS
 
     def __init__(self): # Construtor da janela principal
         super().__init__() # Chama o construtor da classe pai
         self.setWindowTitle("Red Eye - Interface SSL-EL") # Define o título da janela
+        
+        # Initial font setup (will be used as base)
+        initial_font = QFont("Segoe UI", 9)
+        self.setFont(initial_font) 
+        QApplication.instance().setFont(initial_font) # Set application-wide default font
+
         self.setMinimumSize(1024, 768) # Define o tamanho mínimo da janela
-        self.setFont(QFont("Segoe UI", 9)) # Define uma fonte padrão para a janela
+
+        # Scaling attributes
+        self.current_font_scale = 1.0
+        self.base_font_size = initial_font.pointSize()
+        if self.base_font_size <= 0: # Fallback if pointSize is not reliable
+            self.base_font_size = 9
+        self.base_sidebar_width = self.SIDEBAR_FIXED_WIDTH
+        self.base_logo_height = self.LOGO_HEIGHT
+        self.base_team_label_font_size = self.BASE_TEAM_LABEL_FONT_SIZE
+
 
         # Define a folha de estilos (QSS) para customizar a aparência da interface
         self.setStyleSheet("""
@@ -326,6 +343,25 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
             QSplitter::handle:hover { background-color: #D32F2F; } /* Manipulador ao passar o mouse */
             QGroupBox QGridLayout QLabel { border: 1px solid #5A2A2A; border-radius: 3px; padding: 4px; background-color: #501010; } /* Labels dentro de tabelas (GridLayout em QGroupBox) */
             QGroupBox QGridLayout QLabel[isHeader="true"] { font-weight: bold; color: #FFCDD2; background-color: #6A0000; } /* Labels de cabeçalho em tabelas */
+        
+            QPushButton#ZoomButton {
+                background-color: #D32F2F; /* Red background */
+                color: white; /* White text */
+                border: 1px solid #8B0000; /* Darker red border */
+                border-radius: 15px; /* Circular */
+                font-weight: bold;
+                min-width: 30px; /* Ensure circle shape */
+                max-width: 30px;
+                min-height: 30px;
+                max-height: 30px;
+                padding: 0px; /* Adjust padding if text is off-center */
+            }
+            QPushButton#ZoomButton:hover {
+                background-color: #E57373; /* Lighter red on hover */
+            }
+            QPushButton#ZoomButton:pressed {
+                background-color: #B71C1C; /* Even darker red when pressed */
+            }
         """)
 
         # --- Configuração do Layout Principal ---
@@ -335,43 +371,141 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
 
         # Configura as barras laterais e o campo de futebol
         self.setupLeftSidebar()
-        self.setupRightSidebar() # Chamado após setupLeftSidebar para usar self.left_layout.spacing()
+        # self.setupRightSidebar() # Chamado após setupLeftSidebar para usar self.left_layout.spacing() # REMOVED
         self.soccer_field_widget = SoccerFieldWidget() # Cria a instância do widget do campo
 
         # Cria o QSplitter para dividir a janela em seções redimensionáveis
-        splitter = QSplitter(Qt.Horizontal) # Splitter horizontal
-        splitter.addWidget(self.left_sidebar_widget) # Adiciona a barra esquerda ao splitter
-        splitter.addWidget(self.soccer_field_widget) # Adiciona o campo ao centro do splitter
-        splitter.addWidget(self.right_sidebar_widget) # Adiciona a barra direita ao splitter
+        self.splitter = QSplitter(Qt.Horizontal) # Splitter horizontal - Made instance variable
+        self.splitter.addWidget(self.left_sidebar_widget) # Adiciona a barra esquerda ao splitter
+        self.splitter.addWidget(self.soccer_field_widget) # Adiciona o campo ao centro do splitter
+        # splitter.addWidget(self.right_sidebar_widget) # Adiciona a barra direita ao splitter # REMOVED
 
         # Define como as seções do splitter se comportam ao redimensionar
-        splitter.setStretchFactor(0, 0) # Barra esquerda não expande
-        splitter.setStretchFactor(1, 1) # Campo central expande para preencher o espaço
-        splitter.setStretchFactor(2, 0) # Barra direita não expande
+        self.splitter.setStretchFactor(0, 0) # Barra esquerda não expande
+        self.splitter.setStretchFactor(1, 1) # Campo central expande para preencher o espaço
+        # splitter.setStretchFactor(2, 0) # Barra direita não expande # REMOVED
         
         # A linha splitter.setSizes é mantida conforme o código original fornecido pelo usuário.
         # Se o campo não aparecer, esta linha pode ser a causa e pode precisar ser comentada/removida.
-        splitter.setSizes([self.SIDEBAR_FIXED_WIDTH, self.width() - (2 * self.SIDEBAR_FIXED_WIDTH) - 20, self.SIDEBAR_FIXED_WIDTH])
+        # splitter.setSizes([self.SIDEBAR_FIXED_WIDTH, self.width() - (2 * self.SIDEBAR_FIXED_WIDTH) - 20, self.SIDEBAR_FIXED_WIDTH])
+        # Adjusted splitter.setSizes for two widgets
+        # Initial size setting will be handled by apply_scale
+        # self.splitter.setSizes([self.base_sidebar_width, self.width() - self.base_sidebar_width - 10])
 
-        main_layout.addWidget(splitter) # Adiciona o splitter ao layout principal
+
+        main_layout.addWidget(self.splitter) # Adiciona o splitter ao layout principal
         self.setCentralWidget(main_widget) # Define o widget principal da QMainWindow
+
+        # --- Connect Scaling Buttons ---
+        self.btn_increase_scale.clicked.connect(self.increase_scale)
+        self.btn_decrease_scale.clicked.connect(self.decrease_scale)
 
         # --- Conexões de Sinais e Slots ---
         self.cb_opponent.toggled.connect(self.update_left_panel_display)
         self.cb_red_dragons.toggled.connect(self.update_left_panel_display)
-        self.cb_elec.toggled.connect(self.update_right_panel_display)
-        self.cb_wheels.toggled.connect(self.update_right_panel_display)
+        # self.cb_elec.toggled.connect(self.update_left_panel_display) # REMOVED
+        # self.cb_wheels.toggled.connect(self.update_left_panel_display) # REMOVED
 
         # Atualiza a UI inicial
         self.update_left_panel_display()
-        self.update_right_panel_display()
+        # self.update_right_panel_display() # REMOVED
         
         # Comunicação com o código principal
         self.last_udp_message = None
         self.listener_thread = UDPListenerThread()      # Thread de comunicação
         self.listener_thread.message_received.connect(self.receive_message)
         self.listener_thread.start()
+
+        self.apply_scale() # Apply initial scale
         
+    def increase_scale(self):
+        self.current_font_scale += 0.1
+        if self.current_font_scale > 2.0: # Max scale limit
+            self.current_font_scale = 2.0
+        self.apply_scale()
+
+    def decrease_scale(self):
+        self.current_font_scale -= 0.1
+        if self.current_font_scale < 0.7: # Min scale limit (0.5 was too small for 9pt base)
+            self.current_font_scale = 0.7
+        self.apply_scale()
+
+    def apply_scale(self):
+        # Calculate new sizes
+        new_font_size = int(self.base_font_size * self.current_font_scale)
+        new_team_label_font_size = int(self.base_team_label_font_size * self.current_font_scale)
+        new_sidebar_width = int(self.base_sidebar_width * self.current_font_scale)
+        new_logo_height = int(self.base_logo_height * self.current_font_scale)
+
+        # Apply application and main window font
+        app_font = QFont("Segoe UI", new_font_size)
+        QApplication.setFont(app_font) # Use static method
+        self.setFont(app_font)
+
+        # Update team label font (overridden by QSS)
+        if hasattr(self, 'team_label'):
+            team_font = QFont("Segoe UI", new_team_label_font_size, QFont.Bold)
+            self.team_label.setFont(team_font)
+            # Adjust style for team_label if needed, e.g., padding, or ensure QSS uses em/rem if possible
+            self.team_label.setStyleSheet(f"""
+                font-size: {new_team_label_font_size}pt; 
+                font-weight: bold; 
+                color: #fd0000;
+                padding: 5px 0px; 
+            """)
+
+        # Update font for checkboxes
+        if hasattr(self, 'cb_opponent') and hasattr(self, 'cb_red_dragons'):
+            checkbox_font = QFont("Segoe UI", new_font_size)
+            self.cb_opponent.setFont(checkbox_font)
+            self.cb_red_dragons.setFont(checkbox_font)
+
+        # Update sidebar width
+        if hasattr(self, 'left_sidebar_widget'):
+            self.left_sidebar_widget.setFixedWidth(new_sidebar_width)
+
+        # Update logo height and pixmap
+        if hasattr(self, 'logo_display_widget'):
+            self.logo_display_widget.setFixedHeight(new_logo_height)
+            if hasattr(self, 'original_logo_pixmap') and self.logo_display_widget == self.logo_label:
+                scaled_pixmap = self.original_logo_pixmap.scaledToHeight(new_logo_height, Qt.SmoothTransformation)
+                self.logo_label.setPixmap(scaled_pixmap)
+        
+        # Update splitter sizes
+        if hasattr(self, 'splitter') and self.splitter is not None:
+             # Ensure width is positive, splitter might not be fully initialized on first call if width() is 0
+            current_main_width = self.width() if self.width() > 0 else 1024 # Use minimum if not yet shown
+            field_width = current_main_width - new_sidebar_width - 20 # Approx splitter handle + margins
+            if field_width < 100: field_width = 100 # Ensure field has some minimum width
+            self.splitter.setSizes([new_sidebar_width, field_width])
+
+
+        # Force update of layouts and widgets
+        if hasattr(self, 'left_sidebar_widget'):
+            self.left_sidebar_widget.updateGeometry()
+            # Update fonts of group boxes titles and their QLabel contents
+            group_box_title_font_size = int(new_font_size * 1.1)  # Slightly larger for titles
+            group_box_content_font_size = new_font_size           # Standard size for content
+
+            for gb in self.left_sidebar_widget.findChildren(QGroupBox):
+                # Set font for the GroupBox itself (primarily for its title via inheritance if QSS doesn't set font-size)
+                gb_title_font = QFont("Segoe UI", group_box_title_font_size, QFont.Bold)
+                gb.setFont(gb_title_font)
+
+                # Set font for all QLabels within this GroupBox's layout
+                # This includes headers (QSS handles bold) and data cells.
+                gb_content_font = QFont("Segoe UI", group_box_content_font_size)
+                for label in gb.findChildren(QLabel):
+                    label.setFont(gb_content_font)
+
+
+        if hasattr(self, 'soccer_field_widget'):
+            self.soccer_field_widget.update()
+        
+        self.updateGeometry()
+        self.update()
+
+
     def receive_message(self, msg):
         try:
             data = json.loads(msg)
@@ -392,35 +526,42 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
             key = f"{team}{i}"
             if key in data:
                 rob = data[key]
-                self.pos_labels[i][0].setText(f"{(rob['x']/100):.2f}")
-                self.pos_labels[i][1].setText(f"{(rob['y']/100):.2f}")
-                self.pos_labels[i][2].setText(f"{rob['theta']:.2f}")
+                # Check if pos_labels[i] exists and has enough elements
+                if i < len(self.pos_labels) and len(self.pos_labels[i]) == 3:
+                    self.pos_labels[i][0].setText(f"{(rob['x']/100):.2f}")
+                    self.pos_labels[i][1].setText(f"{(rob['y']/100):.2f}")
+                    self.pos_labels[i][2].setText(f"{rob['theta']:.2f}")
             else:
-                self.pos_labels[i][0].setText("?")
-                self.pos_labels[i][1].setText("?")
-                self.pos_labels[i][2].setText("?")
+                if i < len(self.pos_labels) and len(self.pos_labels[i]) == 3:
+                    self.pos_labels[i][0].setText("?")
+                    self.pos_labels[i][1].setText("?")
+                    self.pos_labels[i][2].setText("?")
 
         if "ball" in data:
             self.ball_pos_x_label_value.setText(f"{(data['ball']['x']/100):.2f}")
             self.ball_pos_y_label_value.setText(f"{(data['ball']['y']/100):.2f}")
 
     # Função que atuzaliza a right sidebar (por enquanto não recebemos nada da eletrônica)
+    # This function now updates labels that are part of the left sidebar
     def update_wheel_speeds(self, data):
         wheel_keys = ["FR", "FL", "BR", "BL"]
 
         for i in range(3):
-            robot_key = f"robot{i}"
+            robot_key = f"robot{i}" # Assumes wheel speeds are always for "robot" (Red Dragons)
             if robot_key in data and "wheels" in data[robot_key]:
                 wheels = data[robot_key]["wheels"]
-                for j, wheel in enumerate(wheel_keys):
-                    value = wheels.get(wheel, None)
-                    if value is not None:
-                        self.wheels_labels[i][j].setText(f"{value:.2f}")
-                    else:
-                        self.wheels_labels[i][j].setText("?")
+                # Check if wheels_labels[i] exists and has enough elements
+                if i < len(self.wheels_labels) and len(self.wheels_labels[i]) == len(wheel_keys):
+                    for j, wheel in enumerate(wheel_keys):
+                        value = wheels.get(wheel, None)
+                        if value is not None:
+                            self.wheels_labels[i][j].setText(f"{value:.2f}")
+                        else:
+                            self.wheels_labels[i][j].setText("?")
             else:
-                for j in range(4):
-                    self.wheels_labels[i][j].setText("?")
+                if i < len(self.wheels_labels) and len(self.wheels_labels[i]) == len(wheel_keys):
+                    for j in range(len(wheel_keys)):
+                        self.wheels_labels[i][j].setText("?")
 
     def create_styled_label(self, text, is_header=False): 
         label = QLabel(text)
@@ -430,10 +571,33 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
 
     def setupLeftSidebar(self): 
         self.left_sidebar_widget = QWidget()
-        self.left_sidebar_widget.setFixedWidth(self.SIDEBAR_FIXED_WIDTH) 
+        # self.left_sidebar_widget.setFixedWidth(self.SIDEBAR_FIXED_WIDTH) # Width set by apply_scale
         self.left_layout = QVBoxLayout(self.left_sidebar_widget) 
         self.left_layout.setAlignment(Qt.AlignTop) 
         self.left_layout.setSpacing(10) 
+
+        # --- Scaling Buttons ---
+        self.scale_buttons_layout = QHBoxLayout()
+        self.btn_decrease_scale = QPushButton("-")
+        self.btn_increase_scale = QPushButton("+")
+        self.btn_decrease_scale.setObjectName("ZoomButton") # For QSS styling
+        self.btn_increase_scale.setObjectName("ZoomButton") # For QSS styling
+        self.btn_decrease_scale.setToolTip("Diminuir tamanho da interface")
+        self.btn_increase_scale.setToolTip("Aumentar tamanho da interface")
+        
+        # Styling and size are now primarily handled by QSS
+        # font_button_size = max(8, int(self.base_font_size * 0.9)) # Keep for potential dynamic font adjustments if QSS pt size is not enough
+        # button_font = QFont("Segoe UI", font_button_size, QFont.Bold) # QFont.Bold added
+        # self.btn_decrease_scale.setFont(button_font)
+        # self.btn_increase_scale.setFont(button_font)
+        # self.btn_decrease_scale.setFixedSize(QSize(30,30)) # Size now controlled by QSS min/max width/height
+        # self.btn_increase_scale.setFixedSize(QSize(30,30))
+
+        self.scale_buttons_layout.addWidget(self.btn_decrease_scale)
+        self.scale_buttons_layout.addWidget(self.btn_increase_scale)
+        self.scale_buttons_layout.addStretch() # Keep buttons to the left
+        self.left_layout.addLayout(self.scale_buttons_layout) # Add to the top
+        # --- End Scaling Buttons ---
 
         self.logo_label = QLabel() 
         self.logo_label.setObjectName("LogoLabel") 
@@ -441,17 +605,44 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
         logo_path = os.path.join(script_dir, "assets", "logoRedEye.png") 
 
         if os.path.exists(logo_path): 
-            pixmap = QPixmap(logo_path) 
-            scaled_pixmap = pixmap.scaledToHeight(self.LOGO_HEIGHT, Qt.SmoothTransformation)
-            self.logo_label.setPixmap(scaled_pixmap) 
+            self.original_logo_pixmap = QPixmap(logo_path) # Store original
+            # Initial scaling will be done by apply_scale
+            # scaled_pixmap = self.original_logo_pixmap.scaledToHeight(self.base_logo_height, Qt.SmoothTransformation)
+            # self.logo_label.setPixmap(scaled_pixmap) 
             self.logo_label.setAlignment(Qt.AlignCenter) 
+            self.logo_display_widget = self.logo_label
             self.left_layout.addWidget(self.logo_label) 
         else:
             print(f"AVISO: Logo não encontrada em {logo_path}") 
             error_logo_spacer = QWidget()
-            error_logo_spacer.setFixedHeight(self.LOGO_HEIGHT)
+            # error_logo_spacer.setFixedHeight(self.base_logo_height) # Height set by apply_scale
+            self.logo_display_widget = error_logo_spacer
             self.left_layout.addWidget(error_logo_spacer)
         
+        # Set initial height for logo_display_widget (will be adjusted by apply_scale)
+        self.logo_display_widget.setFixedHeight(self.base_logo_height)
+
+        # --- Scaling Buttons --- MOVED TO THE TOP ---
+        # self.scale_buttons_layout = QHBoxLayout()
+        # self.btn_decrease_scale = QPushButton("-")
+        # self.btn_increase_scale = QPushButton("+")
+        # self.btn_decrease_scale.setToolTip("Diminuir tamanho da interface")
+        # self.btn_increase_scale.setToolTip("Aumentar tamanho da interface")
+        
+        # # Make buttons smaller/less intrusive
+        # font_button_size = max(8, int(self.base_font_size * 0.9))
+        # button_font = QFont("Segoe UI", font_button_size)
+        # self.btn_decrease_scale.setFont(button_font)
+        # self.btn_increase_scale.setFont(button_font)
+        # self.btn_decrease_scale.setFixedSize(QSize(30,30))
+        # self.btn_increase_scale.setFixedSize(QSize(30,30))
+
+        # self.scale_buttons_layout.addStretch() 
+        # self.scale_buttons_layout.addWidget(self.btn_decrease_scale)
+        # self.scale_buttons_layout.addWidget(self.btn_increase_scale)
+        # self.left_layout.addLayout(self.scale_buttons_layout)
+        # --- End Scaling Buttons ---
+
         self.team_label = QLabel("Red Dragons") 
         self.team_label.setObjectName("TeamTitleLabel") 
         self.left_layout.addWidget(self.team_label)
@@ -510,42 +701,7 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
         
         self.left_layout.addWidget(self.ball_pos_group)
         
-        self.left_layout.addStretch(1) 
-
-    def setupRightSidebar(self): 
-        self.right_sidebar_widget = QWidget()
-        self.right_sidebar_widget.setFixedWidth(self.SIDEBAR_FIXED_WIDTH)
-        self.right_layout = QVBoxLayout(self.right_sidebar_widget) 
-        self.right_layout.setAlignment(Qt.AlignTop)
-        self.right_layout.setSpacing(10) 
-
-        # --- Espaçador para alinhar títulos ---
-        # Adiciona um espaçador no topo da barra direita com a altura da logo da barra esquerda.
-        # Como o espaçamento dos layouts é o mesmo (10px), isso deve alinhar os títulos.
-        logo_alignment_spacer = QWidget()
-        logo_alignment_spacer.setFixedHeight(self.LOGO_HEIGHT) # Usa a altura da logo
-        self.right_layout.addWidget(logo_alignment_spacer)
-        # --- Fim Espaçador ---
-
-        self.right_sidebar_title_label = QLabel("Informações Eletrônica")
-        self.right_sidebar_title_label.setObjectName("RightSidebarTitleLabel") 
-        self.right_layout.addWidget(self.right_sidebar_title_label)
-        
-        self.cb_elec = QCheckBox("Eletrônica")
-        self.cb_wheels = QCheckBox("Velo. Rodas")
-        self.cb_wheels.setChecked(True) 
-
-        self.right_display_group = QButtonGroup(self) 
-        self.right_display_group.setExclusive(True)
-        self.right_display_group.addButton(self.cb_elec)
-        self.right_display_group.addButton(self.cb_wheels)
-
-        checkbox_layout_right = QHBoxLayout() 
-        checkbox_layout_right.addWidget(self.cb_elec)
-        checkbox_layout_right.addWidget(self.cb_wheels)
-        checkbox_layout_right.addStretch()
-        self.right_layout.addLayout(checkbox_layout_right) 
-
+        # --- Elements moved from Right Sidebar ---
         self.elec_group = QGroupBox("Eletrônica")
         elec_layout = QGridLayout(self.elec_group)
         elec_layout.setSpacing(5)
@@ -565,7 +721,7 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
                 lbl = self.create_styled_label("?")
                 self.elec_labels[i].append(lbl)
                 elec_layout.addWidget(lbl, i + 1, j + 1)
-        self.right_layout.addWidget(self.elec_group)
+        self.left_layout.addWidget(self.elec_group)
 
         self.wheels_group = QGroupBox("Velocidades")
         wheels_layout = QGridLayout(self.wheels_group)
@@ -583,22 +739,99 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
                 lbl = self.create_styled_label("?")
                 self.wheels_labels[i].append(lbl)
                 wheels_layout.addWidget(lbl, i + 1, j + 1)
-        self.right_layout.addWidget(self.wheels_group)
-        
-        self.right_layout.addStretch(1) 
-        self.elec_group.hide() 
+        self.left_layout.addWidget(self.wheels_group)
+        # --- End of elements moved from Right Sidebar ---
+
+        self.left_layout.addStretch(1) 
+
+    # def setupRightSidebar(self): # REMOVED
+    #     self.right_sidebar_widget = QWidget()
+    #     self.right_sidebar_widget.setFixedWidth(self.SIDEBAR_FIXED_WIDTH)
+    #     self.right_layout = QVBoxLayout(self.right_sidebar_widget) 
+    #     self.right_layout.setAlignment(Qt.AlignTop)
+    #     self.right_layout.setSpacing(10) 
+    # 
+    #     # --- Espaçador para alinhar títulos ---
+    #     # Adiciona um espaçador no topo da barra direita com a altura da logo da barra esquerda.
+    #     # Como o espaçamento dos layouts é o mesmo (10px), isso deve alinhar os títulos.
+    #     logo_alignment_spacer = QWidget()
+    #     logo_alignment_spacer.setFixedHeight(self.LOGO_HEIGHT) # Usa a altura da logo
+    #     self.right_layout.addWidget(logo_alignment_spacer)
+    #     # --- Fim Espaçador ---
+    # 
+    #     self.right_sidebar_title_label = QLabel("Informações Eletrônica")
+    #     self.right_sidebar_title_label.setObjectName("RightSidebarTitleLabel") 
+    #     self.right_layout.addWidget(self.right_sidebar_title_label)
+    #     
+    #     self.cb_elec = QCheckBox("Eletrônica")
+    #     self.cb_wheels = QCheckBox("Velo. Rodas")
+    #     self.cb_wheels.setChecked(True) 
+    # 
+    #     self.right_display_group = QButtonGroup(self) 
+    #     self.right_display_group.setExclusive(True)
+    #     self.right_display_group.addButton(self.cb_elec)
+    #     self.right_display_group.addButton(self.cb_wheels)
+    # 
+    #     checkbox_layout_right = QHBoxLayout() 
+    #     checkbox_layout_right.addWidget(self.cb_elec)
+    #     checkbox_layout_right.addWidget(self.cb_wheels)
+    #     checkbox_layout_right.addStretch()
+    #     self.right_layout.addLayout(checkbox_layout_right) 
+    # 
+    #     self.elec_group = QGroupBox("Eletrônica")
+    #     elec_layout = QGridLayout(self.elec_group)
+    #     elec_layout.setSpacing(5)
+    #     elec_layout.setColumnStretch(0, 1); elec_layout.setColumnStretch(1, 2); elec_layout.setColumnStretch(2, 2); elec_layout.setColumnStretch(3, 1); elec_layout.setColumnStretch(4, 2)
+    # 
+    #     elec_layout.addWidget(self.create_styled_label("Robô", True), 0, 0)
+    #     elec_layout.addWidget(self.create_styled_label("Tensão (V)", True), 0, 1)
+    #     elec_layout.addWidget(self.create_styled_label("Corrente (A)", True), 0, 2)
+    #     elec_layout.addWidget(self.create_styled_label("Loss (%)", True), 0, 3)
+    #     elec_layout.addWidget(self.create_styled_label("Ping (ms)", True), 0, 4)
+    # 
+    #     self.elec_labels = [] 
+    #     for i in range(3):
+    #         self.elec_labels.append([])
+    #         elec_layout.addWidget(self.create_styled_label(f"Robô {i+1}"), i + 1, 0)
+    #         for j in range(4):
+    #             lbl = self.create_styled_label("?")
+    #             self.elec_labels[i].append(lbl)
+    #             elec_layout.addWidget(lbl, i + 1, j + 1)
+    #     self.right_layout.addWidget(self.elec_group)
+    # 
+    #     self.wheels_group = QGroupBox("Velocidades")
+    #     wheels_layout = QGridLayout(self.wheels_group)
+    #     wheels_layout.setSpacing(5)
+    #     wheels_layout.addWidget(self.create_styled_label("Robô", True), 0, 0)
+    #     wheel_names = ["FR", "FL", "BR", "BL"] 
+    #     for col_idx, name in enumerate(wheel_names):
+    #         wheels_layout.addWidget(self.create_styled_label(name, True), 0, col_idx + 1)
+    # 
+    #     self.wheels_labels = [] 
+    #     for i in range(3):
+    #         self.wheels_labels.append([])
+    #         wheels_layout.addWidget(self.create_styled_label(f"Robô {i+1}"), i + 1, 0)
+    #         for j in range(len(wheel_names)):
+    #             lbl = self.create_styled_label("?")
+    #             self.wheels_labels[i].append(lbl)
+    #             wheels_layout.addWidget(lbl, i + 1, j + 1)
+    #     self.right_layout.addWidget(self.wheels_group)
+    #     
+    #     self.right_layout.addStretch(1) 
+    #     self.elec_group.hide() 
         
     def update_left_panel_display(self): 
         is_opponent = self.cb_opponent.isChecked()
         team_name = "Adversários" if is_opponent else "Red Dragons"
         data_prefix = "Op" if is_opponent else "RD"
         
-        self.team_label.setText(team_name) 
+        if hasattr(self, 'team_label'): # Check if team_label exists
+            self.team_label.setText(team_name) 
         self.pos_group.setTitle(f"Posição e Rotação ({data_prefix})")
         
         num_robots_to_display = 3 
         for i in range(num_robots_to_display):
-            if i < len(self.pos_labels): 
+            if i < len(self.pos_labels) and len(self.pos_labels[i]) == 3: # Ensure list and sublist exist
                  self.pos_labels[i][0].setText("---") 
                  self.pos_labels[i][1].setText("---") 
                  self.pos_labels[i][2].setText("---") 
@@ -606,26 +839,46 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
         self.ball_pos_x_label_value.setText("?.??") 
         self.ball_pos_y_label_value.setText("?.??") 
 
-    def update_right_panel_display(self): 
-        self.elec_group.setVisible(self.cb_elec.isChecked()) 
-        self.wheels_group.setVisible(self.cb_wheels.isChecked()) 
+        # Logic from old update_right_panel_display merged here
+        # self.elec_group.setVisible(self.cb_elec.isChecked()) # REMOVED - always visible
+        # self.wheels_group.setVisible(self.cb_wheels.isChecked()) # REMOVED - always visible
         
-        if self.cb_elec.isChecked(): self.right_sidebar_title_label.setText("Info Eletrônica")
-        elif self.cb_wheels.isChecked(): self.right_sidebar_title_label.setText("Info Velocidades")
-        else: self.right_sidebar_title_label.setText("Informações")
+        # Update titles for QGroupBoxes directly if needed, or rely on their static titles.
+        # The self.right_sidebar_title_label is removed.
 
-        num_robots_to_display = 3
-        if self.cb_elec.isChecked():
-            for i in range(num_robots_to_display):
-                 if i < len(self.elec_labels):
-                    for j in range(4): self.elec_labels[i][j].setText("-/-")
-        elif self.cb_wheels.isChecked():
-            for i in range(num_robots_to_display):
-                if i < len(self.wheels_labels):
-                    for j in range(4): self.wheels_labels[i][j].setText("0.0")
+        # Update placeholders for elec_labels (elec_group is always visible)
+        for i in range(num_robots_to_display):
+             if i < len(self.elec_labels) and len(self.elec_labels[i]) == 4: # Ensure list and sublist exist
+                for j in range(4): self.elec_labels[i][j].setText("-/-")
+        
+        # Update placeholders for wheels_labels (wheels_group is always visible)
+        for i in range(num_robots_to_display):
+            if i < len(self.wheels_labels) and len(self.wheels_labels[i]) == 4: # Ensure list and sublist exist
+                for j in range(4): self.wheels_labels[i][j].setText("0.0")
+
+
+    # def update_right_panel_display(self): # REMOVED
+    #     self.elec_group.setVisible(self.cb_elec.isChecked()) 
+    #     self.wheels_group.setVisible(self.cb_wheels.isChecked()) 
+    #     
+    #     if self.cb_elec.isChecked(): self.right_sidebar_title_label.setText("Info Eletrônica")
+    #     elif self.cb_wheels.isChecked(): self.right_sidebar_title_label.setText("Info Velocidades")
+    #     else: self.right_sidebar_title_label.setText("Informações")
+    # 
+    #     num_robots_to_display = 3
+    #     if self.cb_elec.isChecked():
+    #         for i in range(num_robots_to_display):
+    #              if i < len(self.elec_labels):
+    #                 for j in range(4): self.elec_labels[i][j].setText("-/-")
+    #     elif self.cb_wheels.isChecked():
+    #         for i in range(num_robots_to_display):
+    #             if i < len(self.wheels_labels):
+    #                 for j in range(4): self.wheels_labels[i][j].setText("0.0")
 
 def main(): 
+    # Ensure QApplication instance exists before setting global font
     app = QApplication(sys.argv) 
+    # QApplication.setFont(QFont("Segoe UI", 9)) # Moved to MainWindow.__init__ for base size logic
     window = MainWindow() 
     window.show() 
     sys.exit(app.exec_()) 
