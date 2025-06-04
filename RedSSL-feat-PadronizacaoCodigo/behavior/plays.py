@@ -38,10 +38,9 @@ def estrategia_block_ball_real(
     fixed_point = 80  # Ponto X fixo para o zagueiro bloquear
     tactics.goleiro_real_2(robot_goalie, field, fixed=10)
     skills.block_ball_y(robot_zagueiro, field, fixed_x=fixed_point)
-    tactics.atacante_campo_todo_real(robot_atacante, field)
+    tactics.atacante_campo_todo_real(robot_atacante, field) # atacamte
 
-    # A linha abaixo atribui a posição da bola, mas a variável não é usada posteriormente na função.
-    # Considere remover se não for necessária para depuração ou lógica futura.
+# Bola posição
     ball_position = field.ball.get_coordinates()
 
 
