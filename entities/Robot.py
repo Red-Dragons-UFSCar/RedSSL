@@ -3,7 +3,7 @@ from communication.actuator import Actuator
 from entities.Obstacle import ObstacleMap
 from entities.Target import Target
 from control.PID import PID
-from control.PID_discrete_2 import PID_discrete
+from control.PID_discrete import PID_discrete
 import numpy as np
 
 
@@ -30,6 +30,7 @@ class Robot(KinematicBody):
         self.v_max = 1.0  # Velocidade linear máxima em módulo
 
         '''
+        '''
         # Parâmetros PID
         Kp_x = 6.551
         Kd_x = 0.1
@@ -39,10 +40,10 @@ class Robot(KinematicBody):
         Kd_y = 0.1
         Ki_y = 0
         N_y = 1 / 0.01805
-        Kp_theta = 5
+        Kp_theta = 3
         Kd_theta = 0
         Ki_theta = 0
-        '''
+        
         
 
         ''' Controlador PID original fisico
@@ -61,13 +62,14 @@ class Robot(KinematicBody):
 
         ''' FISICO ATUAL'''
          
+
         Kp_x = 25
         Kd_x = 0
-        Ki_x = 30
+        Ki_x = 15
         N_x = 30
         Kp_y = 25
         Kd_y = 0
-        Ki_y = 30
+        Ki_y = 15
         N_y = 30
         Kp_theta = 5
         Kd_theta = 0

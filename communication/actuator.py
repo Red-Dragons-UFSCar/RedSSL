@@ -205,6 +205,12 @@ class Actuator():
         dw2 =  (1.0 / robot.wheel_radius) * (( (robot.robot_radius * angular) - (vx_local * np.sin(robot.phi2)) + (vy_local * np.cos(robot.phi2))) )
         dw3 =  (1.0 / robot.wheel_radius) * (( (robot.robot_radius * angular) - (vx_local * np.sin(robot.phi3)) + (vy_local * np.cos(robot.phi3))) )
         dw4 =  (1.0 / robot.wheel_radius) * (( (robot.robot_radius * angular) - (vx_local * np.sin(robot.phi4)) + (vy_local * np.cos(robot.phi4))) )
+        
+        # Atualiza os atributos do robô
+        robot.v_bottom_left = dw1
+        robot.v_bottom_right = dw2
+        robot.v_top_left = dw3
+        robot.v_top_right = dw4
 
         # Por algum motivo os motores precisam ir de 4 até 1... 
         # O simulador inverteu os motores
@@ -222,7 +228,7 @@ class Actuator():
         '''
         vx_local = velocity_x
         vy_local = velocity_y
-        angular = 0
+        #angular = 0
 
         #vx_local = -1
         #vy_local = 0
@@ -233,6 +239,12 @@ class Actuator():
         dw2 =  (1.0 / robot.wheel_radius) * (( (robot.robot_radius * angular) - (vx_local * np.sin(robot.phi2)) + (vy_local * np.cos(robot.phi2))) )
         dw3 =  (1.0 / robot.wheel_radius) * (( (robot.robot_radius * angular) - (vx_local * np.sin(robot.phi3)) + (vy_local * np.cos(robot.phi3))) )
         dw4 =  (1.0 / robot.wheel_radius) * (( (robot.robot_radius * angular) - (vx_local * np.sin(robot.phi4)) + (vy_local * np.cos(robot.phi4))) )
+        
+        # Atualiza os atributos do robô
+        robot.v_bottom_left = dw1
+        robot.v_bottom_right = dw2
+        robot.v_top_left = dw3
+        robot.v_top_right = dw4
 
         # Por algum motivo os motores precisam ir de 4 até 1... 
         # O simulador inverteu os motores

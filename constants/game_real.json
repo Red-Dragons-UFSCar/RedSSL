@@ -1,9 +1,9 @@
 {
     "team":{
         "color": "yellow",
-        "right_side": false,
+        "right_side": true,
         "id_goalkeeper": 3,
-        "id_defender": 5,
+        "id_defender": 9,
         "id_attacker": 2
     },
     "game":{

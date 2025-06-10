@@ -5,7 +5,7 @@
     },
     "command": {
         "ip": "localhost",
-        "port": 10301
+        "port": 10302
     },
     "referee": {
         "ip": "224.5.23.1",
