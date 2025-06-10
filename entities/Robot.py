@@ -60,7 +60,9 @@ class Robot(KinematicBody):
         Ki_theta = 0
         '''
 
-        ''' FISICO ATUAL
+        ''' FISICO ATUAL'''
+         
+
         Kp_x = 25
         Kd_x = 0
         Ki_x = 15
@@ -72,8 +74,7 @@ class Robot(KinematicBody):
         Kp_theta = 5
         Kd_theta = 0
         Ki_theta = 0
-        '''
-        
+       
 
         ''' SIMULACAO 2
         Kp_x = 13
@@ -162,6 +163,18 @@ class Robot(KinematicBody):
         )
         distance_to_target = np.linalg.norm(current_position - target_position)
         return distance_to_target < treshold
+    
+    def xtarget_reached(self, xTreshold=10):
+        if self.target is None:
+            return False
+        xDistance_to_target = abs(self.get_coordinates().X - self.target.get_coordinates().X)
+        return xDistance_to_target < xTreshold
+    
+    def ytarget_reached(self, yTreshold=10):
+        if self.target is None:
+            return False
+        yDistance_to_target = abs(self.get_coordinates().Y - self.target.get_coordinates().Y)
+        return yDistance_to_target < yTreshold
 
     def set_robot_velocity(self, target_velocity_x, target_velocity_y, target_angular):
         # Define as velocidades alvo nos controladores PID
@@ -181,15 +194,3 @@ class Robot(KinematicBody):
 
         # Retorna as velocidades calculadas
         return self.vx, self.vy, self.w
-
-    def xtarget_reached(self, xTreshold=10):
-         if self.target is None:
-             return False
-         xDistance_to_target = abs(self.get_coordinates().X - self.target.get_coordinates().X)
-         return xDistance_to_target < xTreshold
-     
-    def ytarget_reached(self, yTreshold=10):
-        if self.target is None:
-            return False
-        yDistance_to_target = abs(self.get_coordinates().Y - self.target.get_coordinates().Y)
-        return yDistance_to_target < yTreshold

@@ -75,7 +75,7 @@ class RobotController:
         # Cria e adiciona robôs ao campo com base na cor escolhida
         if self.team_color == "blue":
             self.robot0 = Robot(robot_id=0, actuator=self.actuator, vision_id=self.game['team']['id_goalkeeper'])
-            self.robot1 = Robot(robot_id=1, actuator=self.actuator, vision_id=self.game['team']['id_defender'])
+            1 = Robot(robot_id=1, actuator=self.actuator, vision_id=self.game['team']['id_defender'])
             self.robot2 = Robot(robot_id=2, actuator=self.actuator, vision_id=self.game['team']['id_attacker'])
             self.field.add_blue_robot(self.robot0)
             self.field.add_blue_robot(self.robot1)
@@ -195,6 +195,7 @@ class RobotController:
                 self.field.game_on = True
                 self.field.game_stopped = False
 
+                                                        
             #Coach.escolher_estrategia(self.coach, self.robot0, self.robot1, self.robot2)
             #skills.go_to_point(self.robot0, self.field.ball.get_coordinates().X, self.field.ball.get_coordinates().Y, self.field, 0, threshold=15)
             #estrategia_basica_real(self.robot2,self.robot0,self.robot1,self.field)

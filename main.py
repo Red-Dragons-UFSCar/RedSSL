@@ -180,6 +180,7 @@ class RobotController:
             ball_detection = frame["ball"]
             self.field.update_ball_position(ball_detection["x"], ball_detection["y"])
 
+
     def send_velocities(self):
         # Envio de velocidades no sistema global
         """
@@ -242,6 +243,15 @@ class RobotController:
               self.robot2.w,
               self.mode_playing["simulated_mode"],
             )
+            
+    def chute(self, robot, forca):
+
+        vx_ant, vy_ant, w_ant = robot.vx, robot.vy, robot.w
+
+        self.actuator.send_globalVelocity_message(robot, 0, 0, 0, kick_speed=forca)
+
+        robot.vx, robot.vy, robot.w = vx_ant, vy_ant, w_ant
+
 
     def get_vision_frame(self):
         """
@@ -334,7 +344,7 @@ class RobotController:
             Coach.escolher_estrategia(self.coach, self.robot2, self.robot1, self.robot0)
             #Coach.escolher_estrategia_real_2(self.coach, self.robot1,self.robot0,self.robot2)
             #skills.go_to_point(self.robot0, self.field.ball.get_coordinates().X, self.field.ball.get_coordinates().Y, self.field, 0, threshold=15)
-            #estrategia_basica_real(self.robot2,self.robot1,self.robot0,self.field)
+
             #skills.attack_ball_fisico(self.robot0, self.field)
 
             #self.robot0.vx = 1
@@ -396,7 +406,7 @@ class RobotController:
             # print("Robo goleiro, id=", self.enemy_robot2.vision_id)
             # print("x: ", self.enemy_robot2.get_coordinates().X)
             # print("y: ", self.enemy_robot2.get_coordinates().X)
-            # print("r: ", self.enemy_robot2.get_coordinates().rotation)
+            # print("r: ", self.enemy_robot2.get_coordinates().rotation)'''
 
             if (t2 - t1) < 1 / CONTROL_FPS:
                 time.sleep(1 / CONTROL_FPS - (t2 - t1))
@@ -409,3 +419,6 @@ if __name__ == "__main__":
     controller = RobotController()
     controller.start_vision_thread()
     controller.control_loop()
+
+
+
