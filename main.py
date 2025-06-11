@@ -341,7 +341,7 @@ class RobotController:
                 self.field.game_on = True
                 self.field.game_stopped = False
 
-            Coach.escolher_estrategia(self.coach, self.robot2, self.robot1, self.robot0)
+            Coach.escolher_estrategia(self.coach, self.robot2, self.robot1, self.robot0, self)
             #Coach.escolher_estrategia_real_2(self.coach, self.robot1,self.robot0,self.robot2)
             #skills.go_to_point(self.robot0, self.field.ball.get_coordinates().X, self.field.ball.get_coordinates().Y, self.field, 0, threshold=15)
 

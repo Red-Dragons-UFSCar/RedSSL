@@ -59,7 +59,7 @@ class Coach:
         else:
             pass
 
-    def escolher_estrategia(self, robot_goleiro, robot_zagueiro, robot_atacante):
+    def escolher_estrategia(self, robot_goleiro, robot_zagueiro, robot_atacante, controller):
         """
         Escolhe e executa a estratégia baseada na situação do jogo.
         """
@@ -109,7 +109,7 @@ class Coach:
                 elif self.field.allowed_robots == 3:
                     # Estrategia basica em ação
                     plays.estrategia_basica(
-                        robot_goleiro, robot_zagueiro, robot_atacante, self.field
+                        robot_goleiro, robot_zagueiro, robot_atacante, self.field, controller
                     )
 
             elif self.field.game_on and self.field.game_on_but_is_penalty == True:
