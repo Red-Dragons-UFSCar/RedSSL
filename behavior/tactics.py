@@ -55,6 +55,7 @@ def zagueiro(robot0, robot1 ,field):
 
 def atacante(robot0, field):
     ball_position = field.ball.get_coordinates()
+    robot_position = robot0.get_coordinates()
     offensive_line_x = 225.00  # Meio de campo
     midLineY = 150 # Meio em Y
 
@@ -65,8 +66,16 @@ def atacante(robot0, field):
                       robot_field.get_coordinates().rotation)
         robot0.map_obstacle.add_obstacle(obst)
     
-    if (400 < ball_position.X <= 450) and (87.5 <= ball_position.Y <= 222.5):
-        skills.follow_ball_y(robot0, field, 380)
+    # bola está no nosso ataque
+    if (225 <= ball_position.X <= 450):
+        # distância do robô à bola
+        distance_to_ball = np.sqrt((ball_position.X - robot_position.X) ** 2 + (ball_position.Y - robot_position.Y) ** 2)
+        
+        if distance_to_ball > 60:       # bola distante do atacante -> fechar a linha de passe
+            skills.block_pass_line(robot0, field)
+        else:                           # bola perto do atacante -> chutar a bola
+            skills.shoot(robot0, field)
+
     elif ball_position.X < offensive_line_x:
         if ball_position.Y <= midLineY:
             skills.follow_ball_y(robot0, field, fixed_x = offensive_line_x + 20, offset=-50)

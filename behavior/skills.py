@@ -97,6 +97,36 @@ def follow_ball_y(robot0, field, fixed_x=None, target_theta=0, offset=0):
         robot0.vx = 0
         robot0.vy = 0
         robot0.w = 0
+        
+
+def block_pass_line(robot0, field, target_theta=0):
+    """
+    Move o robô para se posicionar em uma região que bloqueie a linha de passe do zagueiro:
+    seguir uma trajetória alinhada à reta entre o atacante e o zagueiro.
+
+    Parâmetros:
+    - robot0: Instância do robô a ser movido.
+    - field: Instância da classe Field.
+    - target_theta: Ângulo alvo (opcional).
+    """
+    
+    map_obstacle = robot0.map_obstacle.get_map_obstacle()    # robôs adversários
+    
+    # posição do atacante e do zagueiro adversário
+    attacker_pos = map_obstacle[2].get_coordinates()
+    defender_pos = map_obstacle[0].get_coordinates()
+    
+    # posição em X -> média das posições X do atacante e do zagueiro adversário (testar se estou pegando os robôs certos)
+    target_x = (attacker_pos.X + defender_pos.X) / 2
+    
+    # posição em Y -> média das posições X do atacante e do zagueiro adversário (testar se estou pegando os robôs certos)
+    target_y = (attacker_pos.Y + defender_pos.Y) / 2
+
+    # limitar o Y para não sair do campo
+    target_y = max(50, min(target_y, 300 - 50))
+
+    go_to_point(robot0, target_x, target_y, field, target_theta)
+    
 
 def block_ball_y(robot0, field, fixed_x=None, target_theta=0, lim_sup = 300, lim_inf = 0):
     """
