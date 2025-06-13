@@ -243,15 +243,6 @@ class RobotController:
               self.robot2.w,
               self.mode_playing["simulated_mode"],
             )
-            
-    def chute(self, robot, forca):
-
-        vx_ant, vy_ant, w_ant = robot.vx, robot.vy, robot.w
-
-        self.actuator.send_globalVelocity_message(robot, 0, 0, 0, kick_speed=forca)
-
-        robot.vx, robot.vy, robot.w = vx_ant, vy_ant, w_ant
-
 
     def get_vision_frame(self):
         """

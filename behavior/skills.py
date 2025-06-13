@@ -2,6 +2,20 @@ import math
 import numpy as np
 from entities.Obstacle import Obstacle
 
+def shoot_kicker(robot0, forca):
+    """
+    Faz com que o robô chute a bola com o módulo de shoot_kicker.
+
+    Parâmetros:
+    - robot0: Instância do robô que vai chutar a bola.
+    """
+
+    vx_ant, vy_ant, w_ant = robot0.vx, robot0.vy, robot0.w
+
+    robot0.actuator.send_globalVelocity_message(robot0, 0, 0, 0, kick_speed=forca)
+
+    robot0.vx, robot0.vy, robot0.w = vx_ant, vy_ant, w_ant
+
 
 def go_to_point(robot0, target_x, target_y, field, target_theta=0, threshold=10):
     """
@@ -194,7 +208,7 @@ def clear_ball(robot0, field, ball_position, robot_position, angle_to_ball):
     go_to_point(robot0, target_x, target_y, field, target_theta, threshold=3)
 
 
-def attack_ball(robot0, field, ball_position, robot_position, target_theta, controller):
+def attack_ball(robot0, field, ball_position, robot_position, target_theta):
     """
     Alinha o robô para atacar a bola no gol.
 
@@ -254,13 +268,13 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta, cont
         target_y = ball_position.Y - 20 * np.sin(angle_ball_to_target)
         target_theta = angle_ball_to_target
         robot0.v_max = 1.25
-        # controller.chute(robot0, 5)
+        # shoot_kicker(robot0, 5)
         # print("Estado B")
 
         if robot0.target_reached(threshold):
             
             if abs(angle_diff <= 15):
-                controller.chute(robot0, 5)
+                shoot_kicker(robot0, 5)
                 current_state = STATE_C
         else:
             current_state = STATE_A
@@ -278,7 +292,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta, cont
 
         #Faz o robo conduzir e chutar quando tiver perto do gol
         robot0.v_max = 1.25 if robot_position.X < 335 else 1.5
-        controller.chute(robot0, 5)
+        shoot_kicker(robot0, 5)
         # print("Estado C")
 
         if not abs(angle_diff) <= 20:
@@ -323,7 +337,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta, cont
         go_to_point(robot0, target_x, target_y, field, target_theta, threshold)
 
 
-def pursue_ball(robot0, field, controller):
+def pursue_ball(robot0, field):
     """
     Faz com que o robô persiga a bola e se alinhe para o lado ofensivo do campo.
 
@@ -347,11 +361,11 @@ def pursue_ball(robot0, field, controller):
             robot0, field, ball_position, robot_position, robot_position.rotation
         )
 
-        controller.chute(robot0, 3)
+        shoot_kicker(robot0, 3)
 
 
 
-def shoot(robot0, field, controller):
+def shoot(robot0, field):
     """
     Faz com que o robô persiga a bola e se alinhe para o lado ofensivo do campo.
 
@@ -368,7 +382,7 @@ def shoot(robot0, field, controller):
     else:
         # Atacar a bola
         attack_ball(
-            robot0, field, ball_position, robot_position, robot_position.rotation, controller
+            robot0, field, ball_position, robot_position, robot_position.rotation
         )
 
 
@@ -972,7 +986,7 @@ def pursue_ball_fisico(robot0, field):
     #alinhar robô com a bola-alvo
     go_to_point(zaga, bola.X, bola.Y, field, alvo_theta)
     if zaga.target_reached(10):
-        controller.chute(zaga, 3)     
+        shoot_kicker(zaga, 3)     
 
     # atacante corre pro ponto de recepção
     go_to_point(ataq, alvo_x, alvo_y, field, alvo_theta)'''
@@ -1016,7 +1030,7 @@ Faz com que um robô persiga a bola e passe a bola para outro robô.
     if (robot0_position.X - ball_position.X) > 0.2 and (robot0_position.Y - ball_position.Y) > 0.2  : #Quando chegar na bola, faz o passe para o atacante
         go_to_point(robot0, ball_position.X, ball_position.Y, field, angle)
         
-    controller.chute(robot0, 3)
+    shoot_kicker(robot0, 3)
 
 
     else:
@@ -1119,7 +1133,7 @@ Faz com que um robô persiga a bola e passe a bola para outro robô.
         target_theta = angle_ball_to_target
         target_theta = 0
         robot0.v_max = 1.5
-        controller.chute(robot0, 3)
+        shoot_kicker(robot0, 3)
         # print("Estado C")
 
         if not abs(angle_diff) <= 30:
@@ -1165,7 +1179,7 @@ Faz com que um robô persiga a bola e passe a bola para outro robô.
         go_to_point(robot0, target_x, target_y, field, target_theta, threshold)'''
 
 
-def pass_ball(robot0,robot1, field, target_theta, controller):
+def pass_ball(robot0,robot1, field, target_theta):
     """
     Alinha o robô para atacar a bola no gol.
 
@@ -1223,13 +1237,13 @@ def pass_ball(robot0,robot1, field, target_theta, controller):
         target_y = ball_position.Y - 20 * np.sin(angle_ball_to_target)
         target_theta = angle_ball_to_target
         robot0.v_max = 1.25
-        # controller.chute(robot0, 5)
+        # shoot_kicker(robot0, 5)
         # print("Estado B")
 
         if robot0.target_reached(threshold):
             
             if abs(angle_diff <= 15):
-                controller.chute(robot0, 3)
+                shoot_kicker(robot0, 3)
                 current_state = STATE_C
         else:
             current_state = STATE_A
@@ -1247,7 +1261,7 @@ def pass_ball(robot0,robot1, field, target_theta, controller):
 
         #Faz o robo conduzir e chutar quando tiver perto do gol
         robot0.v_max = 1.25 if robot_position.X < 335 else 1.5
-        controller.chute(robot0, 2)
+        shoot_kicker(robot0, 2)
         # print("Estado C")
 
         if not abs(angle_diff) <= 20:
