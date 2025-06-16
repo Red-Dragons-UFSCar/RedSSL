@@ -71,16 +71,15 @@ def atacante(robot0, field):
         # distância do robô à bola
         distance_to_ball = np.sqrt((ball_position.X - robot_position.X) ** 2 + (ball_position.Y - robot_position.Y) ** 2)
         
-        if distance_to_ball > 60:       # bola distante do atacante -> fechar a linha de passe
+        if distance_to_ball > 80:       # bola distante do atacante -> fechar a linha de passe
             skills.block_pass_line(robot0, field)
         else:                           # bola perto do atacante -> chutar a bola
             skills.shoot(robot0, field)
 
+    # bola está na nossa defesa
     elif ball_position.X < offensive_line_x:
-        if ball_position.Y <= midLineY:
-            skills.follow_ball_y(robot0, field, fixed_x = offensive_line_x + 20, offset=-50)
-        else: 
-            skills.follow_ball_y(robot0, field, fixed_x = offensive_line_x + 20, offset=50)
+        skills.safe_zone_position(robot0, field)
+        
     else:   
         skills.shoot(robot0, field)
 
