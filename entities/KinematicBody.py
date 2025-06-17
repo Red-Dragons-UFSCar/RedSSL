@@ -11,9 +11,10 @@ class KinematicBody:
     def __init__(self):
         self._coordinates = SpatialCoordinates()
         self._velocities = Velocities()
-        self._is_filtered = False
+        self._is_filtered = True
         self.filter: KalmanFilter = KalmanFilter()
         self.unfiltered_coordinate_buffer = self._coordinates
+        self._velocity_cache = (0.0, 0.0)  # cache para componentes X e Y da velocidade
 
     def set_coordinates(self, x, y, rotation=0):
         if self._is_filtered:
@@ -30,7 +31,8 @@ class KinematicBody:
         self._coordinates.X = self.filter.x[0][0]
         self._coordinates.Y = self.filter.x[1][0]
         self._coordinates.rotation = rotation
-        vel_linear = sqrt(self.filter.x[2] ** 2 + self.filter.x[3] ** 2)
+        vel_linear = sqrt(self.filter.x[2][0] ** 2 + self.filter.x[3][0] ** 2)
+        self._velocity_cache = (self.filter.x[2][0], self.filter.x[3][0])
         self.set_velocities(
             vel_linear,
             self._velocities.angular,

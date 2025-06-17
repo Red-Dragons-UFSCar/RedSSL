@@ -363,6 +363,12 @@ class RobotController:
             self.field.send_local = False
 
             self.data_to_interface()
+
+            ball_vx, ball_vy = self.field.ball._velocity_cache
+            print(f"Ball Velocity: X={ball_vx:.2f}, Y={ball_vy:.2f}")
+            print(f"Robot 0 Velocity: X={self.robot0.vx:.2f}, Y={self.robot0.vy:.2f}")
+
+
             
             # print("---------------------------------------")
             # print("    LOGGING DOS ROBÔS TIME     ")
