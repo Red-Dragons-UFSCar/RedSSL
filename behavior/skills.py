@@ -1380,7 +1380,37 @@ def pass_ball(robot0,robot1, field, target_theta):
     else:
         go_to_point(robot0, target_x, target_y, field, target_theta, threshold)
 
+def trajectory_align(robot0, field, target_x = 50):
 
+    """
+    Move o robô para se posicionar em uma região que bloqueie a linha de passe do zagueiro:More actions
+    seguir uma trajetória alinhada à reta entre o atacante e o zagueiro.
+
+    Parâmetros:
+    - robot0: Instância do robô a ser movido.
+    - field: Instância da classe Field.
+    - target_theta: Ângulo alvo (opcional).
+    """
+    # Posicao do Atacante Adversario
+    map_obstacle = robot0.map_obstacle.get_map_obstacle()    
+    enemy_positions = [r.get_coordinates() for r in map_obstacle]   
+    sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)   
+    attacker_x, attacker_y = sorted_enemies[0].X, sorted_enemies[0].Y   
+
+    # Posicao da Bola
+    ball_position = field.ball.get_coordinates()             
+
+    if attacker_x == ball_position.X:
+        target_y = ball_position.Y  # Pode assumir qualquer y; aqui usamos o da bola
+
+    else:
+        m = (attacker_y - ball_position.Y) / (attacker_x - ball_position.X)
+        target_y = m*(target_x - ball_position.X) + ball_position.Y
+
+    target_x = np.clip(target_x, 0, 50)
+    target_y = np.clip(target_y, 90, 210)
+    target_theta = np.arctan2(attacker_y - target_y, attacker_x - target_x)
+    go_to_point(robot0, target_x, target_y, field, target_theta)
 
 
 
