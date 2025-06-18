@@ -1,4 +1,5 @@
 import math
+import commons.math as cmath
 import numpy as np
 from entities.Obstacle import Obstacle
 
@@ -305,12 +306,36 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
     """
     # Definição dos estados
     STATE_A, STATE_B, STATE_C, STATE_D = "A", "B", "C", "D"
+    
+    ball_pos = field.ball.get_coordinates()
+    map_obstacle = robot0.map_obstacle.get_map_obstacle()    # robôs adversários
+    
+    # posição dos adversários
+    enemy_positions = [r.get_coordinates() for r in map_obstacle]
+    
+    sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)     # adversários ordenados por X
+    
+    goleiro = sorted_enemies[2]
+    
+    # traves -> (450, 110) e (450, 190)
+    t1_ball = np.array([450 - ball_pos.X, 190 - ball_pos.Y])    # vetor: bola → trave de cima
+    t2_ball = np.array([450 - ball_pos.X, 110 - ball_pos.Y])    # vetor: bola → trave de baixo
+    gol_ball = np.array([goleiro.X - ball_pos.X, goleiro.Y - ball_pos.Y])  # vetor: bola → goleiro
 
-    # Define o alvo final (centro do gol)
+    angle_t1_gol = cmath.angle_between(t1_ball, gol_ball)
+    angle_t2_gol = cmath.angle_between(t2_ball, gol_ball)
+    
+    # Ajusta o alvo com base no lado que tem mais ângulo pro chute
+    if angle_t1_gol >= angle_t2_gol:
+        target_y_final = 180 
+    else:
+        target_y_final = 120
+
     target_x_final = 450
-
-    # Ajusta o alvo com base na posição da bola
-    target_y_final = 180 if ball_position.Y < 150 else 145 
+    
+    # print("Ângulo entre trave de cima e goleiro:", np.degrees(angle_t1_gol))
+    # print("Ângulo entre trave de baixo e goleiro:", np.degrees(angle_t2_gol))
+    # print(f'Alvo final -> ({target_x_final}, {target_y_final})')
 
     current_state = field.atacante_current_state
 
