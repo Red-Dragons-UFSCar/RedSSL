@@ -15,11 +15,11 @@ def goleiro(robot0, field):
     Goaie_Y_Enable = 300  # Quando o goleiro começa a perseguir a bola
 
     for robot_field in field.enemy_robots:
-            obst = Obstacle()
-            obst.set_obst(robot_field.get_coordinates().X, 
-                        robot_field.get_coordinates().Y, 
-                        robot_field.get_coordinates().rotation)
-            robot0.map_obstacle.add_obstacle(obst)
+        obst = Obstacle()
+        obst.set_obst(robot_field.get_coordinates().X, 
+                      robot_field.get_coordinates().Y, 
+                      robot_field.get_coordinates().rotation)
+        robot0.map_obstacle.add_obstacle(obst)
 
     # Posição atual da bola
     ball_position = field.ball.get_coordinates()
@@ -32,7 +32,7 @@ def goleiro(robot0, field):
     else:
         if ball_position.X <= Goaie_Y_Enable:
             # A bola não está na área, mas está perto
-            skills.trajectory_align(robot0, field)  # foca em y
+            skills.keeper_activate(robot0, field)
 
         else:
             # a bola não está perto o suficiente para o goleiro precisar se preocupar, então manda ele pro centor do gol

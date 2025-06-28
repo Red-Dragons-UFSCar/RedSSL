@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from entities.Obstacle import Obstacle
+import commons.math as cmath
 
 def shoot_kicker(robot0, forca):
     """
@@ -1380,37 +1381,92 @@ def pass_ball(robot0,robot1, field, target_theta):
     else:
         go_to_point(robot0, target_x, target_y, field, target_theta, threshold)
 
+def keeper_activate(robot0, field, threshold=15):
+    
+    """
+    Seleciona o comportamento ativo o goleiro deve executar.
+    Parâmetros:
+    - robot0: Instância do robô a ser movido.
+    - field: Instância da classe Field.
+    - threshold: Distância de seguranca para assegurar que o goleiro esta mais perto da bola do que o atacante adversário.
+    """
+    
+    ball_position = field.ball.get_coordinates()
+    robot_position = robot0.get_coordinates()
+
+    map_obstacle = robot0.map_obstacle.get_map_obstacle()    
+    enemy_positions = [enemy.get_coordinates() for enemy in map_obstacle]
+    enemy_toball_distance = min(enemy_positions, key=lambda p: math.hypot(p[0] - ball_position.X, p[1] - ball_position.Y))  
+    keeper_toball_distance = math.hypot(robot_position.X - ball_position.X, robot_position.Y - ball_position.Y)
+
+    # Se o goleiro está perto da bola e o atacante adversário também está, ele deve defender
+    if keeper_toball_distance < 100 and enemy_toball_distance + threshold < keeper_toball_distance:
+        trajectory_align(robot0, field)
+
+    # Se o goleiro está longe da bola ou o atacante adversário não está perto, ele deve ficar no centro
+    else:
+        pursue_ball(robot0, field)
+
 def trajectory_align(robot0, field, target_x = 50):
 
     """
-    Move o robô para se posicionar em uma região que bloqueie a linha de passe do zagueiro:More actions
-    seguir uma trajetória alinhada à reta entre o atacante e o zagueiro.
+    Move o robô para se posicionar entre a trajetoria do chute e as retas formadas pela bola e limite do gol.
 
     Parâmetros:
     - robot0: Instância do robô a ser movido.
     - field: Instância da classe Field.
     - target_theta: Ângulo alvo (opcional).
+
+    TODO: Implementar lógica para ajustar o goleiro com base nos angulos de chute do atacante adversário.
+    TODO: Fazer o goleiro nao avancar quando a bola for chutada, precisa detectar o chute(provavelmente vendo se a velocidade da bola e maior que 1.5)
     """
+    gol_lim_x = 50
+    half_court_x = 225
+
     # Posicao do Atacante Adversario
     map_obstacle = robot0.map_obstacle.get_map_obstacle()    
-    enemy_positions = [r.get_coordinates() for r in map_obstacle]   
-    sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)   
-    attacker_x, attacker_y = sorted_enemies[0].X, sorted_enemies[0].Y   
+    enemy_positions = [enemy.get_coordinates() for enemy in map_obstacle]
+    attacker_x, attacker_y = min(enemy_positions, key=lambda p: math.hypot(p[0] - ball_position.X, p[1] - ball_position.Y))    
 
     # Posicao da Bola
     ball_position = field.ball.get_coordinates()             
 
-    if attacker_x == ball_position.X:
-        target_y = ball_position.Y  # Pode assumir qualquer y; aqui usamos o da bola
+    # Projecoes da Bola
+    #ball_low = np.array([ball_position.X, 120 - ball_position.Y]) 
+    #ball_high = np.array([ball_position.X, 180 - ball_position.Y])
+    #attack = np.array([attacker_x - robot0.X, attacker_y - robot0.Y])
+
+    # Calcula o Angulo Formado Entre as Retas
+    #angle_low = cmath.angle_between(ball_low, attack)
+    #angle_high = cmath.angle_between(ball_high, attack)
+
+
+    # Evitando divisão por zero
+    if attacker_x == ball_position.X:       
+        target_y = ball_position.Y      
+
+    # Ajuste para quando o atacante está nas laterais do campo perto da area
+    elif attacker_x <= gol_lim_x:
+        m = (attacker_y - ball_position.Y) / (attacker_x - ball_position.X)        
+        target_x = attacker_x/2
 
     else:
         m = (attacker_y - ball_position.Y) / (attacker_x - ball_position.X)
-        target_y = m*(target_x - ball_position.X) + ball_position.Y
-
+        
+        # Interpolação Linear para o Alvo. 
+        # Se o atacante está mais perto do gol, o alvo é mais próximo do limite da area
+        # Se o atacante está mais longe do gol, o alvo é mais próximo do gol
+        factor = (attacker_x - gol_lim_x + 10) / ((half_court_x - 45) - gol_lim_x + 10)
+        factor = np.clip(factor, 0, 1)  
+        target_x =(1 - factor) * half_court_x
+        
     target_x = np.clip(target_x, 0, 50)
+    target_y = m*(target_x - ball_position.X) + ball_position.Y    
     target_y = np.clip(target_y, 90, 210)
     target_theta = np.arctan2(attacker_y - target_y, attacker_x - target_x)
     go_to_point(robot0, target_x, target_y, field, target_theta)
+
+    
 
 
 
