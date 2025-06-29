@@ -6,7 +6,7 @@ def distance(pos1, pos2):
             Função que recebe duas coordenadas e calcula a distância entre elas
     Entradas:
             pos1:  Coordenada 1 (SpatialCoordinates)
-            pos1:  Coordenada 2 (SpatialCoordinates)
+            pos2:  Coordenada 2 (SpatialCoordinates)
     """
     return np.sqrt((pos2.X - pos1.X) ** 2 + (pos2.Y - pos1.Y) ** 2)
 
