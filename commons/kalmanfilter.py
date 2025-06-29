@@ -58,10 +58,10 @@ class KalmanFilter:
         dt = self.dt
 
         # Matriz de Transicao
-        self.A = np.array([[1, 0, dt, 0],
-                           [0, 1, 0, dt],
-                           [0, 0, 1, 0],
-                           [0, 0, 0, 1]])
+        self.A =  np.array([[1, 0, dt, 0, 0.5*dt**2, 0],
+                            [0, 1, 0, dt, 0, 0.5*dt**2],
+                            [0, 0, 1, 0, dt, 0],
+                            [0, 0, 0, 1, 0, dt]])
 
         self.varX = np.array([0.1])  # Variacao da posicao em X
         self.varY = np.array([0.1])  # Variacao da posicao em Y
@@ -69,60 +69,69 @@ class KalmanFilter:
         # Matriz dos coeficientes de desaceleracao(atrito)
         self.u = np.array([[-0.05],
                            [-0.05]])
-
+        
         # Matriz de Controle
-        self.B = np.array([[0.5 * (dt * dt), 0],
-                           [0, 0.5 * (dt * dt)],
-                           [dt, 0],
-                           [0, dt]])
+        self.B =  np.array([[0.5 * (dt * dt), 0],
+                            [0, 0.5 * (dt * dt)],
+                            [dt, 0],
+                            [0, dt],
+                            [1, 0],
+                            [0, 1]])
 
         # Matriz da covariancia do ruido do processo
         # self.Q = np.array([[(1.0 / 4) * (power(dt, 4)), 0, (1.0 / 2) * (power(dt, 3)), 0],
         #                    [0, (1.0 / 4) * (power(dt, 4)), 0, (1.0 / 2) * (power(dt, 3))],
         #                    [(1.0 / 2) * (power(dt, 3)), 0, power(dt, 2), 0],
         #                    [0, (1.0 / 2) * (power(dt, 3)), 0, power(dt, 2)]])
-        self.Q = np.array([[(1.0 / 2) * (np.power(dt, 3)), 0                            , (1.0 / 1) * (np.power(dt, 2)), 0                            ],
-                           [0                            , (1.0 / 2) * (np.power(dt, 3)), 0                            , (1.0 / 1) * (np.power(dt, 2))],
-                           [(1.0 / 1) * (np.power(dt, 2)), 0                            , np.power(dt, 1)              , 0                            ],
-                           [0                            , (1.0 / 1) * (np.power(dt, 2)), 0                            , np.power(dt, 1)              ]])
-
-        # Matriz da covariancia do ruida da medicao
+        self.Q = np.array([[(1.0 / 2) * (np.power(dt, 3)), 0                            , (1.0 / 1) * (np.power(dt, 2)), 0                            , (1/2)*dt, 0       ],
+                           [0                            , (1.0 / 2) * (np.power(dt, 3)), 0                            , (1.0 / 1) * (np.power(dt, 2)), 0       , (1/2)*dt],
+                           [(1.0 / 1) * (np.power(dt, 2)), 0                            , np.power(dt, 1)              , 0                            , dt		, 0		  ],
+                           [0                            , (1.0 / 1) * (np.power(dt, 2)), 0                            , np.power(dt, 1)              , 0		, dt      ],
+                           [(1.0 / 0.5) * dt			 , 0							, 1							   , 0						      , 1		, 0		  ],
+                           [0                            , (1.0 / 0.5) * dt				, 0							   , 1							  , 0		, 1		  ]])
+        # Matriz da covariancia do ruido da medicao
         # self.R = np.array([[0.1, 0],
         #                    [0, 0.1]])
         self.R = np.array([[0.01, 0   ],
                            [0   , 0.01]])
 
         # Matriz Jacobiana do modelo
-        self.H = np.array([[1, 0, 0, 0],
-                           [0, 1, 0, 0]])
+        self.H = np.array([[1, 0, 0, 0, 0, 0],
+                            [0, 1, 0, 0, 0, 0]])
 
         self.posX = 0.0  # Posição em X [m]
         self.posY = 0.0  # Posição em Y [m]
         self.velX = 0.5  # Velocidade em X [m/s]
         self.velY = 0.5  # Velocidade em Y [m/s]
-        # posX, posY, velX, velY = self.posX, self.posY, self.velX, self.velY
+        self.accX = 0.0  # Aceleração em X [m/s²]
+        self.accY = 0.0  # Aceleração em Y [m/s²]
+        # posX, posY, velX, velY, accX, accY = self.posX, self.posY, self.velX, self.velY, self.accX, self.accY
 
         # Ganho de Kalman
         # self.P = self.Q.copy()
         # self.P = np.eye(4) * 500.
-        self.P = np.array([[10, 0 , 0  , 0  ],
-                           [0 , 10, 0  , 0  ],
-                           [0 , 0 , 100, 0  ],
-                           [0 , 0 , 0  , 100]])
+        self.P = np.array([[10, 0 , 0  , 0  , 0   , 0   ],
+                           [0 , 10, 0  , 0  , 0   , 0   ],
+                           [0 , 0 , 100, 0  , 0   , 0   ],
+                           [0 , 0 , 0  , 100, 0   , 0   ],
+                           [0 , 0 , 0  , 0  , 1000, 0   ],
+                           [0 , 0 , 0  , 0  , 0   , 1000]])
 
         # Vetor de Estados
         self.x = np.array([[self.posX],
                            [self.posY],
                            [self.velX],
-                           [self.velY]])
+                           [self.velY],
+                           [self.accX],
+                           [self.accY]])
 
         # x(k-1) Estado anterior
-        self.x_k_1 = np.zeros([4, 1])
+        self.x_k_1 = np.zeros([6, 1])
 
         # print(self.x_k_1)
 
         # P(k-1) Ganho no tempo anterior
-        self.P_k_1 = np.identity(4)
+        self.P_k_1 = np.identity(6)
 
         # print(self.P_k_1)
 
@@ -140,7 +149,7 @@ class KalmanFilter:
 
         self.vtVelocidade = np.array([[0.0, 0.0]])  # Vetor com a velocidade do objeto
 
-        self.K = np.zeros([4, 2])  # Ganho de Kalman
+        self.K = np.zeros([6, 2])  # Ganho de Kalman
 
         if print_attr:
             members = [attr for attr in dir(self) if not callable(getattr(self, attr)) and not attr.startswith("__")]
