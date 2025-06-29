@@ -36,22 +36,33 @@ def goleiro(robot0, field):
             )  # manda pro centrofrom behavior.skills import follow_ball_y, pursue_ball'''
 
 
-def zagueiro(robot0, robot1 ,field):
+def zagueiro(robot0, field):
     """
     Função que controla o comportamento do robô zagueiro.
-    O robô segue a bola no eixo Y quando a bola está no ataque,
-    e persegue a bola com alinhamento ofensivo quando está na defesa.
-    """
-    offensive_line_x = 225.00  # Meio de campo
+    O robô segue a bola no eixo Y quando a bola está no ataque.
+    Na defesa, verifica se o atacante está livre: caso esteja, efetua um passe; caso contrário, chuta direto.
+    """ 
+    offensive_line_x = 225.00   # meio de campo
     ball_position = field.ball.get_coordinates()
     robot_position = robot0.get_coordinates()
 
+    team_with_pos = [(r, r.get_coordinates()) for r in field.team_robots]
+    enemy_positions = [r.get_coordinates() for r in field.enemy_robots]
+    
+    sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)     # adversários ordenados por X
+    sorted_team = sorted(team_with_pos, key=lambda pair: pair[1].X)     # teammates ordenados por X
+    
+    team_atacante = sorted_team[2][0]
+    team_atacante_pos = sorted_team[2][1]
+    enemy_zagueiro = sorted_enemies[1]
 
     if ball_position.X >= offensive_line_x: 
         skills.follow_ball_y(robot0, field)
     else:
-        skills.pass_ball(robot0, robot1 ,field, robot_position.rotation)
-        #skills.pursue_ball
+        if math.distance(team_atacante_pos, enemy_zagueiro) >= 100:     # atacante não está marcado -> passe
+            skills.pass_ball(robot0, team_atacante ,field, robot_position.rotation)    
+        else:   # atacante está marcado -> chuta direto
+            skills.shoot(robot0, field)
 
 def atacante(robot0, field):
     ball_position = field.ball.get_coordinates()
