@@ -1394,18 +1394,21 @@ def keeper_activate(robot0, field, threshold=15):
     ball_position = field.ball.get_coordinates()
     robot_position = robot0.get_coordinates()
 
-    map_obstacle = robot0.map_obstacle.get_map_obstacle()    
-    enemy_positions = [enemy.get_coordinates() for enemy in map_obstacle]
-    enemy_toball_distance = min(enemy_positions, key=lambda p: math.hypot(p[0] - ball_position.X, p[1] - ball_position.Y))  
+    enemy_robots = field.get_enemy_robots()      
+    enemy_positions = [enemy.get_coordinates() for enemy in enemy_robots]
+    closest_enemy = min(enemy_positions, key=lambda p: math.hypot(p.X - ball_position.X, p.Y - ball_position.Y))
+
+    # Distância do inimigo mais próximo até a bola
+    enemy_toball_distance = math.hypot(closest_enemy.X - ball_position.X, closest_enemy.Y - ball_position.Y)
     keeper_toball_distance = math.hypot(robot_position.X - ball_position.X, robot_position.Y - ball_position.Y)
 
-    # Se o goleiro está perto da bola e o atacante adversário também está, ele deve defender
-    if keeper_toball_distance < 100 and enemy_toball_distance + threshold < keeper_toball_distance:
-        trajectory_align(robot0, field)
+    # Se o goleiro está perto da bola e o atacante nao ele deve atacar
+    if keeper_toball_distance < 100 and enemy_toball_distance + threshold > keeper_toball_distance:
+        pursue_ball(robot0, field)
 
     # Se o goleiro está longe da bola ou o atacante adversário não está perto, ele deve ficar no centro
     else:
-        pursue_ball(robot0, field)
+        trajectory_align(robot0, field)
 
 def trajectory_align(robot0, field, target_x = 50):
 
@@ -1420,17 +1423,19 @@ def trajectory_align(robot0, field, target_x = 50):
     TODO: Implementar lógica para ajustar o goleiro com base nos angulos de chute do atacante adversário.
     TODO: Fazer o goleiro nao avancar quando a bola for chutada, precisa detectar o chute(provavelmente vendo se a velocidade da bola e maior que 1.5)
     """
-    gol_lim_x = 50
-    half_court_x = 225
+    GolLimX = 50
+    HalfCourtX = 225
+    
+    # Posicao da Bola
+    ball_position = field.ball.get_coordinates()  
 
     # Posicao do Atacante Adversario
-    map_obstacle = robot0.map_obstacle.get_map_obstacle()    
-    enemy_positions = [enemy.get_coordinates() for enemy in map_obstacle]
-    attacker_x, attacker_y = min(enemy_positions, key=lambda p: math.hypot(p[0] - ball_position.X, p[1] - ball_position.Y))    
-
-    # Posicao da Bola
-    ball_position = field.ball.get_coordinates()             
-
+    enemy_robots = field.get_enemy_robots()   
+    enemy_positions = [enemy.get_coordinates() for enemy in enemy_robots]
+    closest_enemy = min(enemy_positions, key=lambda p: math.hypot(p.X - ball_position.X, p.Y - ball_position.Y))
+    attacker_x, attacker_y = closest_enemy.X, closest_enemy.Y
+    for i, enemy in enumerate(enemy_positions):
+        print(f"Enemy {i}: X = {enemy.X}, Y = {enemy.Y}")
     # Projecoes da Bola
     #ball_low = np.array([ball_position.X, 120 - ball_position.Y]) 
     #ball_high = np.array([ball_position.X, 180 - ball_position.Y])
@@ -1446,7 +1451,7 @@ def trajectory_align(robot0, field, target_x = 50):
         target_y = ball_position.Y      
 
     # Ajuste para quando o atacante está nas laterais do campo perto da area
-    elif attacker_x <= gol_lim_x:
+    elif attacker_x <= GolLimX:
         m = (attacker_y - ball_position.Y) / (attacker_x - ball_position.X)        
         target_x = attacker_x/2
 
@@ -1456,9 +1461,9 @@ def trajectory_align(robot0, field, target_x = 50):
         # Interpolação Linear para o Alvo. 
         # Se o atacante está mais perto do gol, o alvo é mais próximo do limite da area
         # Se o atacante está mais longe do gol, o alvo é mais próximo do gol
-        factor = (attacker_x - gol_lim_x + 10) / ((half_court_x - 45) - gol_lim_x + 10)
+        factor = (attacker_x - GolLimX + 10) / ((HalfCourtX - 45) - GolLimX + 10)
         factor = np.clip(factor, 0, 1)  
-        target_x =(1 - factor) * half_court_x
+        target_x =(1 - factor) * HalfCourtX
         
     target_x = np.clip(target_x, 0, 50)
     target_y = m*(target_x - ball_position.X) + ball_position.Y    

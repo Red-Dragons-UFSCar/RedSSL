@@ -11,36 +11,27 @@ import time
 
 def goleiro(robot0, field):
 
-    Goalie_Chase_line = 80  # Limite para considerar perto
-    Goaie_Y_Enable = 300  # Quando o goleiro começa a perseguir a bola
-
-    for robot_field in field.enemy_robots:
-        obst = Obstacle()
-        obst.set_obst(robot_field.get_coordinates().X, 
-                      robot_field.get_coordinates().Y, 
-                      robot_field.get_coordinates().rotation)
-        robot0.map_obstacle.add_obstacle(obst)
+    GoalieChaseline = 80  # Limite para considerar perto
+    OffensiveLineX = 225.00  # Quando o goleiro começa a perseguir a bola
 
     # Posição atual da bola
     ball_position = field.ball.get_coordinates()
 
-    # Verifica se a bola está pŕoxima à área
-    if (ball_position.X <= Goalie_Chase_line) and (90 < ball_position.Y < 210):
-        # A bola está perto da area
-        skills.basic_tackle(robot0, field)  # vai atras
+    # Verifica se a bola esta depois do meio de campo
+    if ball_position.X >= OffensiveLineX:  
+        skills.stay_on_center(robot0, field)
 
+    # Verifica se a bola está pŕoxima à área
+    elif (ball_position.X <= GoalieChaseline) and (90 < ball_position.Y < 210):
+            # A bola está perto da area
+            skills.basic_tackle(robot0, field)  # vai atras
+            
     else:
-        if ball_position.X <= Goaie_Y_Enable:
             # A bola não está na área, mas está perto
             skills.keeper_activate(robot0, field)
+    
 
-        else:
-            # a bola não está perto o suficiente para o goleiro precisar se preocupar, então manda ele pro centor do gol
-            # poupar bateria e motor (não sei se é tão relevante assim)
-            skills.stay_on_center(
-                robot0, field
-            )  # manda pro centrofrom behavior.skills import follow_ball_y, pursue_ball'''
-
+   
 
 def zagueiro(robot0, robot1 ,field):
     """
