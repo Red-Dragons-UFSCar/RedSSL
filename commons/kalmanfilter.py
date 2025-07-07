@@ -61,7 +61,9 @@ class KalmanFilter:
         self.A =  np.array([[1, 0, dt, 0, 0.5*dt**2, 0],
                             [0, 1, 0, dt, 0, 0.5*dt**2],
                             [0, 0, 1, 0, dt, 0],
-                            [0, 0, 0, 1, 0, dt]])
+                            [0, 0, 0, 1, 0, dt],
+                            [0, 0, 0, 0, 1, 0],
+                            [0, 0, 0, 0, 0, 1]])
 
         self.varX = np.array([0.1])  # Variacao da posicao em X
         self.varY = np.array([0.1])  # Variacao da posicao em Y
@@ -87,8 +89,8 @@ class KalmanFilter:
                            [0                            , (1.0 / 2) * (np.power(dt, 3)), 0                            , (1.0 / 1) * (np.power(dt, 2)), 0       , (1/2)*dt],
                            [(1.0 / 1) * (np.power(dt, 2)), 0                            , np.power(dt, 1)              , 0                            , dt		, 0		  ],
                            [0                            , (1.0 / 1) * (np.power(dt, 2)), 0                            , np.power(dt, 1)              , 0		, dt      ],
-                           [(1.0 / 0.5) * dt			 , 0							, 1							   , 0						      , 1		, 0		  ],
-                           [0                            , (1.0 / 0.5) * dt				, 0							   , 1							  , 0		, 1		  ]])
+                           [(1.0 / 0.75) * dt			 , 0							, 1							   , 0						      , 1		, 0		  ],
+                           [0                            , (1.0 / 0.75) * dt				, 0							   , 1							  , 0		, 1		  ]])
         # Matriz da covariancia do ruido da medicao
         # self.R = np.array([[0.1, 0],
         #                    [0, 0.1]])
@@ -203,7 +205,7 @@ class KalmanFilter:
 
         # P = ident;
 
-        self.P = np.identity(4)
+        self.P = np.identity(6)
 
     def v_atualiza_kalman(self, _vt2d_posicao_atual, print_attr=False):
         """
@@ -239,7 +241,7 @@ class KalmanFilter:
         sk = np.matmul(np.matmul(self.H, self.P_k_1), self.H.T) + self.R
         self.K = np.matmul(np.matmul(self.P_k_1, self.H.T), np.linalg.inv(sk))
         self.x = self.x_k_1 + np.matmul(self.K, yk)
-        self.P = np.matmul(np.identity(4) - np.matmul(self.K, self.H), self.P_k_1)
+        self.P = np.matmul(np.identity(6) - np.matmul(self.K, self.H), self.P_k_1)
 
         if print_attr:
             print(f'_vt2dPosicaoAtual = {_vt2d_posicao_atual}')
@@ -380,9 +382,9 @@ class KalmanFilter:
         # vAtualizaVariancia(99,99);
 
         x_k_1_ = self.xPred.copy()  # x(k-1) Estado anterior
-        x_k_1_aux = np.zeros([4, 1])
+        x_k_1_aux = np.zeros([6, 1])
         p_k_1_ = self.pPred.copy()  # P(k-1) Ganho no tempo anterior
-        p_k_1_aux = np.zeros([4, 4])
+        p_k_1_aux = np.zeros([6, 6])
         k_ = self.K.copy()  # Kk Ganho de Kalman
 
         d_modulo = 0.0
@@ -453,7 +455,17 @@ class KalmanFilter:
         pos_y = pos[i, 1]
         vel_x = pos[i, 0] - pos[i - 1, 0]
         vel_y = pos[i, 1] - pos[i - 1, 1]
+        if i >= 2:
+            prev_vel_x = pos[i - 1, 0] - pos[i - 2, 0]
+            prev_vel_y = pos[i - 1, 1] - pos[i - 2, 1]
+            acc_x = vel_x - prev_vel_x
+            acc_y = vel_y - prev_vel_y
+        else:
+            acc_x = 0.0
+            acc_y = 0.0
         self.x = np.array([[pos_x],
                            [pos_y],
                            [vel_x],
-                           [vel_y]])
+                           [vel_y],
+                           [acc_x],
+                           [acc_y]])

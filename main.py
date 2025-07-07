@@ -364,10 +364,14 @@ class RobotController:
 
             self.data_to_interface()
 
-            ball_vx, ball_vy = self.field.ball._velocity_cache
-            print(f"Ball Velocity: X={ball_vx:.2f}, Y={ball_vy:.2f}")
-            print(f"Robot 0 Velocity: X={self.robot0.vx:.2f}, Y={self.robot0.vy:.2f}")
+            #ball_vx, ball_vy = self.field.ball._velocity_cache
+            #ball_ax, ball_ay = self.field.ball._acceleration_cache  # <-- pega aceleração da bola
+            #print(f"Ball Velocity: X={ball_vx:.2f}, Y={ball_vy:.2f}")
+            #print(f"Ball Acceleration: X={ball_ax:.2f}, Y={ball_ay:.2f}")  # <-- print da aceleração
+            #print(f"Robot 0 Velocity: X={self.robot0.vx:.2f}, Y={self.robot0.vy:.2f}")
 
+            ball_stop_x, ball_stop_y = self.field.ball.predict_ball_position()
+            print(f"[PREVISÃO] Bola irá parar em: X={ball_stop_x:.2f}, Y={ball_stop_y:.2f}")
 
             
             # print("---------------------------------------")

@@ -15,6 +15,7 @@ class KinematicBody:
         self.filter: KalmanFilter = KalmanFilter()
         self.unfiltered_coordinate_buffer = self._coordinates
         self._velocity_cache = (0.0, 0.0)  # cache para componentes X e Y da velocidade
+        self._acceleration_cache = (0.0, 0.0)  # cache para componentes X e Y da aceleração
 
     def set_coordinates(self, x, y, rotation=0):
         if self._is_filtered:
@@ -32,7 +33,9 @@ class KinematicBody:
         self._coordinates.Y = self.filter.x[1][0]
         self._coordinates.rotation = rotation
         vel_linear = sqrt(self.filter.x[2][0] ** 2 + self.filter.x[3][0] ** 2)
+        acc_linear = sqrt(self.filter.x[4][0] ** 2 + self.filter.x[5][0] ** 2)
         self._velocity_cache = (self.filter.x[2][0], self.filter.x[3][0])
+        self._acceleration_cache = (self.filter.x[4][0], self.filter.x[5][0])
         self.set_velocities(
             vel_linear,
             self._velocities.angular,
@@ -41,6 +44,7 @@ class KinematicBody:
             self._velocities.v_bottom_right,
             self._velocities.v_bottom_left,
         )
+        # Se quiser acessar o módulo da aceleração: acc_linear
 
     def unfiltered_coordinates(self, x, y, rotation):
         self._coordinates.X = x
@@ -93,3 +97,29 @@ class KinematicBody:
                 self._velocities.linear,
             )
         )
+
+    def predict_ball_position(self, t=None):
+        """
+        Prediz a posição futura da bola.
+        Se t for fornecido, retorna a posição após t segundos.
+        Se t não for fornecido, retorna a posição onde a bola irá parar (velocidade final zero).
+        """
+        ball_pos = self.get_coordinates()
+        v_x, v_y = self._velocity_cache
+        a_x, a_y = self._acceleration_cache
+
+        # Se t é fornecido, calcula a posição após t segundos
+        if t is not None:
+            x_pred = ball_pos.X + v_x * t + 0.5 * a_x * t ** 2
+            y_pred = ball_pos.Y + v_y * t + 0.5 * a_y * t ** 2
+            return x_pred, y_pred
+
+        # Se t não é fornecido, calcula onde a bola irá parar (v = 0)
+        def stop_pos(pos, vel, acc):
+            if acc == 0:
+                return pos
+            return pos - (vel ** 2) / (2 * acc)
+
+        x_stop = stop_pos(ball_pos.X, v_x, a_x)
+        y_stop = stop_pos(ball_pos.Y, v_y, a_y)
+        return x_stop, y_stop
