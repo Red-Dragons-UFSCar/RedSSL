@@ -311,6 +311,10 @@ class RobotController:
                     "x": self.field.ball.get_coordinates().X,
                     "y": self.field.ball.get_coordinates().Y,
                 },
+                "predicted_ball": {
+                    "x": self.field.ball.predict_ball_position()[0],
+                    "y": self.field.ball.predict_ball_position()[1]
+                }
             }
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             msg = json.dumps(data).encode("utf-8")
