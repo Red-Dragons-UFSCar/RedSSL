@@ -1,4 +1,5 @@
 import math
+import commons.math as cmath
 import numpy as np
 from entities.Obstacle import Obstacle
 import commons.math as cmath
@@ -103,7 +104,7 @@ def follow_ball_y(robot0, field, fixed_x=None, target_theta=0, offset=0):
 def safe_zone_position(robot0, field, target_theta=0):
     """
     Move o robô para se posicionar em uma região neutra do campo, fungindo da marcação adversária:
-    seguir uma trajetória contrária a da bola ao longo do eixo Y, mantendo uma posição X intermediária em relação aos adversários.
+    seguir uma trajetória contrária a da bola ao longo do eixo Y, mantendo a mesma posição X do zagueiro adversário.
 
     Parâmetros:
     - robot0: Instância do robô a ser movido.
@@ -118,16 +119,16 @@ def safe_zone_position(robot0, field, target_theta=0):
     # posição dos adversários
     enemy_positions = [r.get_coordinates() for r in map_obstacle]
     
-    sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)
+    sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)     # adversários ordenados por X
     
-    # posição em X -> média das posições X do atacante e do zagueiro adversário
-    target_x = (sorted_enemies[1].X)
+    # posição em X -> X do zagueiro adversário
+    target_x = sorted_enemies[1].X
     
     # zagueiro adversário
     zagueiro_y = sorted_enemies[1].Y
-    offset_y = 150  # pode ajustar
+    offset_y = 150  # distância para ficar do zagueiro adversário (sujeito a ajuste)
 
-    # Se a bola estiver acima do zagueiro, vá para baixo (e vice-versa)
+    # posicionamento do lado oposto ao da bola
     if ball_position.Y > field_middle_y:
         target_y = zagueiro_y - offset_y
     else:
@@ -135,8 +136,6 @@ def safe_zone_position(robot0, field, target_theta=0):
 
     # limitar o Y para não sair do campo
     target_y = max(20, min(target_y, 300 - 20))
-    
-    # print(f"Estou indo para: X = {target_x} | Y = {target_y}")
 
     go_to_point(robot0, target_x, target_y, field, target_theta)
     
@@ -152,21 +151,32 @@ def block_pass_line(robot0, field, target_theta=0):
     - target_theta: Ângulo alvo (opcional).
     """
     
+    ball_pos = field.ball.get_coordinates()
     map_obstacle = robot0.map_obstacle.get_map_obstacle()    # robôs adversários
     
     # posição dos adversários
     enemy_positions = [r.get_coordinates() for r in map_obstacle]
     
-    sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)
+    sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)     # adversários ordenados por X
     
-    # menor X -> atacante e zagueiro adversários    
-    pos1, pos2 = sorted_enemies[0], sorted_enemies[1]
+    zag_pos = sorted_enemies[1]
+    gol_pos = sorted_enemies[2]
     
-    # posição em X -> média das posições X do atacante e do zagueiro adversário (testar se estou pegando os robôs certos)
-    target_x = (pos1.X + pos2.X) / 2
+    dist_ball_zag = math.sqrt((zag_pos.X - ball_pos.X) ** 2 + (zag_pos.Y - ball_pos.Y) ** 2)
+    dist_ball_gol = math.sqrt((gol_pos.X - ball_pos.X) ** 2 + (gol_pos.Y - ball_pos.Y) ** 2)
     
-    # posição em Y -> média das posições X do atacante e do zagueiro adversário (testar se estou pegando os robôs certos)
-    target_y = (pos1.Y + pos2.Y) / 2
+    # posição de quem tem a posse da bola: quem está mais perto da bola
+    if dist_ball_zag < dist_ball_gol: posse_pos = zag_pos
+    else: posse_pos = gol_pos
+    
+    # posição do atacante adversário 
+    ata_pos = sorted_enemies[0]
+    
+    # posição em X -> média das posições X do atacante e do adversário que tem a posse da bola
+    target_x = (ata_pos.X + posse_pos.X) / 2
+    
+    # posição em Y -> média das posições Y do atacante e do adversário que tem a posse da bola
+    target_y = (ata_pos.Y + posse_pos.Y) / 2
 
     # limitar o Y para não sair do campo
     target_y = max(50, min(target_y, 300 - 50))
@@ -297,12 +307,36 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
     """
     # Definição dos estados
     STATE_A, STATE_B, STATE_C, STATE_D = "A", "B", "C", "D"
+    
+    ball_pos = field.ball.get_coordinates()
+    map_obstacle = robot0.map_obstacle.get_map_obstacle()    # robôs adversários
+    
+    # posição dos adversários
+    enemy_positions = [r.get_coordinates() for r in map_obstacle]
+    
+    sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)     # adversários ordenados por X
+    
+    goleiro = sorted_enemies[2]
+    
+    # traves -> (450, 110) e (450, 190)
+    t1_ball = np.array([450 - ball_pos.X, 190 - ball_pos.Y])    # vetor: bola → trave de cima
+    t2_ball = np.array([450 - ball_pos.X, 110 - ball_pos.Y])    # vetor: bola → trave de baixo
+    gol_ball = np.array([goleiro.X - ball_pos.X, goleiro.Y - ball_pos.Y])  # vetor: bola → goleiro
 
-    # Define o alvo final (centro do gol)
+    angle_t1_gol = cmath.angle_between(t1_ball, gol_ball)
+    angle_t2_gol = cmath.angle_between(t2_ball, gol_ball)
+    
+    # Ajusta o alvo com base no lado que tem mais ângulo pro chute
+    if angle_t1_gol >= angle_t2_gol:
+        target_y_final = 180 
+    else:
+        target_y_final = 120
+
     target_x_final = 450
-
-    # Ajusta o alvo com base na posição da bola
-    target_y_final = 180 if ball_position.Y < 150 else 145 
+    
+    # print("Ângulo entre trave de cima e goleiro:", np.degrees(angle_t1_gol))
+    # print("Ângulo entre trave de baixo e goleiro:", np.degrees(angle_t2_gol))
+    # print(f'Alvo final -> ({target_x_final}, {target_y_final})')
 
     current_state = field.atacante_current_state
 
