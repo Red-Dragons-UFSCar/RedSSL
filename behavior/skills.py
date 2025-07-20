@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from entities.Obstacle import Obstacle
+import commons.math as cmath
 
 def shoot_kicker(robot0, forca):
     """
@@ -97,6 +98,81 @@ def follow_ball_y(robot0, field, fixed_x=None, target_theta=0, offset=0):
         robot0.vx = 0
         robot0.vy = 0
         robot0.w = 0
+
+
+def safe_zone_position(robot0, field, target_theta=0):
+    """
+    Move o robô para se posicionar em uma região neutra do campo, fungindo da marcação adversária:
+    seguir uma trajetória contrária a da bola ao longo do eixo Y, mantendo uma posição X intermediária em relação aos adversários.
+
+    Parâmetros:
+    - robot0: Instância do robô a ser movido.
+    - field: Instância da classe Field.
+    - target_theta: Ângulo alvo (opcional).
+    """
+    
+    field_middle_y = 150.00     # meio de campo no eixo Y
+    ball_position = field.ball.get_coordinates()
+    map_obstacle = robot0.map_obstacle.get_map_obstacle()    # robôs adversários
+    
+    # posição dos adversários
+    enemy_positions = [r.get_coordinates() for r in map_obstacle]
+    
+    sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)
+    
+    # posição em X -> média das posições X do atacante e do zagueiro adversário
+    target_x = (sorted_enemies[1].X)
+    
+    # zagueiro adversário
+    zagueiro_y = sorted_enemies[1].Y
+    offset_y = 150  # pode ajustar
+
+    # Se a bola estiver acima do zagueiro, vá para baixo (e vice-versa)
+    if ball_position.Y > field_middle_y:
+        target_y = zagueiro_y - offset_y
+    else:
+        target_y = zagueiro_y + offset_y
+
+    # limitar o Y para não sair do campo
+    target_y = max(20, min(target_y, 300 - 20))
+    
+    # print(f"Estou indo para: X = {target_x} | Y = {target_y}")
+
+    go_to_point(robot0, target_x, target_y, field, target_theta)
+    
+
+def block_pass_line(robot0, field, target_theta=0):
+    """
+    Move o robô para se posicionar em uma região que bloqueie a linha de passe do zagueiro:
+    seguir uma trajetória alinhada à reta entre o atacante e o zagueiro.
+
+    Parâmetros:
+    - robot0: Instância do robô a ser movido.
+    - field: Instância da classe Field.
+    - target_theta: Ângulo alvo (opcional).
+    """
+    
+    map_obstacle = robot0.map_obstacle.get_map_obstacle()    # robôs adversários
+    
+    # posição dos adversários
+    enemy_positions = [r.get_coordinates() for r in map_obstacle]
+    
+    sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)
+    
+    # menor X -> atacante e zagueiro adversários    
+    pos1, pos2 = sorted_enemies[0], sorted_enemies[1]
+    
+    # posição em X -> média das posições X do atacante e do zagueiro adversário (testar se estou pegando os robôs certos)
+    target_x = (pos1.X + pos2.X) / 2
+    
+    # posição em Y -> média das posições X do atacante e do zagueiro adversário (testar se estou pegando os robôs certos)
+    target_y = (pos1.Y + pos2.Y) / 2
+
+    # limitar o Y para não sair do campo
+    target_y = max(50, min(target_y, 300 - 50))
+
+    go_to_point(robot0, target_x, target_y, field, target_theta)
+    
 
 def block_ball_y(robot0, field, fixed_x=None, target_theta=0, lim_sup = 300, lim_inf = 0):
     """
@@ -274,7 +350,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         if robot0.target_reached(threshold):
             
             if abs(angle_diff <= 15):
-                shoot_kicker(robot0, 5)
+                shoot_kicker(robot0, 2)
                 current_state = STATE_C
         else:
             current_state = STATE_A
@@ -292,7 +368,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
 
         #Faz o robo conduzir e chutar quando tiver perto do gol
         robot0.v_max = 1.25 if robot_position.X < 335 else 1.5
-        shoot_kicker(robot0, 5)
+        shoot_kicker(robot0, 2)
         # print("Estado C")
 
         if not abs(angle_diff) <= 20:
@@ -1305,7 +1381,97 @@ def pass_ball(robot0,robot1, field, target_theta):
     else:
         go_to_point(robot0, target_x, target_y, field, target_theta, threshold)
 
+def keeper_activate(robot0, field, threshold=15):
+    
+    """
+    Seleciona o comportamento ativo o goleiro deve executar.
+    Parâmetros:
+    - robot0: Instância do robô a ser movido.
+    - field: Instância da classe Field.
+    - threshold: Distância de seguranca para assegurar que o goleiro esta mais perto da bola do que o atacante adversário.
+    """
+    
+    ball_position = field.ball.get_coordinates()
+    robot_position = robot0.get_coordinates()
 
+    enemy_robots = field.get_enemy_robots()      
+    enemy_positions = [enemy.get_coordinates() for enemy in enemy_robots]
+    closest_enemy = min(enemy_positions, key=lambda p: math.hypot(p.X - ball_position.X, p.Y - ball_position.Y))
+
+    # Distância do inimigo mais próximo até a bola
+    enemy_toball_distance = math.hypot(closest_enemy.X - ball_position.X, closest_enemy.Y - ball_position.Y)
+    keeper_toball_distance = math.hypot(robot_position.X - ball_position.X, robot_position.Y - ball_position.Y)
+
+    # Se o goleiro está perto da bola e o atacante nao ele deve atacar
+    if keeper_toball_distance < 100 and enemy_toball_distance + threshold > keeper_toball_distance:
+        pursue_ball(robot0, field)
+
+    # Se o goleiro está longe da bola ou o atacante adversário não está perto, ele deve ficar no centro
+    else:
+        trajectory_align(robot0, field)
+
+def trajectory_align(robot0, field, target_x = 50):
+
+    """
+    Move o robô para se posicionar entre a trajetoria do chute e as retas formadas pela bola e limite do gol.
+
+    Parâmetros:
+    - robot0: Instância do robô a ser movido.
+    - field: Instância da classe Field.
+    - target_theta: Ângulo alvo (opcional).
+
+    TODO: Implementar lógica para ajustar o goleiro com base nos angulos de chute do atacante adversário.
+    TODO: Fazer o goleiro nao avancar quando a bola for chutada, precisa detectar o chute(provavelmente vendo se a velocidade da bola e maior que 1.5)
+    """
+    GolLimX = 50
+    HalfCourtX = 225
+    
+    # Posicao da Bola
+    ball_position = field.ball.get_coordinates()  
+
+    # Posicao do Atacante Adversario
+    enemy_robots = field.get_enemy_robots()   
+    enemy_positions = [enemy.get_coordinates() for enemy in enemy_robots]
+    closest_enemy = min(enemy_positions, key=lambda p: math.hypot(p.X - ball_position.X, p.Y - ball_position.Y))
+    attacker_x, attacker_y = closest_enemy.X, closest_enemy.Y
+    for i, enemy in enumerate(enemy_positions):
+        print(f"Enemy {i}: X = {enemy.X}, Y = {enemy.Y}")
+    # Projecoes da Bola
+    #ball_low = np.array([ball_position.X, 120 - ball_position.Y]) 
+    #ball_high = np.array([ball_position.X, 180 - ball_position.Y])
+    #attack = np.array([attacker_x - robot0.X, attacker_y - robot0.Y])
+
+    # Calcula o Angulo Formado Entre as Retas
+    #angle_low = cmath.angle_between(ball_low, attack)
+    #angle_high = cmath.angle_between(ball_high, attack)
+
+
+    # Evitando divisão por zero
+    if attacker_x == ball_position.X:       
+        target_y = ball_position.Y      
+
+    # Ajuste para quando o atacante está nas laterais do campo perto da area
+    elif attacker_x <= GolLimX:
+        m = (attacker_y - ball_position.Y) / (attacker_x - ball_position.X)        
+        target_x = attacker_x/2
+
+    else:
+        m = (attacker_y - ball_position.Y) / (attacker_x - ball_position.X)
+        
+        # Interpolação Linear para o Alvo. 
+        # Se o atacante está mais perto do gol, o alvo é mais próximo do limite da area
+        # Se o atacante está mais longe do gol, o alvo é mais próximo do gol
+        factor = (attacker_x - GolLimX + 10) / ((HalfCourtX - 45) - GolLimX + 10)
+        factor = np.clip(factor, 0, 1)  
+        target_x =(1 - factor) * HalfCourtX
+        
+    target_x = np.clip(target_x, 0, 50)
+    target_y = m*(target_x - ball_position.X) + ball_position.Y    
+    target_y = np.clip(target_y, 90, 210)
+    target_theta = np.arctan2(attacker_y - target_y, attacker_x - target_x)
+    go_to_point(robot0, target_x, target_y, field, target_theta)
+
+    
 
 
 
