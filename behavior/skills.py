@@ -114,10 +114,7 @@ def safe_zone_position(robot0, field, target_theta=0):
     
     field_middle_y = 150.00     # meio de campo no eixo Y
     ball_position = field.ball.get_coordinates()
-    map_obstacle = robot0.map_obstacle.get_map_obstacle()    # robôs adversários
-    
-    # posição dos adversários
-    enemy_positions = [r.get_coordinates() for r in map_obstacle]
+    enemy_positions = [r.get_coordinates() for r in field.enemy_robots]
     
     sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)     # adversários ordenados por X
     
@@ -152,10 +149,7 @@ def block_pass_line(robot0, field, target_theta=0):
     """
     
     ball_pos = field.ball.get_coordinates()
-    map_obstacle = robot0.map_obstacle.get_map_obstacle()    # robôs adversários
-    
-    # posição dos adversários
-    enemy_positions = [r.get_coordinates() for r in map_obstacle]
+    enemy_positions = [r.get_coordinates() for r in field.enemy_robots]
     
     sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)     # adversários ordenados por X
     
@@ -309,10 +303,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
     STATE_A, STATE_B, STATE_C, STATE_D = "A", "B", "C", "D"
     
     ball_pos = field.ball.get_coordinates()
-    map_obstacle = robot0.map_obstacle.get_map_obstacle()    # robôs adversários
-    
-    # posição dos adversários
-    enemy_positions = [r.get_coordinates() for r in map_obstacle]
+    enemy_positions = [r.get_coordinates() for r in field.enemy_robots]
     
     sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)     # adversários ordenados por X
     
