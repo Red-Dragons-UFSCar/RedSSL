@@ -24,7 +24,8 @@ def goleiro(robot0, field):
     # Verifica se a bola está pŕoxima à área
     elif (ball_position.X <= GoalieChaseline) and (90 < ball_position.Y < 210):
             # A bola está perto da area
-            skills.basic_tackle(robot0, field)  # vai atras
+            #skills.basic_tackle(robot0, field)  # vai atras
+            skills.goalie_intercept_and_pass(robot0, field)
             
     else:
             # A bola não está na área, mas está perto

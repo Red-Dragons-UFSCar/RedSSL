@@ -28,6 +28,9 @@ class Field:
         # Máquina de estados do atacante
         self.atacante_current_state = "A"
 
+        # Máquina de estados do goleiro
+        self.goleiro_current_state = "A"
+
         # Máquina de estados do atacante real
         self.atacante_state_real = "A"
         self.enable_angular_controller_mono = False

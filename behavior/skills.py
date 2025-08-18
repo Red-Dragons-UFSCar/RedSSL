@@ -1280,9 +1280,9 @@ Faz com que um robô persiga a bola e passe a bola para outro robô.
         go_to_point(robot0, target_x, target_y, field, target_theta, threshold)'''
 
 
-def pass_ball(robot0,robot1, field, target_theta):
+def pass_ball(robot0, robot1, field, target_theta):
     """
-    Alinha o robô para atacar a bola no gol.
+    Alinha o robô para fazer o passe de bola.
 
     Parâmetros:
     - robot0: Instância do robô a ser movido.
@@ -1427,7 +1427,7 @@ def keeper_activate(robot0, field, threshold=15):
     enemy_toball_distance = math.hypot(closest_enemy.X - ball_position.X, closest_enemy.Y - ball_position.Y)
     keeper_toball_distance = math.hypot(robot_position.X - ball_position.X, robot_position.Y - ball_position.Y)
 
-    # Se o goleiro está perto da bola e o atacante nao ele deve atacar
+    # Se o goleiro está perto da bola e o atacante, nao ele deve atacar
     if keeper_toball_distance < 100 and enemy_toball_distance + threshold > keeper_toball_distance:
         pursue_ball(robot0, field)
 
@@ -1496,10 +1496,76 @@ def trajectory_align(robot0, field, target_x = 50):
     target_theta = np.arctan2(attacker_y - target_y, attacker_x - target_x)
     go_to_point(robot0, target_x, target_y, field, target_theta)
 
+
+def goalie_intercept_and_pass(robot0, field):
+    """
+    Goleiro domina a bola e passa para o robô mais livre.
+    """
+
+    # Definição dos estados
+    STATE_A, STATE_B, STATE_C, STATE_D = "A", "B", "C", "D"
+
     
+    current_state = field.goleiro_current_state
 
+    
+    pred_x, pred_y = field.ball.predict_ball_position()
 
+    robot_position = robot0.get_coordinates()
+    ball_position = field.ball.get_coordinates()
+    v_x, v_y = field.ball._velocity_cache
+    ball_velocity = math.hypot(v_x, v_y)
+    distance_to_target = math.hypot(pred_x - robot_position.X, pred_y - robot_position.Y)
+    ball_distance = math.hypot(ball_position.X - robot_position.X, ball_position.Y - robot_position.Y)
 
+    if current_state == STATE_A:
+        #Ir até o ponto previsto da bola
+        go_to_point(robot0, pred_x, pred_y, field)
+        if distance_to_target < 15:
+            current_state = STATE_B
 
+    elif current_state == STATE_B:
+        #Esperar a bola chegar e parar
+        robot0.set_velocities(0, 0, 0, 0, 0, 0)
+        if ball_distance < 20 and ball_velocity < 50:
+            current_state = STATE_C
 
+    elif current_state == STATE_C:
+        #Escolher o melhor aliado para o passe
+        allies = [ally for ally in field.get_ally_robots() if ally.robot_id != robot0.robot_id]
+        enemies = field.get_enemy_robots()
+
+        best_ally = None
+        best_score = float('-inf')
+
+        for ally in allies:
+            ally_pos = ally.get_coordinates()
+            min_enemy_dist = min(
+                math.hypot(ally_pos.X - e.get_coordinates().X, ally_pos.Y - e.get_coordinates().Y)
+                for e in enemies
+            )
+            lateral_score = abs(ally_pos.Y - field.height / 2)
+            score = min_enemy_dist + 0.1 * lateral_score
+
+            if score > best_score:
+                best_score = score
+                best_ally = ally
+
+        if best_ally:
+            angle_to_ally = np.arctan2(
+                best_ally.get_coordinates().Y - ball_position.Y,
+                best_ally.get_coordinates().X - ball_position.X
+            )
+            pass_ball(robot0, best_ally, field, angle_to_ally)
+            current_state = STATE_D
+        else:
+            # Se nenhum robô estiver disponível, segura a bola
+            robot0.set_velocities(0, 0, 0, 0, 0, 0)
+
+    elif current_state == STATE_D:
+        #Estado final ou de espera
+        robot0.set_velocities(0, 0, 0, 0, 0, 0)
+
+    # Atualiza estado do goleiro
+    field.goleiro_current_state = current_state
 
