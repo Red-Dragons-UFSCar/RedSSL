@@ -265,6 +265,7 @@ class RobotController:
     def data_to_interface(self):
         try:
             data = {
+                "type": "código",
                 "robot0": {
                     "x": self.robot0.get_coordinates().X,
                     "y": self.robot0.get_coordinates().Y,
@@ -322,6 +323,38 @@ class RobotController:
         except:
             print('Erro ao enviar dados para interface')
 
+    # Simulando dados que vêm da eletrônica       
+    def electronics_to_interface(self):
+        try:
+            data = {
+                "type": "eletrônica",
+                "robot0": {
+                    "tensao": round(random.uniform(11.5, 12.6), 2),
+                    "corrente": round(random.uniform(1.2, 2.0), 2),
+                    "loss": round(random.uniform(0.0, 1.0), 2),
+                    "ping": random.randint(10, 20)
+                },
+                "robot1": {
+                    "tensao": round(random.uniform(11.5, 12.6), 2),
+                    "corrente": round(random.uniform(1.2, 2.0), 2),
+                    "loss": round(random.uniform(0.0, 1.0), 2),
+                    "ping": random.randint(10, 20)
+                },
+                "robot2": {
+                    "tensao": round(random.uniform(11.5, 12.6), 2),
+                    "corrente": round(random.uniform(1.2, 2.0), 2),
+                    "loss": round(random.uniform(0.0, 1.0), 2),
+                    "ping": random.randint(10, 20)
+                }
+            }
+
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            msg = json.dumps(data).encode("utf-8")
+            client_socket.sendto(msg, ('127.0.0.1', 12000))
+            print("Mensagem da eletrônica enviada")
+        except Exception as e:
+            print("Erro ao enviar dados da eletrônica:", e)
+
     def control_loop(self):
         while True:
             t1 = time.time()
@@ -367,6 +400,7 @@ class RobotController:
             self.field.send_local = False
 
             self.data_to_interface()
+            self.electronics_to_interface()
 
             #ball_vx, ball_vy = self.field.ball._velocity_cache
             #ball_ax, ball_ay = self.field.ball._acceleration_cache  # <-- pega aceleração da bola
@@ -376,7 +410,6 @@ class RobotController:
 
             ball_stop_x, ball_stop_y = self.field.ball.predict_ball_position()
             print(f"[PREVISÃO] Bola irá parar em: X={ball_stop_x:.2f}, Y={ball_stop_y:.2f}")
-
             
             # print("---------------------------------------")
             # print("    LOGGING DOS ROBÔS TIME     ")

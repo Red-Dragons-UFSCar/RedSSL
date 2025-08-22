@@ -8,10 +8,10 @@ import json
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QLabel, QCheckBox, QGroupBox,
     QHBoxLayout, QVBoxLayout, QGridLayout, QFrame, QButtonGroup, QSplitter,
-    QPushButton # QPushButton ADICIONADO AQUI
+    QPushButton
 )
 from PyQt5.QtGui import (
-    QPixmap, QPainter, QPen, QBrush, QColor, QFont, QPalette, QPolygonF, QFontMetrics # QFontMetrics ADICIONADO AQUI
+    QPixmap, QPainter, QPen, QBrush, QColor, QFont, QPalette, QPolygonF, QFontMetrics
 )
 from PyQt5.QtCore import (
     Qt, QRectF, QLineF, QPointF, QSize, QThread, pyqtSignal
@@ -440,7 +440,8 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
         # self.update_right_panel_display() # REMOVED
         
         # Comunicação com o código principal
-        self.last_udp_message = None
+        self.last_code_message = None
+        self.last_eletronics_message = None
         self.listener_thread = UDPListenerThread()      # Thread de comunicação
         self.listener_thread.message_received.connect(self.receive_message)
         self.listener_thread.start()
@@ -534,28 +535,35 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
         self.updateGeometry()
         self.update()
 
-
     def receive_message(self, msg):
         try:
             data = json.loads(msg)
-            self.last_udp_message = data  # salva último dado recebido
         except json.JSONDecodeError:
-            print("Erro ao decodificar JSON")
+            print("Erro ao decodificar J SON")
             return
 
-        self.display_left_sidebar(data)     # dados para a left bar
-        self.update_wheel_speeds(data)      # dados para a right bar
-        self.soccer_field_widget.load_from_json(data)       # dados para o campo
+        type = data.get("type")
+        
+        # Recebimento de dados do código
+        if type == "código":
+            self.last_code_message = data
+            self.update_positions(data)     
+            self.update_wheel_speeds(data)      
+            self.soccer_field_widget.load_from_json(data)       
+        
+        # Recebimento de dados da eletrôncia
+        elif type == "eletrônica":
+            self.last_eletronics_message = data
+            self.update_electronics_data(data)
 
-    # Função que atuzaliza a left sidebar
-    def display_left_sidebar(self, data):
+    # Função que atualiza a posição dos robôs e da bola
+    def update_positions(self, data):
         team = "robot" if self.cb_red_dragons.isChecked() else "enemy_robot"
 
         for i in range(3):
             key = f"{team}{i}"
             if key in data:
                 rob = data[key]
-                # Check if pos_labels[i] exists and has enough elements
                 if i < len(self.pos_labels) and len(self.pos_labels[i]) == 3:
                     self.pos_labels[i][0].setText(f"{(rob['x']/100):.2f}")
                     self.pos_labels[i][1].setText(f"{(rob['y']/100):.2f}")
@@ -570,13 +578,13 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
             self.ball_pos_x_label_value.setText(f"{(data['ball']['x']/100):.2f}")
             self.ball_pos_y_label_value.setText(f"{(data['ball']['y']/100):.2f}")
 
-    # Função que atuzaliza a right sidebar (por enquanto não recebemos nada da eletrônica)
-    # This function now updates labels that are part of the left sidebar
+    # Função que atuzaliza a velocidade das rodas
     def update_wheel_speeds(self, data):
         wheel_keys = ["FR", "FL", "BR", "BL"]
+        team = "robot" if self.cb_red_dragons.isChecked() else "enemy_robot"
 
         for i in range(3):
-            robot_key = f"robot{i}" # Assumes wheel speeds are always for "robot" (Red Dragons)
+            robot_key = f"{team}{i}" # Assumes wheel speeds are always for "robot" (Red Dragons)
             if robot_key in data and "wheels" in data[robot_key]:
                 wheels = data[robot_key]["wheels"]
                 # Check if wheels_labels[i] exists and has enough elements
@@ -591,6 +599,18 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
                 if i < len(self.wheels_labels) and len(self.wheels_labels[i]) == len(wheel_keys):
                     for j in range(len(wheel_keys)):
                         self.wheels_labels[i][j].setText("?")
+
+    # Função que atuzaliza as informações vindas da eletrônica       
+    def update_electronics_data(self, data):
+        if self.cb_red_dragons.isChecked():
+            elec_keys = ["tensao", "corrente", "loss", "ping"]
+            for i in range(3):
+                robot_key = f"robot{i}"
+                if robot_key in data and any(k in data[robot_key] for k in elec_keys):
+                    for j, key in enumerate(elec_keys):
+                        value = data[robot_key].get(key, None)
+                        if i < len(self.elec_labels) and j < len(self.elec_labels[i]):
+                            self.elec_labels[i][j].setText(f"{value:.2f}" if isinstance(value, (int, float)) else "?")
 
     def create_styled_label(self, text, is_header=False): 
         label = QLabel(text)
@@ -772,82 +792,6 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
         # --- End of elements moved from Right Sidebar ---
 
         self.left_layout.addStretch(1) 
-
-    # def setupRightSidebar(self): # REMOVED
-    #     self.right_sidebar_widget = QWidget()
-    #     self.right_sidebar_widget.setFixedWidth(self.SIDEBAR_FIXED_WIDTH)
-    #     self.right_layout = QVBoxLayout(self.right_sidebar_widget) 
-    #     self.right_layout.setAlignment(Qt.AlignTop)
-    #     self.right_layout.setSpacing(10) 
-    # 
-    #     # --- Espaçador para alinhar títulos ---
-    #     # Adiciona um espaçador no topo da barra direita com a altura da logo da barra esquerda.
-    #     # Como o espaçamento dos layouts é o mesmo (10px), isso deve alinhar os títulos.
-    #     logo_alignment_spacer = QWidget()
-    #     logo_alignment_spacer.setFixedHeight(self.LOGO_HEIGHT) # Usa a altura da logo
-    #     self.right_layout.addWidget(logo_alignment_spacer)
-    #     # --- Fim Espaçador ---
-    # 
-    #     self.right_sidebar_title_label = QLabel("Informações Eletrônica")
-    #     self.right_sidebar_title_label.setObjectName("RightSidebarTitleLabel") 
-    #     self.right_layout.addWidget(self.right_sidebar_title_label)
-    #     
-    #     self.cb_elec = QCheckBox("Eletrônica")
-    #     self.cb_wheels = QCheckBox("Velo. Rodas")
-    #     self.cb_wheels.setChecked(True) 
-    # 
-    #     self.right_display_group = QButtonGroup(self) 
-    #     self.right_display_group.setExclusive(True)
-    #     self.right_display_group.addButton(self.cb_elec)
-    #     self.right_display_group.addButton(self.cb_wheels)
-    # 
-    #     checkbox_layout_right = QHBoxLayout() 
-    #     checkbox_layout_right.addWidget(self.cb_elec)
-    #     checkbox_layout_right.addWidget(self.cb_wheels)
-    #     checkbox_layout_right.addStretch()
-    #     self.right_layout.addLayout(checkbox_layout_right) 
-    # 
-    #     self.elec_group = QGroupBox("Eletrônica")
-    #     elec_layout = QGridLayout(self.elec_group)
-    #     elec_layout.setSpacing(5)
-    #     elec_layout.setColumnStretch(0, 1); elec_layout.setColumnStretch(1, 2); elec_layout.setColumnStretch(2, 2); elec_layout.setColumnStretch(3, 1); elec_layout.setColumnStretch(4, 2)
-    # 
-    #     elec_layout.addWidget(self.create_styled_label("Robô", True), 0, 0)
-    #     elec_layout.addWidget(self.create_styled_label("Tensão (V)", True), 0, 1)
-    #     elec_layout.addWidget(self.create_styled_label("Corrente (A)", True), 0, 2)
-    #     elec_layout.addWidget(self.create_styled_label("Loss (%)", True), 0, 3)
-    #     elec_layout.addWidget(self.create_styled_label("Ping (ms)", True), 0, 4)
-    # 
-    #     self.elec_labels = [] 
-    #     for i in range(3):
-    #         self.elec_labels.append([])
-    #         elec_layout.addWidget(self.create_styled_label(f"Robô {i+1}"), i + 1, 0)
-    #         for j in range(4):
-    #             lbl = self.create_styled_label("?")
-    #             self.elec_labels[i].append(lbl)
-    #             elec_layout.addWidget(lbl, i + 1, j + 1)
-    #     self.right_layout.addWidget(self.elec_group)
-    # 
-    #     self.wheels_group = QGroupBox("Velocidades")
-    #     wheels_layout = QGridLayout(self.wheels_group)
-    #     wheels_layout.setSpacing(5)
-    #     wheels_layout.addWidget(self.create_styled_label("Robô", True), 0, 0)
-    #     wheel_names = ["FR", "FL", "BR", "BL"] 
-    #     for col_idx, name in enumerate(wheel_names):
-    #         wheels_layout.addWidget(self.create_styled_label(name, True), 0, col_idx + 1)
-    # 
-    #     self.wheels_labels = [] 
-    #     for i in range(3):
-    #         self.wheels_labels.append([])
-    #         wheels_layout.addWidget(self.create_styled_label(f"Robô {i+1}"), i + 1, 0)
-    #         for j in range(len(wheel_names)):
-    #             lbl = self.create_styled_label("?")
-    #             self.wheels_labels[i].append(lbl)
-    #             wheels_layout.addWidget(lbl, i + 1, j + 1)
-    #     self.right_layout.addWidget(self.wheels_group)
-    #     
-    #     self.right_layout.addStretch(1) 
-    #     self.elec_group.hide() 
         
     def update_left_panel_display(self): 
         is_opponent = self.cb_opponent.isChecked()
@@ -884,25 +828,6 @@ class MainWindow(QMainWindow): # Define a classe da janela principal, herda de Q
         for i in range(num_robots_to_display):
             if i < len(self.wheels_labels) and len(self.wheels_labels[i]) == 4: # Ensure list and sublist exist
                 for j in range(4): self.wheels_labels[i][j].setText("0.0")
-
-
-    # def update_right_panel_display(self): # REMOVED
-    #     self.elec_group.setVisible(self.cb_elec.isChecked()) 
-    #     self.wheels_group.setVisible(self.cb_wheels.isChecked()) 
-    #     
-    #     if self.cb_elec.isChecked(): self.right_sidebar_title_label.setText("Info Eletrônica")
-    #     elif self.cb_wheels.isChecked(): self.right_sidebar_title_label.setText("Info Velocidades")
-    #     else: self.right_sidebar_title_label.setText("Informações")
-    # 
-    #     num_robots_to_display = 3
-    #     if self.cb_elec.isChecked():
-    #         for i in range(num_robots_to_display):
-    #              if i < len(self.elec_labels):
-    #                 for j in range(4): self.elec_labels[i][j].setText("-/-")
-    #     elif self.cb_wheels.isChecked():
-    #         for i in range(num_robots_to_display):
-    #             if i < len(self.wheels_labels):
-    #                 for j in range(4): self.wheels_labels[i][j].setText("0.0")
 
 def main(): 
     # Ensure QApplication instance exists before setting global font
