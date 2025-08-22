@@ -11,7 +11,7 @@ import time
 
 def goleiro(robot0, field):
 
-    Goalie_Chase_line = 75  # Limite para considerar perto
+    Goalie_Chase_line = 80  # Limite para considerar perto
     Goaie_Y_Enable = 300  # Quando o goleiro começa a perseguir a bola
 
     # Posição atual da bola
@@ -21,6 +21,7 @@ def goleiro(robot0, field):
     if (ball_position.X <= Goalie_Chase_line) and (90 < ball_position.Y < 210):
         # A bola está perto da area
         skills.basic_tackle(robot0, field)  # vai atras
+
 
     else:
         if ball_position.X <= Goaie_Y_Enable:
@@ -32,10 +33,10 @@ def goleiro(robot0, field):
             # poupar bateria e motor (não sei se é tão relevante assim)
             skills.stay_on_center(
                 robot0, field
-            )  # manda pro centrofrom behavior.skills import follow_ball_y, pursue_ball
+            )  # manda pro centrofrom behavior.skills import follow_ball_y, pursue_ball'''
 
 
-def zagueiro(robot0, field):
+def zagueiro(robot0, robot1 ,field):
     """
     Função que controla o comportamento do robô zagueiro.
     O robô segue a bola no eixo Y quando a bola está no ataque,
@@ -43,15 +44,19 @@ def zagueiro(robot0, field):
     """
     offensive_line_x = 225.00  # Meio de campo
     ball_position = field.ball.get_coordinates()
+    robot_position = robot0.get_coordinates()
 
-    if ball_position.X >= offensive_line_x:
+
+    if ball_position.X >= offensive_line_x: 
         skills.follow_ball_y(robot0, field)
     else:
-        skills.pursue_ball(robot0, field)
-
+        skills.pass_ball(robot0, robot1 ,field, robot_position.rotation)
+        #skills.pursue_ball
 
 def atacante(robot0, field):
     ball_position = field.ball.get_coordinates()
+    offensive_line_x = 225.00  # Meio de campo
+    midLineY = 150 # Meio em Y
 
     for robot_field in field.enemy_robots:
         obst = Obstacle()
@@ -62,9 +67,12 @@ def atacante(robot0, field):
     
     if (400 < ball_position.X <= 450) and (87.5 <= ball_position.Y <= 222.5):
         skills.follow_ball_y(robot0, field, 380)
-    elif ball_position.X < 225:
-        skills.follow_ball_y(robot0, field, 300)
-    else:
+    elif ball_position.X < offensive_line_x:
+        if ball_position.Y <= midLineY:
+            skills.follow_ball_y(robot0, field, fixed_x = offensive_line_x + 20, offset=-50)
+        else: 
+            skills.follow_ball_y(robot0, field, fixed_x = offensive_line_x + 20, offset=50)
+    else:   
         skills.shoot(robot0, field)
 
 def atacante_campo_todo(robot0, field):

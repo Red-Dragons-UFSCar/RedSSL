@@ -180,6 +180,7 @@ class RobotController:
             ball_detection = frame["ball"]
             self.field.update_ball_position(ball_detection["x"], ball_detection["y"])
 
+
     def send_velocities(self):
         # Envio de velocidades no sistema global
         """
@@ -311,6 +312,10 @@ class RobotController:
                     "x": self.field.ball.get_coordinates().X,
                     "y": self.field.ball.get_coordinates().Y,
                 },
+                "predicted_ball": {
+                    "x": self.field.ball.predict_ball_position()[0],
+                    "y": self.field.ball.predict_ball_position()[1]
+                }
             }
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             msg = json.dumps(data).encode("utf-8")
@@ -367,7 +372,7 @@ class RobotController:
             Coach.escolher_estrategia(self.coach, self.robot2, self.robot1, self.robot0)
             #Coach.escolher_estrategia_real_2(self.coach, self.robot1,self.robot0,self.robot2)
             #skills.go_to_point(self.robot0, self.field.ball.get_coordinates().X, self.field.ball.get_coordinates().Y, self.field, 0, threshold=15)
-            #estrategia_basica_real(self.robot2,self.robot1,self.robot0,self.field)
+
             #skills.attack_ball_fisico(self.robot0, self.field)
 
             #self.robot0.vx = 1
@@ -396,6 +401,15 @@ class RobotController:
 
             self.data_to_interface()
             self.electronics_to_interface()
+
+            #ball_vx, ball_vy = self.field.ball._velocity_cache
+            #ball_ax, ball_ay = self.field.ball._acceleration_cache  # <-- pega aceleração da bola
+            #print(f"Ball Velocity: X={ball_vx:.2f}, Y={ball_vy:.2f}")
+            #print(f"Ball Acceleration: X={ball_ax:.2f}, Y={ball_ay:.2f}")  # <-- print da aceleração
+            #print(f"Robot 0 Velocity: X={self.robot0.vx:.2f}, Y={self.robot0.vy:.2f}")
+
+            ball_stop_x, ball_stop_y = self.field.ball.predict_ball_position()
+            print(f"[PREVISÃO] Bola irá parar em: X={ball_stop_x:.2f}, Y={ball_stop_y:.2f}")
             
             # print("---------------------------------------")
             # print("    LOGGING DOS ROBÔS TIME     ")
@@ -430,7 +444,7 @@ class RobotController:
             # print("Robo goleiro, id=", self.enemy_robot2.vision_id)
             # print("x: ", self.enemy_robot2.get_coordinates().X)
             # print("y: ", self.enemy_robot2.get_coordinates().X)
-            # print("r: ", self.enemy_robot2.get_coordinates().rotation)
+            # print("r: ", self.enemy_robot2.get_coordinates().rotation)'''
 
             if (t2 - t1) < 1 / CONTROL_FPS:
                 time.sleep(1 / CONTROL_FPS - (t2 - t1))
@@ -443,3 +457,6 @@ if __name__ == "__main__":
     controller = RobotController()
     controller.start_vision_thread()
     controller.control_loop()
+
+
+

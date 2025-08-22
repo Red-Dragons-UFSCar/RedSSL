@@ -9,7 +9,7 @@ def estrategia_basica(robot_goalie, robot_zagueiro, robot_atacante, field):
     Chama as funções goalie e zagueiro para controlar os dois robôs.
     """
     tactics.goleiro(robot_goalie, field)
-    tactics.zagueiro(robot_zagueiro, field)
+    tactics.zagueiro(robot_zagueiro, robot_atacante ,field)
     tactics.atacante(robot_atacante, field)
 
 def estrategia_basica_real(robot_goalie, robot_zagueiro, robot_atacante, field):

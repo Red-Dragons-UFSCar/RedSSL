@@ -90,6 +90,12 @@ class SoccerFieldWidget(QWidget): # Define uma classe personalizada que herda de
             "x": self.FIELD_PLAYING_LENGTH_M / 2, # Centro do campo em X
             "y": self.FIELD_PLAYING_WIDTH_M / 2,  # Centro do campo em Y
         }
+        
+        # Add predicted ball data
+        self.predicted_ball_data = {
+            "x": self.FIELD_PLAYING_LENGTH_M / 2,
+            "y": self.FIELD_PLAYING_WIDTH_M / 2,
+        }
 
     # --- Métodos de Desenho ---
     def draw_robot(self, painter, robot_info, pixels_per_meter):
@@ -158,7 +164,7 @@ class SoccerFieldWidget(QWidget): # Define uma classe personalizada que herda de
 
         painter.restore() # Restaura o estado anterior do QPainter
 
-    def draw_ball(self, painter, ball_info, pixels_per_meter):
+    def draw_ball(self, painter, ball_info, pixels_per_meter, color=None, opacity=1.0):
         """Desenha a bola no campo."""
         x_m, y_m = ball_info["x"] / 100, ball_info["y"] / 100   # dados vêm em cm 
         # Converte dimensões e posições para pixels
@@ -169,7 +175,11 @@ class SoccerFieldWidget(QWidget): # Define uma classe personalizada que herda de
         painter.save() # Salva estado do painter
         painter.translate(center_x_px, center_y_px) # Move origem para o centro da bola
         
-        painter.setBrush(self.BALL_COLOR) # Define cor de preenchimento da bola (laranja)
+        # Use custom color and opacity if provided, otherwise use default
+        ball_color = color if color is not None else self.BALL_COLOR
+        painter.setBrush(QBrush(ball_color))
+        painter.setOpacity(opacity)
+        
         # Define caneta para borda sutil da bola (marrom escuro, espessura escalonada)
         painter.setPen(QPen(QColor(100,60,0), max(0.5, 1.0 * pixels_per_meter / 150))) 
         painter.drawEllipse(QPointF(0,0), ball_radius_px, ball_radius_px) # Desenha a bola
@@ -250,10 +260,18 @@ class SoccerFieldWidget(QWidget): # Define uma classe personalizada que herda de
         painter.drawEllipse(QPointF(penalty_mark_x2_px, playing_area_px_h / 2.0),
                               penalty_mark_radius_px, penalty_mark_radius_px)
         
-        # --- Desenhar Robôs e Bola ---
+        # --- Desenhar Robôs e Bolas ---
         for robot_data in self.robots_data: # Itera sobre a lista de robôs
             self.draw_robot(painter, robot_data, pixels_per_meter) # Chama o método para desenhar cada robô
-        self.draw_ball(painter, self.ball_data, pixels_per_meter) # Chama o método para desenhar a bola
+        
+        # Draw predicted ball first (underneath the real ball)
+        if hasattr(self, 'predicted_ball_data') and self.predicted_ball_data:
+            predicted_color = QColor(120, 120, 120)  # Grayish color
+            self.draw_ball(painter, self.predicted_ball_data, pixels_per_meter, 
+                          color=predicted_color, opacity=0.5)
+        
+        # Draw real ball on top
+        self.draw_ball(painter, self.ball_data, pixels_per_meter)
         
         painter.restore() # Restaura o estado do painter (remove a translação do campo)
         painter.end()     # Finaliza o uso do QPainter para este evento
@@ -269,6 +287,17 @@ class SoccerFieldWidget(QWidget): # Define uma classe personalizada que herda de
             "x": game_state_json["ball"]["x"],
             "y": game_state_json["ball"]["y"]
         }
+        
+        # Load predicted ball data if available
+        if "predicted_ball" in game_state_json:
+            self.predicted_ball_data = {
+                "x": game_state_json["predicted_ball"]["x"],
+                "y": game_state_json["predicted_ball"]["y"]
+            }
+        else:
+            # Fallback: use current ball position if no prediction available
+            self.predicted_ball_data = self.ball_data.copy()
+            
         self.update()
         
     def json_to_robot_data(self, json_data):
