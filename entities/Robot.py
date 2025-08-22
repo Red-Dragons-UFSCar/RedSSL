@@ -30,8 +30,8 @@ class Robot(KinematicBody):
         self.v_max = 1.0  # Velocidade linear máxima em módulo
 
         '''
-        '''
         # Parâmetros PID
+        '''
         Kp_x = 6.551
         Kd_x = 0.1
         Ki_x = 0
@@ -43,7 +43,6 @@ class Robot(KinematicBody):
         Kp_theta = 3
         Kd_theta = 0
         Ki_theta = 0
-        
         
 
         ''' Controlador PID original fisico
@@ -60,9 +59,7 @@ class Robot(KinematicBody):
         Ki_theta = 0
         '''
 
-        ''' FISICO ATUAL'''
-         
-
+        ''' FISICO ATUAL
         Kp_x = 25
         Kd_x = 0
         Ki_x = 15
@@ -74,7 +71,7 @@ class Robot(KinematicBody):
         Kp_theta = 5
         Kd_theta = 0
         Ki_theta = 0
-       
+        '''
 
         ''' SIMULACAO 2
         Kp_x = 13
