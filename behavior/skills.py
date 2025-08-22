@@ -1,6 +1,8 @@
 import math
+import commons.math as cmath
 import numpy as np
 from entities.Obstacle import Obstacle
+import commons.math as cmath
 
 def shoot_kicker(robot0, forca):
     """
@@ -97,6 +99,84 @@ def follow_ball_y(robot0, field, fixed_x=None, target_theta=0, offset=0):
         robot0.vx = 0
         robot0.vy = 0
         robot0.w = 0
+
+
+def safe_zone_position(robot0, field, target_theta=0):
+    """
+    Move o robô para se posicionar em uma região neutra do campo, fungindo da marcação adversária:
+    seguir uma trajetória contrária a da bola ao longo do eixo Y, mantendo a mesma posição X do zagueiro adversário.
+
+    Parâmetros:
+    - robot0: Instância do robô a ser movido.
+    - field: Instância da classe Field.
+    - target_theta: Ângulo alvo (opcional).
+    """
+    
+    field_middle_y = 150.00     # meio de campo no eixo Y
+    ball_position = field.ball.get_coordinates()
+    enemy_positions = [r.get_coordinates() for r in field.enemy_robots]
+    
+    sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)     # adversários ordenados por X
+    
+    # posição em X -> X do zagueiro adversário
+    target_x = sorted_enemies[1].X
+    
+    # zagueiro adversário
+    zagueiro_y = sorted_enemies[1].Y
+    offset_y = 150  # distância para ficar do zagueiro adversário (sujeito a ajuste)
+
+    # posicionamento do lado oposto ao da bola
+    if ball_position.Y > field_middle_y:
+        target_y = zagueiro_y - offset_y
+    else:
+        target_y = zagueiro_y + offset_y
+
+    # limitar o Y para não sair do campo
+    target_y = max(20, min(target_y, 300 - 20))
+
+    go_to_point(robot0, target_x, target_y, field, target_theta)
+    
+
+def block_pass_line(robot0, field, target_theta=0):
+    """
+    Move o robô para se posicionar em uma região que bloqueie a linha de passe do zagueiro:
+    seguir uma trajetória alinhada à reta entre o atacante e o zagueiro.
+
+    Parâmetros:
+    - robot0: Instância do robô a ser movido.
+    - field: Instância da classe Field.
+    - target_theta: Ângulo alvo (opcional).
+    """
+    
+    ball_pos = field.ball.get_coordinates()
+    enemy_positions = [r.get_coordinates() for r in field.enemy_robots]
+    
+    sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)     # adversários ordenados por X
+    
+    zag_pos = sorted_enemies[1]
+    gol_pos = sorted_enemies[2]
+    
+    dist_ball_zag = math.sqrt((zag_pos.X - ball_pos.X) ** 2 + (zag_pos.Y - ball_pos.Y) ** 2)
+    dist_ball_gol = math.sqrt((gol_pos.X - ball_pos.X) ** 2 + (gol_pos.Y - ball_pos.Y) ** 2)
+    
+    # posição de quem tem a posse da bola: quem está mais perto da bola
+    if dist_ball_zag < dist_ball_gol: posse_pos = zag_pos
+    else: posse_pos = gol_pos
+    
+    # posição do atacante adversário 
+    ata_pos = sorted_enemies[0]
+    
+    # posição em X -> média das posições X do atacante e do adversário que tem a posse da bola
+    target_x = (ata_pos.X + posse_pos.X) / 2
+    
+    # posição em Y -> média das posições Y do atacante e do adversário que tem a posse da bola
+    target_y = (ata_pos.Y + posse_pos.Y) / 2
+
+    # limitar o Y para não sair do campo
+    target_y = max(50, min(target_y, 300 - 50))
+
+    go_to_point(robot0, target_x, target_y, field, target_theta)
+    
 
 def block_ball_y(robot0, field, fixed_x=None, target_theta=0, lim_sup = 300, lim_inf = 0):
     """
@@ -221,12 +301,33 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
     """
     # Definição dos estados
     STATE_A, STATE_B, STATE_C, STATE_D = "A", "B", "C", "D"
+    
+    ball_pos = field.ball.get_coordinates()
+    enemy_positions = [r.get_coordinates() for r in field.enemy_robots]
+    
+    sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)     # adversários ordenados por X
+    
+    goleiro = sorted_enemies[2]
+    
+    # traves -> (450, 110) e (450, 190)
+    t1_ball = np.array([450 - ball_pos.X, 190 - ball_pos.Y])    # vetor: bola → trave de cima
+    t2_ball = np.array([450 - ball_pos.X, 110 - ball_pos.Y])    # vetor: bola → trave de baixo
+    gol_ball = np.array([goleiro.X - ball_pos.X, goleiro.Y - ball_pos.Y])  # vetor: bola → goleiro
 
-    # Define o alvo final (centro do gol)
+    angle_t1_gol = cmath.angle_between(t1_ball, gol_ball)
+    angle_t2_gol = cmath.angle_between(t2_ball, gol_ball)
+    
+    # Ajusta o alvo com base no lado que tem mais ângulo pro chute
+    if angle_t1_gol >= angle_t2_gol:
+        target_y_final = 180 
+    else:
+        target_y_final = 120
+
     target_x_final = 450
-
-    # Ajusta o alvo com base na posição da bola
-    target_y_final = 180 if ball_position.Y < 150 else 145 
+    
+    # print("Ângulo entre trave de cima e goleiro:", np.degrees(angle_t1_gol))
+    # print("Ângulo entre trave de baixo e goleiro:", np.degrees(angle_t2_gol))
+    # print(f'Alvo final -> ({target_x_final}, {target_y_final})')
 
     current_state = field.atacante_current_state
 
@@ -274,7 +375,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
         if robot0.target_reached(threshold):
             
             if abs(angle_diff <= 15):
-                shoot_kicker(robot0, 5)
+                shoot_kicker(robot0, 2)
                 current_state = STATE_C
         else:
             current_state = STATE_A
@@ -292,7 +393,7 @@ def attack_ball(robot0, field, ball_position, robot_position, target_theta):
 
         #Faz o robo conduzir e chutar quando tiver perto do gol
         robot0.v_max = 1.25 if robot_position.X < 335 else 1.5
-        shoot_kicker(robot0, 5)
+        shoot_kicker(robot0, 2)
         # print("Estado C")
 
         if not abs(angle_diff) <= 20:
@@ -1305,7 +1406,97 @@ def pass_ball(robot0,robot1, field, target_theta):
     else:
         go_to_point(robot0, target_x, target_y, field, target_theta, threshold)
 
+def keeper_activate(robot0, field, threshold=15):
+    
+    """
+    Seleciona o comportamento ativo o goleiro deve executar.
+    Parâmetros:
+    - robot0: Instância do robô a ser movido.
+    - field: Instância da classe Field.
+    - threshold: Distância de seguranca para assegurar que o goleiro esta mais perto da bola do que o atacante adversário.
+    """
+    
+    ball_position = field.ball.get_coordinates()
+    robot_position = robot0.get_coordinates()
 
+    enemy_robots = field.get_enemy_robots()      
+    enemy_positions = [enemy.get_coordinates() for enemy in enemy_robots]
+    closest_enemy = min(enemy_positions, key=lambda p: math.hypot(p.X - ball_position.X, p.Y - ball_position.Y))
+
+    # Distância do inimigo mais próximo até a bola
+    enemy_toball_distance = math.hypot(closest_enemy.X - ball_position.X, closest_enemy.Y - ball_position.Y)
+    keeper_toball_distance = math.hypot(robot_position.X - ball_position.X, robot_position.Y - ball_position.Y)
+
+    # Se o goleiro está perto da bola e o atacante nao ele deve atacar
+    if keeper_toball_distance < 100 and enemy_toball_distance + threshold > keeper_toball_distance:
+        pursue_ball(robot0, field)
+
+    # Se o goleiro está longe da bola ou o atacante adversário não está perto, ele deve ficar no centro
+    else:
+        trajectory_align(robot0, field)
+
+def trajectory_align(robot0, field, target_x = 50):
+
+    """
+    Move o robô para se posicionar entre a trajetoria do chute e as retas formadas pela bola e limite do gol.
+
+    Parâmetros:
+    - robot0: Instância do robô a ser movido.
+    - field: Instância da classe Field.
+    - target_theta: Ângulo alvo (opcional).
+
+    TODO: Implementar lógica para ajustar o goleiro com base nos angulos de chute do atacante adversário.
+    TODO: Fazer o goleiro nao avancar quando a bola for chutada, precisa detectar o chute(provavelmente vendo se a velocidade da bola e maior que 1.5)
+    """
+    GolLimX = 50
+    HalfCourtX = 225
+    
+    # Posicao da Bola
+    ball_position = field.ball.get_coordinates()  
+
+    # Posicao do Atacante Adversario
+    enemy_robots = field.get_enemy_robots()   
+    enemy_positions = [enemy.get_coordinates() for enemy in enemy_robots]
+    closest_enemy = min(enemy_positions, key=lambda p: math.hypot(p.X - ball_position.X, p.Y - ball_position.Y))
+    attacker_x, attacker_y = closest_enemy.X, closest_enemy.Y
+    for i, enemy in enumerate(enemy_positions):
+        print(f"Enemy {i}: X = {enemy.X}, Y = {enemy.Y}")
+    # Projecoes da Bola
+    #ball_low = np.array([ball_position.X, 120 - ball_position.Y]) 
+    #ball_high = np.array([ball_position.X, 180 - ball_position.Y])
+    #attack = np.array([attacker_x - robot0.X, attacker_y - robot0.Y])
+
+    # Calcula o Angulo Formado Entre as Retas
+    #angle_low = cmath.angle_between(ball_low, attack)
+    #angle_high = cmath.angle_between(ball_high, attack)
+
+
+    # Evitando divisão por zero
+    if attacker_x == ball_position.X:       
+        target_y = ball_position.Y      
+
+    # Ajuste para quando o atacante está nas laterais do campo perto da area
+    elif attacker_x <= GolLimX:
+        m = (attacker_y - ball_position.Y) / (attacker_x - ball_position.X)        
+        target_x = attacker_x/2
+
+    else:
+        m = (attacker_y - ball_position.Y) / (attacker_x - ball_position.X)
+        
+        # Interpolação Linear para o Alvo. 
+        # Se o atacante está mais perto do gol, o alvo é mais próximo do limite da area
+        # Se o atacante está mais longe do gol, o alvo é mais próximo do gol
+        factor = (attacker_x - GolLimX + 10) / ((HalfCourtX - 45) - GolLimX + 10)
+        factor = np.clip(factor, 0, 1)  
+        target_x =(1 - factor) * HalfCourtX
+        
+    target_x = np.clip(target_x, 0, 50)
+    target_y = m*(target_x - ball_position.X) + ball_position.Y    
+    target_y = np.clip(target_y, 90, 210)
+    target_theta = np.arctan2(attacker_y - target_y, attacker_x - target_x)
+    go_to_point(robot0, target_x, target_y, field, target_theta)
+
+    
 
 
 

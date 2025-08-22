@@ -1,5 +1,15 @@
 import numpy as np
 
+def distance(pos1, pos2):
+    """
+    Descrição:
+            Função que recebe duas coordenadas e calcula a distância entre elas
+    Entradas:
+            pos1:  Coordenada 1 (SpatialCoordinates)
+            pos2:  Coordenada 2 (SpatialCoordinates)
+    """
+    return np.sqrt((pos2.X - pos1.X) ** 2 + (pos2.Y - pos1.Y) ** 2)
+
 
 def rotate_vector(v, theta):
     """

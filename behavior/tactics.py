@@ -11,50 +11,59 @@ import time
 
 def goleiro(robot0, field):
 
-    Goalie_Chase_line = 80  # Limite para considerar perto
-    Goaie_Y_Enable = 300  # Quando o goleiro começa a perseguir a bola
+    GoalieChaseline = 80  # Limite para considerar perto
+    OffensiveLineX = 225.00  # Quando o goleiro começa a perseguir a bola
 
     # Posição atual da bola
     ball_position = field.ball.get_coordinates()
 
+    # Verifica se a bola esta depois do meio de campo
+    if ball_position.X >= OffensiveLineX:  
+        skills.stay_on_center(robot0, field)
+
     # Verifica se a bola está pŕoxima à área
-    if (ball_position.X <= Goalie_Chase_line) and (90 < ball_position.Y < 210):
-        # A bola está perto da area
-        skills.basic_tackle(robot0, field)  # vai atras
-
-
+    elif (ball_position.X <= GoalieChaseline) and (90 < ball_position.Y < 210):
+            # A bola está perto da area
+            skills.basic_tackle(robot0, field)  # vai atras
+            
     else:
-        if ball_position.X <= Goaie_Y_Enable:
             # A bola não está na área, mas está perto
-            skills.follow_ball_y_elipse(robot0, field)  # foca em y
+            skills.keeper_activate(robot0, field)
+    
 
-        else:
-            # a bola não está perto o suficiente para o goleiro precisar se preocupar, então manda ele pro centor do gol
-            # poupar bateria e motor (não sei se é tão relevante assim)
-            skills.stay_on_center(
-                robot0, field
-            )  # manda pro centrofrom behavior.skills import follow_ball_y, pursue_ball'''
+   
 
-
-def zagueiro(robot0, robot1 ,field):
+def zagueiro(robot0, field):
     """
     Função que controla o comportamento do robô zagueiro.
-    O robô segue a bola no eixo Y quando a bola está no ataque,
-    e persegue a bola com alinhamento ofensivo quando está na defesa.
-    """
-    offensive_line_x = 225.00  # Meio de campo
+    O robô segue a bola no eixo Y quando a bola está no ataque.
+    Na defesa, verifica se o atacante está livre: caso esteja, efetua um passe; caso contrário, chuta direto.
+    """ 
+    offensive_line_x = 225.00   # meio de campo
     ball_position = field.ball.get_coordinates()
     robot_position = robot0.get_coordinates()
 
+    team_with_pos = [(r, r.get_coordinates()) for r in field.team_robots]
+    enemy_positions = [r.get_coordinates() for r in field.enemy_robots]
+    
+    sorted_enemies = sorted(enemy_positions, key=lambda p: p.X)     # adversários ordenados por X
+    sorted_team = sorted(team_with_pos, key=lambda pair: pair[1].X)     # teammates ordenados por X
+    
+    team_atacante = sorted_team[2][0]
+    team_atacante_pos = sorted_team[2][1]
+    enemy_zagueiro = sorted_enemies[1]
 
     if ball_position.X >= offensive_line_x: 
         skills.follow_ball_y(robot0, field)
     else:
-        skills.pass_ball(robot0, robot1 ,field, robot_position.rotation)
-        #skills.pursue_ball
+        if math.distance(team_atacante_pos, enemy_zagueiro) >= 100:     # atacante não está marcado -> passe
+            skills.pass_ball(robot0, team_atacante ,field, robot_position.rotation)    
+        else:   # atacante está marcado -> chuta direto
+            skills.shoot(robot0, field)
 
 def atacante(robot0, field):
     ball_position = field.ball.get_coordinates()
+    robot_position = robot0.get_coordinates()
     offensive_line_x = 225.00  # Meio de campo
     midLineY = 150 # Meio em Y
 
@@ -65,13 +74,20 @@ def atacante(robot0, field):
                       robot_field.get_coordinates().rotation)
         robot0.map_obstacle.add_obstacle(obst)
     
-    if (400 < ball_position.X <= 450) and (87.5 <= ball_position.Y <= 222.5):
-        skills.follow_ball_y(robot0, field, 380)
+    # bola está no nosso ataque
+    if (225 <= ball_position.X <= 450):
+        # distância do robô à bola
+        distance_to_ball = np.sqrt((ball_position.X - robot_position.X) ** 2 + (ball_position.Y - robot_position.Y) ** 2)
+        
+        if distance_to_ball > 80:       # bola distante do atacante -> fechar a linha de passe
+            skills.block_pass_line(robot0, field)
+        else:                           # bola perto do atacante -> chutar a bola
+            skills.shoot(robot0, field)
+
+    # bola está na nossa defesa
     elif ball_position.X < offensive_line_x:
-        if ball_position.Y <= midLineY:
-            skills.follow_ball_y(robot0, field, fixed_x = offensive_line_x + 20, offset=-50)
-        else: 
-            skills.follow_ball_y(robot0, field, fixed_x = offensive_line_x + 20, offset=50)
+        skills.safe_zone_position(robot0, field)
+        
     else:   
         skills.shoot(robot0, field)
 
